@@ -44,7 +44,7 @@ The **“requests”** library is used to obtain the fasta and gb files from NCB
 All these libraries are installed through modules within the script, and **Figure 4** shows an example of these modules.   
 <br/>
 
-<p align="center"><img src="https://github.com/luanrabelo/dataFishing/blob/stable/assets/Figure4.png" width="100%" title="Figure 4">Figure 4. Pandas library installation module.</p>  
+<p align="center"><img src="https://github.com/luanrabelo/dataFishing/blob/stable/assets/Figure5.png" width="100%" title="Figure 4">Figure 4. Pandas library installation module.</p>  
 <br/>  
 
 In the example above **(Figure 4)**, an attempt to import the **“pandas”** library is shown (try:).  
@@ -54,7 +54,7 @@ If the script cannot import it, because it is not installed on the system (excep
 However, as shown in **Note 1**, if the command to execute Python is `python3` rather than `python`, the user will need to edit the command for the installation in the script, in each module, adding the correct command for their system, as shown in **Figure 5**.  
 <br/>
 
-<p align="center"><img src="https://github.com/luanrabelo/dataFishing/blob/stable/assets/Figure5.png" width="100%" title="Figure 5">Figure 5. Installing Pandas library using the correct user PATH command.</p>  
+<p align="center"><img src="https://github.com/luanrabelo/dataFishing/blob/stable/assets/Figure4.png" width="100%" title="Figure 5">Figure 5. Installing Pandas library using the correct user PATH command.</p>  
 <br/>  
 
 # Running *dataFishing*
