@@ -32,7 +32,7 @@ After installing Python, the libraries, such as the **“biopython”** library,
 
 The gene sequences of a particular species are then searched using the Entrez tool. We also use libraries to read the files obtained, and to extract as extensive information.  
 
-The “requests” library is used to obtain the fasta and gb files from NCBI repository. The **“pandas”** library is used for data manipulation, such as removing redundancies in the input file and for preparing the output file, in Excel format, with the mining data, whereas for writing this file, **“xlsxwriter”** library is used.
+The **“requests”** library is used to obtain the fasta and gb files from NCBI repository. The **“pandas”** library is used for data manipulation, such as removing redundancies in the input file and for preparing the output file, in Excel format, with the mining data, whereas for writing this file, **“xlsxwriter”** library is used.
 All these libraries are installed through modules within the script, and **Figure 4** shows an example of these modules.   
 <br/>
 
@@ -52,12 +52,12 @@ However, as shown in **Note 1**, if the command to execute Python is `python3` r
 # Running *dataFishing*
   - Obtaining *dataFishing*  
   
-The dataFishing script is available at the GitHub repository https://github.com/luanrabelo/dataFishing/releases. An example input file is also available with the script, containing data on fish species of the family Carangidae as well as output files with the mining data of this family.  
+The *dataFishing* script is available at the GitHub repository https://github.com/luanrabelo/dataFishing/releases. An example input file is also available with the script, containing data on fish species of the family Carangidae as well as output files with the mining data of this family.  
 
   - Input File  
 *dataFishing* accepts a file in **TSV format** as input for data mining, and this file is obtained directly from the **BOLD Systems** website (https://www.boldsystems.org/).  
 
-On the website, click “Explore the Data” (Figure 6), and a search field will appear for the user. Thereafter, type the term you want to search, for example: Family Carangidae (Figure 7A).  
+On the website, click *“Explore the Data”* **(Figure 6)**, and a search field will appear for the user. Thereafter, type the term you want to search, for example: Family Carangidae (Figure 7A).  
 <br/>
 
 <p align="center"><img src="https://github.com/luanrabelo/dataFishing/blob/stable/assets/Figure6.png" width="100%" title="Figure 6">Figure 6. BOLD Systems initial page.</p>  
@@ -69,4 +69,23 @@ On the website, click “Explore the Data” (Figure 6), and a search field will
 After searching **(Figure 7 A)**, find the option **“Combined:”** and click the option to get a **TSV file (Figure 7 B)**. After getting the text file with the data, we can start the mining process.  
 <br/>  
 
-# Running *dataFishing*
+# Running *dataFishing*  
+
+Arguments are needed for the mining process. **Figure 8** shows the complete command executed in the terminal:  
+<br/>  
+
+<p align="center"><img src="https://github.com/luanrabelo/dataFishing/blob/stable/assets/Figure8.png" width="100%" title="Figure 8">Figure 8. Command for executing dataFishing, where arguments must be provided.</p>  
+<br/>  
+
+> **(1) Shows the user running the script and the folder the terminal is accessing. This part may be slightly different depending on the operating system or the terminal used. However, the user needs to pay attention to which folder the terminal is accessing, a specific folder or the default root folder. In the figure, the terminal is accessing the folder `/home/luan`. **  
+
+> **(2) This is the command to run a Python script, remembering that the command may be different *(python or python3)* depending on the system or version of Python installed; *see Note 1 for more details*.**  
+
+> **(3) The full path where the *dataFishing.py* script is located. Here, the user can simply drag and drop the script on the terminal so that it finds the path. It is worth mentioning that a directory will be created in the folder where the terminal is working to store the output files *(see the step (1) for more information)*.**  
+
+> **(4) In this path, the user will need to inform the full path of the input file *(See section 2.2)*.**  
+
+> **(5) Enter a valid email address to use the tool.**  
+
+> **(6) The user needs to inform the time (in seconds) that the script will have to wait between queries, because the NCBI does not accept a high number of requests in a brief time, which may cause an error in the Entrez tool usage. Enter a time between 5 and 10 seconds to avoid errors, remembering that this parameter will influence the mining time.**  
+
