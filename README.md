@@ -2,7 +2,7 @@
 <a href="https://www.buymeacoffee.com/lprabelo">
 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Eucalyp-Deus_Coffee.png/640px-Eucalyp-Deus_Coffee.png" width="10%">
 <br>
-Did you like my bioinformatic scripts? Buy me a coffee to help me make more!
+Did you like my scripts? So, please, buy me a coffee to keep me working on it..
 </a>
 </p>
 
@@ -83,7 +83,7 @@ After searching **(Figure 7 A)**, find the option **“Combined:”** and click 
 Arguments are needed for the mining process. **Figure 8** shows the complete command executed in the terminal:  
 <br/>  
 
-<p align="center"><img src="https://github.com/luanrabelo/dataFishing/blob/stable/assets/Figure8.svg" width="100%" title="Figure 8">Figure 8. Command for executing dataFishing, where arguments must be provided.</p>  
+<p align="center"><img src="https://github.com/luanrabelo/dataFishing/blob/stable/assets/Figure8.png" width="100%" title="Figure 8">Figure 8. Command for executing dataFishing, where arguments must be provided.</p>  
 <br/>  
 
 > **(1) Shows the user running the script and the folder the terminal is accessing. This part may be slightly different depending on the operating system or the terminal used. However, the user needs to pay attention to which folder the terminal is accessing, a specific folder or the default root folder. In the figure, the terminal is accessing the folder `/home/luan`.**  
