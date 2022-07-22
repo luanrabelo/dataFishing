@@ -52,4 +52,21 @@ However, as shown in **Note 1**, if the command to execute Python is `python3` r
 # Running *dataFishing*
   - Obtaining *dataFishing*  
   
-The dataFishing script is available at the GitHub repository https://github.com/luanrabelo/dataFishing/releases. An example input file is also available with the script, containing data on fish species of the family Carangidae as well as output files with the mining data of this family.
+The dataFishing script is available at the GitHub repository https://github.com/luanrabelo/dataFishing/releases. An example input file is also available with the script, containing data on fish species of the family Carangidae as well as output files with the mining data of this family.  
+
+  - Input File  
+*dataFishing* accepts a file in **TSV format** as input for data mining, and this file is obtained directly from the **BOLD Systems** website (https://www.boldsystems.org/).  
+
+On the website, click “Explore the Data” (Figure 6), and a search field will appear for the user. Thereafter, type the term you want to search, for example: Family Carangidae (Figure 7A).  
+<br/>
+
+<p align="center"><img src="https://github.com/luanrabelo/dataFishing/blob/stable/assets/Figure6.png" width="100%" title="Figure 6">Figure 6. BOLD Systems initial page.</p>  
+<br/>  
+
+<p align="center"><img src="https://github.com/luanrabelo/dataFishing/blob/stable/assets/Figure7.png" width="100%" title="Figure 7">Figure 7. Search page for the systematic term about a given species, such as an order, family, or genus (A). Type of file to obtain containing the search results (B).</p>  
+<br/>  
+
+After searching **(Figure 7 A)**, find the option **“Combined:”** and click the option to get a **TSV file (Figure 7 B)**. After getting the text file with the data, we can start the mining process.  
+<br/>  
+
+# Running *dataFishing*
