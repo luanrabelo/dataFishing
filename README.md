@@ -54,7 +54,8 @@ However, as shown in **Note 1**, if the command to execute Python is `python3` r
   
 The *dataFishing* script is available at the GitHub repository https://github.com/luanrabelo/dataFishing/releases. An example input file is also available with the script, containing data on fish species of the family Carangidae as well as output files with the mining data of this family.  
 
-  - Input File  
+  - Input File
+
 *dataFishing* accepts a file in **TSV format** as input for data mining, and this file is obtained directly from the **BOLD Systems** website (https://www.boldsystems.org/).  
 
 On the website, click *“Explore the Data”* **(Figure 6)**, and a search field will appear for the user. Thereafter, type the term you want to search, for example: Family Carangidae **(Figure 7A)**.  
