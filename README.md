@@ -31,7 +31,7 @@ After installation, users will be able to verify the installed Python version by
 > **Note 1: In the user's operating system PATH, pay attention to the Python execution command, which can be `python --version` or `python3 --version` (Figure 3).**
 <br/>  
 
-<p align="center"><img src="https://github.com/luanrabelo/dataFishing/blob/stable/assets/Figure3.png" width="100%" title="Figure 3">Figure 3. Different ways to run Python depending on the downloaded version.</p>  
+<p align="center"><img src="https://github.com/luanrabelo/dataFishing/blob/stable/assets/Figure3.png" width="100%" title="Figure 3">Figure 3. Different ways to run Python.</p>  
 <br/>
 
 # Libraries
