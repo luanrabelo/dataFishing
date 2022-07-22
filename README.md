@@ -1,3 +1,11 @@
+<p align="center">
+<a href="https://www.buymeacoffee.com/lprabelo">
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Eucalyp-Deus_Coffee.png/640px-Eucalyp-Deus_Coffee.png" width="10%">
+<br>
+Did you like my bioinformatic scripts? Buy me a coffee to help me make more!
+</a>
+</p>
+
 <h2><p align="center">Manual <i>dataFishing</i> v1.0</p></h2>
 
 <p align="center">
