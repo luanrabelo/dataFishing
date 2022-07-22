@@ -16,13 +16,13 @@ Did you like my bioinformatic scripts? Buy me a coffee to help me make more!
 
 - <h3>Python</h3> 
 
-*dataFishing* requires the installation of Python environment. For installation on your operating system, refer to the website https://www.python.org/downloads/ **(Figure 1)**.  
+*dataFishing* requires the installation of Python 3 environment. For installation on your operating system, refer to the website https://www.python.org/downloads/ **(Figure 1)**.  
 <br/>
 
-<p align="center"><img src="https://github.com/luanrabelo/dataFishing/blob/stable/assets/Figure1.png" width="100%" title="Figure 1">Figure 1. Python download page.</p>  
+<p align="center"><img src="https://github.com/luanrabelo/dataFishing/blob/stable/assets/Figure1.png" width="100%" title="Figure 1">Figure 1. Python 3 download page.</p>  
 <br/>
 
-After installation, users will be able to verify the installed Python version by running the command `python --version` in their operating system terminal, and a message like the one shown in **Figure 2** will appear.  
+After installation, users will be able to verify the installed Python version by running the command `python3 --version` in their operating system terminal, and a message like the one shown in **Figure 2** will appear.  
 <br/>
 
 <p align="center"><img src="https://github.com/luanrabelo/dataFishing/blob/stable/assets/Figure2.png" width="100%" title="Figure 2">Figure 2. Command to check the installed Python version.</p>
@@ -49,7 +49,7 @@ All these libraries are installed through modules within the script, and **Figur
 
 In the example above **(Figure 4)**, an attempt to import the **“pandas”** library is shown (try:).  
 
-If the script cannot import it, because it is not installed on the system (except ImportError:), the script will try to install it through the command `python -m pip install -U pandas`.  
+If the script cannot import it, because it is not installed on the system (except ImportError:), the script will try to install it through the command `python3 -m pip install -U pandas`.  
 
 However, as shown in **Note 1**, if the command to execute Python is `python3` rather than `python`, the user will need to edit the command for the installation in the script, in each module, adding the correct command for their system, as shown in **Figure 5**.  
 <br/>
