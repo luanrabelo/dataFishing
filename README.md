@@ -1,7 +1,7 @@
 <h2><p align="center">Manual <i>dataFishing</i> v1.0</p></h2>
 
 <p align="center">
-  <img src="https://github.com/luanrabelo/dataFishing/blob/stable/assets/dataFishing.png" width="50%" title="hover text">
+  <img src="https://github.com/luanrabelo/dataFishing/blob/stable/assets/dataFishing.png" width="75%" title="hover text">
 </p>
 
 # Installation
@@ -57,7 +57,7 @@ The *dataFishing* script is available at the GitHub repository https://github.co
   - Input File  
 *dataFishing* accepts a file in **TSV format** as input for data mining, and this file is obtained directly from the **BOLD Systems** website (https://www.boldsystems.org/).  
 
-On the website, click *“Explore the Data”* **(Figure 6)**, and a search field will appear for the user. Thereafter, type the term you want to search, for example: Family Carangidae (Figure 7A).  
+On the website, click *“Explore the Data”* **(Figure 6)**, and a search field will appear for the user. Thereafter, type the term you want to search, for example: Family Carangidae **(Figure 7A)**.  
 <br/>
 
 <p align="center"><img src="https://github.com/luanrabelo/dataFishing/blob/stable/assets/Figure6.png" width="100%" title="Figure 6">Figure 6. BOLD Systems initial page.</p>  
@@ -77,7 +77,7 @@ Arguments are needed for the mining process. **Figure 8** shows the complete com
 <p align="center"><img src="https://github.com/luanrabelo/dataFishing/blob/stable/assets/Figure8.png" width="100%" title="Figure 8">Figure 8. Command for executing dataFishing, where arguments must be provided.</p>  
 <br/>  
 
-> **(1) Shows the user running the script and the folder the terminal is accessing. This part may be slightly different depending on the operating system or the terminal used. However, the user needs to pay attention to which folder the terminal is accessing, a specific folder or the default root folder. In the figure, the terminal is accessing the folder `/home/luan`. **  
+> **(1) Shows the user running the script and the folder the terminal is accessing. This part may be slightly different depending on the operating system or the terminal used. However, the user needs to pay attention to which folder the terminal is accessing, a specific folder or the default root folder. In the figure, the terminal is accessing the folder `/home/luan`.**  
 
 > **(2) This is the command to run a Python script, remembering that the command may be different *(python or python3)* depending on the system or version of Python installed; *see Note 1 for more details*.**  
 
@@ -89,3 +89,12 @@ Arguments are needed for the mining process. **Figure 8** shows the complete com
 
 > **(6) The user needs to inform the time (in seconds) that the script will have to wait between queries, because the NCBI does not accept a high number of requests in a brief time, which may cause an error in the Entrez tool usage. Enter a time between 5 and 10 seconds to avoid errors, remembering that this parameter will influence the mining time.**  
 
+# Output  
+
+After the mining process, an Excel file will appear so that the user can visualise which genes, from which species, and from which specimen the sequences were found in NCBI **(Figure 9)**.  
+
+In addition, a second spreadsheet will contain data on the location of specimens extracted from the input file, so that the researcher will be able to search which genes are available for the same specimen or which specimens from the same region have available genes.  
+<br/>  
+
+<p align="center"><img src="https://github.com/luanrabelo/dataFishing/blob/stable/assets/Figure9.png" width="100%" title="Figure 9">Figure 9. Output file in Excel format containing the list of genes found and their respective vouchers.</p>  
+<br/>  
