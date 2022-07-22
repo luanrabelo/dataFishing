@@ -8,7 +8,7 @@
 
 - <h3>Python</h3> 
 
-  *dataFishing* requires the installation of Python environment. For installation on your operating system, refer to the website https://www.python.org/downloads/ **(Figure 1)**.  
+*dataFishing* requires the installation of Python environment. For installation on your operating system, refer to the website https://www.python.org/downloads/ **(Figure 1)**.  
 <br/>
 
 <p align="center"><img src="https://github.com/luanrabelo/dataFishing/blob/stable/assets/Figure1.png" width="100%" title="Figure 1">Figure 1. Python download page.</p>  
