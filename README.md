@@ -9,7 +9,7 @@ Did you like my bioinformatic scripts? Buy me a coffee to help me make more!
 <h2><p align="center">Manual <i>dataFishing</i> v1.0</p></h2>
 
 <p align="center">
-  <img src="https://github.com/luanrabelo/dataFishing/blob/stable/assets/dataFishing.png" width="75%" title="hover text">
+  <img src="https://github.com/luanrabelo/dataFishing/blob/stable/assets/dataFishing.svg" width="75%" title="hover text">
 </p>
 
 # Installation
