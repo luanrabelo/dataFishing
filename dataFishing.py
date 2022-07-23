@@ -1,11 +1,28 @@
-import os
-import time
-import sys
+__author__      = "Luan Rabelo"
+__license__     = "MIT"
+__version__     = "1.0"
+__maintainer__  = "Luan Rabelo"
+__email__       = "luanrabelo@outlook.com"
+__date__        = "2022/07/21"
+__twitter__     = "lprabelo"
+
+import os, time, sys
+
+class bcolors:
+    Header      = '\033[95m'
+    Blue        = '\033[94m'
+    Cyan        = '\033[96m'
+    Green       = '\033[92m'
+    Warning     = '\033[93m'
+    Fail        = '\033[91m'
+    End         = '\033[0m'
+    Bold        = '\033[1m'
+    Underline   = '\033[4m'
 
 try:
     import xlsxwriter
 except ImportError:
-    cmd = "python -m pip install -U xlsxwriter"
+    cmd = "python3 -m pip install -U xlsxwriter"
     os.system(cmd)
     import xlsxwriter
 
@@ -19,7 +36,7 @@ except ImportError:
 try:
     import requests
 except ImportError:
-    cmd = "python -m pip install -U requests"
+    cmd = "python3 -m pip install -U requests"
     os.system(cmd)
     import requests
 
@@ -27,7 +44,7 @@ try:
     import Bio
     from Bio import Entrez
 except ImportError:
-    cmd = "python -m pip install -U biopython"
+    cmd = "python3 -m pip install -U biopython"
     os.system(cmd)
     import Bio
     from Bio import Entrez
@@ -36,7 +53,7 @@ try:
     import Bio
     from Bio import SeqIO
 except ImportError:
-    cmd = "python -m pip install -U biopython"
+    cmd = "python3 -m pip install -U biopython"
     os.system(cmd)
     import Bio
     from Bio import SeqIO
@@ -44,14 +61,14 @@ except ImportError:
 try:
     from collections import OrderedDict
 except ImportError:
-    cmd = "python -m pip install -U collections"
+    cmd = "python3 -m pip install -U collections"
     os.system(cmd)
     from collections import OrderedDict
 
 try:
     from operator import itemgetter
 except ImportError:
-    cmd = "python -m pip install -U operator"
+    cmd = "python3 -m pip install -U operator"
     os.system(cmd)
     from operator import itemgetter
 
@@ -74,6 +91,10 @@ BoldCountry         = []
 BoldState           = []
 BoldRegion          = []
 BoldAccession       = []
+Bin                 = []
+Code                = []
+MarkerCode          = []
+BoldSpecie          = []
 # Genome
 GenomeString        = ''
 idGenome            = []
@@ -132,13 +153,25 @@ VouchersCYTB        = []
 SampleCYTB          = []
 
 Now = time.strftime("%Y_%m_%d-%H_%M_%S")
-print("\ndataFishing - Developed by Luan Rabelo\n")
+
+Developer   = "Developer: Luan Rabelo;\n\nCollaborators:\nOscar Balcázar,\nMurilo Furtado,\nAurycéia Guimarães-Costa,\nIracilda Sampaio,\nMarcelo Vallinoto;\n"
+Github      = "https://github.com/luanrabelo/dataFishing"
+Coffee      = "https://www.buymeacoffee.com/lprabelo"
+print("==========================================================================================================\n")
+print(f"{bcolors.Cyan}\ndataFishing - Developed by lprabelo{bcolors.End}")
+print(f"{bcolors.Cyan}{Github.center(20, '=')}\n{bcolors.End}")
+print(f"{bcolors.Cyan}{Developer.center(20, '=')}\n{bcolors.End}")
+print(f"{bcolors.Bold}{bcolors.Cyan}{Coffee.center(20, '=')}\n{bcolors.End}{bcolors.End}")
+print("==========================================================================================================\n")
 
 
 def CreateFolder(Folder):
     Folder = Folder.replace(":", "").replace(".", "")
     if not os.path.exists(Folder):
+        print(f"{bcolors.Blue}{bcolors.Warning}Creating Folder {Folder}, please wait...{bcolors.End}")
         os.makedirs(Folder)
+
+
 CreateFolder("dataFishing/"+Now+"/datasets/")
 
 # Search mtGenome gene in NCBI
@@ -152,19 +185,18 @@ def mtGenome(Specie, Email, Time):
     SearchResult    = Entrez.read(Search)
     if(int(SearchResult["Count"]) > 0):
         Genome.append("Found")
-        print(f"Mitochondrial Genome {Specie} Found")
+        print(f"{bcolors.Blue}Mitochondrial Genome {Specie} Found {bcolors.End}")
         for Voucher in SearchResult["IdList"]:
             Log = open("dataFishing/"+Now+"/dataFishing.log", "a+")
             Log.write(str(Specie)+": "+str("mtGenome Found in NCBI")+time.strftime("%Y/%m/%d-%H:%M:%S")+"\r")
             Log.close()
-            print(f"Download mtGenome {Specie}")
+            print(f"{bcolors.Warning}Download mtGenome {Specie} {bcolors.End}")
             VouchersGenome.append(DownloadFastaFile(Voucher, "dataFishing/"+Now+"/datasets/"+Specie+"/mtgenome/fasta/", Specie))
             DownloadGenBankFile(Voucher, "dataFishing/"+Now+"/datasets/"+Specie+"/mtgenome/", Specie)
             idGenome.append(Voucher)
-            print(f"Download mtGenome {Specie} successfully")
             time.sleep(Time)
     else:
-        print(f"mtGenome {Specie} not found!")
+        print(f"{bcolors.Fail}mtGenome {Specie} not found! {bcolors.End}")
         Log = open("dataFishing/"+Now+"/dataFishing.log", "a+")
         Log.write(str(Specie)+": "+str("mtGenome not Found in NCBI")+time.strftime("%Y/%m/%d-%H:%M:%S")+"\r")
         Log.close()
@@ -173,7 +205,6 @@ def mtGenome(Specie, Email, Time):
         time.sleep(Time)
     Search.close()
     
-
 # Search rhodopsin gene in NCBI
 def Rhodopsin(Specie, Email, Time):
     Specie = Specie.replace(":", "").replace(".", "")
@@ -186,18 +217,17 @@ def Rhodopsin(Specie, Email, Time):
     SearchResult    = Entrez.read(Search)
     if(int(SearchResult["Count"]) > 0):
         GeneRhodopsin.append("Found")
-        print(f"Rhodopsin {Specie} Found")
+        print(f"{bcolors.Blue}Rhodopsin {Specie} Found {bcolors.End}")
         for Voucher in SearchResult["IdList"]:
             Log = open("dataFishing/"+Now+"/dataFishing.log", "a+")
             Log.write(str(Specie)+": "+str("Rhodopsin Found in NCBI")+time.strftime("%Y/%m/%d-%H:%M:%S")+"\r")
             Log.close()
-            print(f"Download Rhodopsin {Specie}")
+            print(f"{bcolors.Warning}Download Rhodopsin {Specie} {bcolors.End}")
             VouchersRhodopsin.append(DownloadFastaFile(Voucher, "dataFishing/"+Now+"/datasets/"+Specie+"/NCBI-Rhodopsin/", Specie))
             idRhodopsin.append(Voucher)
-            print(f"Download Rhodopsin {Specie} successfully")
             time.sleep(Time)
     else:
-        print(f"Rhodopsin {Specie} not found!")
+        print(f"{bcolors.Fail}Rhodopsin {Specie} not found! {bcolors.End}")
         Log = open("dataFishing/"+Now+"/dataFishing.log", "a+")
         Log.write(str(Specie)+": "+str("Rhodopsin not Found in NCBI")+time.strftime("%Y/%m/%d-%H:%M:%S")+"\r")
         Log.close()
@@ -206,7 +236,6 @@ def Rhodopsin(Specie, Email, Time):
         time.sleep(Time)
     Search.close()
     
-
 # Search RAG gene in NCBI
 def RAG(Specie, Email, Time):
     Specie = Specie.replace(":", "").replace(".", "")
@@ -218,18 +247,17 @@ def RAG(Specie, Email, Time):
     SearchResult    = Entrez.read(Search)
     if(int(SearchResult["Count"]) > 0):
         GeneRAG.append("Found")
-        print(f"RAG {Specie} Found")
+        print(f"{bcolors.Blue}RAG {Specie} Found {bcolors.End}")
         for Voucher in SearchResult["IdList"]:
             Log = open("dataFishing/"+Now+"/dataFishing.log", "a+")
             Log.write(str(Specie)+": "+str("RAG Found in NCBI")+time.strftime("%Y/%m/%d-%H:%M:%S")+"\r")
             Log.close()
-            print(f"Download RAG {Specie}")
+            print(f"{bcolors.Warning}Download RAG {Specie} {bcolors.End}")
             VouchersRag.append(DownloadFastaFile(Voucher, "dataFishing/"+Now+"/datasets/"+Specie+"/NCBI-RAG/", Specie))
             idRAG.append(Voucher)
-            print(f"Download RAG {Specie} successfully")
             time.sleep(Time)
     else:
-        print(f"RAG {Specie} not found!")
+        print(f"{bcolors.Fail}RAG {Specie} not found! {bcolors.End}")
         Log = open("dataFishing/"+Now+"/dataFishing.log", "a+")
         Log.write(str(Specie)+": "+str("RAG not Found in NCBI")+time.strftime("%Y/%m/%d-%H:%M:%S")+"\r")
         Log.close()
@@ -238,7 +266,6 @@ def RAG(Specie, Email, Time):
         time.sleep(Time)
     Search.close()
     
-
 # Search Zic gene in NCBI
 def Zic(Specie, Email, Time):
     Specie = Specie.replace(":", "").replace(".", "")
@@ -250,18 +277,17 @@ def Zic(Specie, Email, Time):
     SearchResult    = Entrez.read(Search)
     if(int(SearchResult["Count"]) > 0):
         GeneZic.append("Found")
-        print(f"Zic {Specie} Found")
+        print(f"{bcolors.Blue}Zic {Specie} Found{bcolors.End}")
         for Voucher in SearchResult["IdList"]:
             Log = open("dataFishing/"+Now+"/dataFishing.log", "a+")
             Log.write(str(Specie)+": "+str("Zic Found in NCBI")+time.strftime("%Y/%m/%d-%H:%M:%S")+"\r")
             Log.close()
-            print(f"Download Zic {Specie}")
+            print(f"{bcolors.Warning}Download Zic {Specie} {bcolors.End}")
             VouchersZic.append(DownloadFastaFile(Voucher, "dataFishing/"+Now+"/datasets/"+Specie+"/NCBI-zic/", Specie))
             idZic.append(Voucher)
-            print(f"Download Zic {Specie} successfully")
             time.sleep(Time)
     else:
-        print(f"Zic {Specie} not found!")
+        print(f"{bcolors.Fail}Zic {Specie} not found! {bcolors.End}")
         Log = open("dataFishing/"+Now+"/dataFishing.log", "a+")
         Log.write(str(Specie)+": "+str("Zic not Found in NCBI")+time.strftime("%Y/%m/%d-%H:%M:%S")+"\r")
         Log.close()
@@ -270,7 +296,6 @@ def Zic(Specie, Email, Time):
         time.sleep(Time)
     Search.close()
     
-
 # Search COI gene in NCBI
 def COI(Specie, Email, Time):
     Specie = Specie.replace(":", "").replace(".", "")
@@ -282,18 +307,17 @@ def COI(Specie, Email, Time):
     SearchResult    = Entrez.read(Search)
     if(int(SearchResult["Count"]) > 0):
         GeneCOI.append("Found")
-        print(f"COI {Specie} Found")
+        print(f"{bcolors.Blue}COI {Specie} Found{bcolors.End}")
         for Voucher in SearchResult["IdList"]:
             Log = open("dataFishing/"+Now+"/dataFishing.log", "a+")
             Log.write(str(Specie)+": "+str("COI Found in NCBI")+time.strftime("%Y/%m/%d-%H:%M:%S")+"\r")
             Log.close()
-            print(f"Download COI {Specie}")
+            print(f"{bcolors.Warning}Download COI {Specie} {bcolors.End}")
             VouchersCOI.append(DownloadFastaFile(Voucher, "dataFishing/"+Now+"/datasets/"+Specie+"/NCBI-COI/", Specie))
             idCOI.append(Voucher)
-            print(f"Download COI {Specie} successfully")
             time.sleep(Time)
     else:
-        print(f"COI {Specie} not found!")
+        print(f"{bcolors.Fail}COI {Specie} not found! {bcolors.End}")
         Log = open("dataFishing/"+Now+"/dataFishing.log", "a+")
         Log.write(str(Specie)+": "+str("COI not Found in NCBI")+time.strftime("%Y/%m/%d-%H:%M:%S")+"\r")
         Log.close()
@@ -302,7 +326,6 @@ def COI(Specie, Email, Time):
         time.sleep(Time)
     Search.close()
     
-
 # Search COII gene in NCBI
 def COII(Specie, Email, Time):
     Specie = Specie.replace(":", "").replace(".", "")
@@ -314,18 +337,17 @@ def COII(Specie, Email, Time):
     SearchResult    = Entrez.read(Search)
     if(int(SearchResult["Count"]) > 0):
         GeneCOII.append("Found")
-        print(f"COII {Specie} Found")
+        print(f"{bcolors.Blue}COII {Specie} Found {bcolors.End}")
         for Voucher in SearchResult["IdList"]:
             Log = open("dataFishing/"+Now+"/dataFishing.log", "a+")
             Log.write(str(Specie)+": "+str("COII Found in NCBI")+time.strftime("%Y/%m/%d-%H:%M:%S")+"\r")
             Log.close()
-            print(f"Download COII {Specie}")
+            print(f"{bcolors.Warning}Download COII {Specie} {bcolors.End}")
             VouchersCOII.append(DownloadFastaFile(Voucher, "dataFishing/"+Now+"/datasets/"+Specie+"/NCBI-COII/", Specie))
             idCOII.append(Voucher)
-            print(f"Download COII {Specie} successfully")
             time.sleep(Time)
     else:
-        print(f"COII {Specie} not found!")
+        print(f"{bcolors.Fail}COII {Specie} not found! {bcolors.End}")
         Log = open("dataFishing/"+Now+"/dataFishing.log", "a+")
         Log.write(str(Specie)+": "+str("COII not Found in NCBI")+time.strftime("%Y/%m/%d-%H:%M:%S")+"\r")
         Log.close()
@@ -334,7 +356,6 @@ def COII(Specie, Email, Time):
         time.sleep(Time)
     Search.close()
     
-
 # Search COIII gene in NCBI
 def COIII(Specie, Email, Time):
     Specie = Specie.replace(":", "").replace(".", "")
@@ -346,18 +367,17 @@ def COIII(Specie, Email, Time):
     SearchResult    = Entrez.read(Search)
     if(int(SearchResult["Count"]) > 0):
         GeneCOIII.append("Found")
-        print(f"COIII {Specie} Found")
+        print(f"{bcolors.Blue}COIII {Specie} Found{bcolors.End}")
         for Voucher in SearchResult["IdList"]:
             Log = open("dataFishing/"+Now+"/dataFishing.log", "a+")
             Log.write(str(Specie)+": "+str("COIII Found in NCBI")+time.strftime("%Y/%m/%d-%H:%M:%S")+"\r")
             Log.close()
-            print(f"Download COIII {Specie}")
+            print(f"{bcolors.Warning}Download COIII {Specie} {bcolors.End}")
             VouchersCOIII.append(DownloadFastaFile(Voucher, "dataFishing/"+Now+"/datasets/"+Specie+"/NCBI-COIII/", Specie))
             idCOIII.append(Voucher)
-            print(f"Download COIII {Specie} successfully")
             time.sleep(Time)
     else:
-        print(f"COIII {Specie} not found!")
+        print(f"{bcolors.Fail}COIII {Specie} not found! {bcolors.End}")
         Log = open("dataFishing/"+Now+"/dataFishing.log", "a+")
         Log.write(str(Specie)+": "+str("COIII not Found in NCBI")+time.strftime("%Y/%m/%d-%H:%M:%S")+"\r")
         Log.close()
@@ -366,7 +386,6 @@ def COIII(Specie, Email, Time):
         time.sleep(Time)
     Search.close()
     
-
 # Search CYTB gene in NCBI
 def CYTB(Specie, Email, Time):
     Specie = Specie.replace(":", "").replace(".", "")
@@ -378,18 +397,17 @@ def CYTB(Specie, Email, Time):
     SearchResult    = Entrez.read(Search)
     if(int(SearchResult["Count"]) > 0):
         GeneCYTB.append("Found")
-        print(f"CYTB {Specie} Found")
+        print(f"{bcolors.Blue}CYTB {Specie} Found {bcolors.End}")
         for Voucher in SearchResult["IdList"]:
             Log = open("dataFishing/"+Now+"/dataFishing.log", "a+")
             Log.write(str(Specie)+": "+str("CYTB Found in NCBI")+time.strftime("%Y/%m/%d-%H:%M:%S")+"\r")
             Log.close()
-            print(f"Download CYTB {Specie}")
+            print(f"{bcolors.Warning}Download CYTB {Specie} {bcolors.End}")
             VouchersCYTB.append(DownloadFastaFile(Voucher, "dataFishing/"+Now+"/datasets/"+Specie+"/NCBI-CYTB/", Specie))
             idCYTB.append(Voucher)
-            print(f"Download CYTB {Specie} successfully")
             time.sleep(Time)
     else:
-        print(f"CYTB {Specie} not found!")
+        print(f"{bcolors.Fail}CYTB {Specie} not found! {bcolors.End}")
         Log = open("dataFishing/"+Now+"/dataFishing.log", "a+")
         Log.write(str(Specie)+": "+str("CYTB not Found in NCBI")+time.strftime("%Y/%m/%d-%H:%M:%S")+"\r")
         Log.close()
@@ -398,19 +416,30 @@ def CYTB(Specie, Email, Time):
         time.sleep(Time)
     Search.close()
     
+def ReadBoldFile(File):
+    df = pd.read_csv(File, sep = '\t', header = 0, encoding = 'cp1252', low_memory = False)
+    df = df.reset_index()
+    for index, row in df.iterrows():
+        if (str(row['species_name']) != "nan"):
+            if row['genbank_accession'] != "-SUPPRESSED":
+                SpecieNameBold = str(row['species_name']).replace(":", "").replace(".", "")
+                print(f"{bcolors.Warning}Writing COI {SpecieNameBold} from BOLD System {bcolors.End}")
+                CreateFolder(f"dataFishing/{Now}/datasets/{SpecieNameBold}/BOLD-COI/")
+                Fasta = open(f"dataFishing/{Now}/datasets/{SpecieNameBold}/BOLD-COI/fromBOLD_{SpecieNameBold}_{row['recordID']}.fasta", "w")
+                Fasta.write(f">{SpecieNameBold}_{row['sampleid']}\n{row['nucleotides']}")
+                Fasta.close()
 
 def ReadFile(File, Email, Time):
     df = pd.read_csv(File, sep = '\t', header = 0, encoding = 'cp1252', low_memory = False)
     df = df.reset_index()
     SpeciesName = {}
     for index, row in df.iterrows():
-        if (str(row['genbank_accession']) != "nan") and (str(row['species_name']) != "nan"):
-            if not ("-SUPPRESSED" in row['genbank_accession']):
-                if(row['species_name'] not in SpeciesName.keys()):
-                    SpeciesName[row['species_name']] = 1
-                else:
-                    Old = SpeciesName[row['species_name']]
-                    SpeciesName[row['species_name']] = Old + 1
+        if (str(row['species_name']) != "nan"):
+            if (row['species_name'] not in SpeciesName.keys()):
+                SpeciesName[row['species_name']] = 1
+            else:
+                Old = SpeciesName[row['species_name']]
+                SpeciesName[row['species_name']] = Old + 1
     for key, value in SpeciesName.items():
         Rhodopsin(str(key), Email, Time)
         RhodopsinString = '\n'.join(idRhodopsin)
@@ -482,7 +511,7 @@ def DownloadFastaFile(Voucher, Folder = "dataFishing/"+Now+"/datasets/", Specie 
     FileName    = Voucher+".fasta"
     Path        = os.path.join(Folder, FileName)
     Download    = requests.get(url, stream = True)
-    LogFile     = open(Folder+Now+".log", "w")
+    LogFile     = open(Folder+Now+".log", "a+")
     Sample      = ''
     if Download.ok:
         with open(Path, 'wb') as f:
@@ -493,7 +522,7 @@ def DownloadFastaFile(Voucher, Folder = "dataFishing/"+Now+"/datasets/", Specie 
                     os.fsync(f.fileno())
                     LogText = "Download %s has been successfully" % Specie
                     LogFile.write(Now+"-"+LogText+"\n")
-                    print(LogText)
+                    print(f"{bcolors.Green}{LogText}{bcolors.End}")
                     with open(Path) as handle:
                         for record in SeqIO.parse(handle, "fasta"):
                             voucher = record.description
@@ -529,7 +558,7 @@ def DownloadGenBankFile(Voucher, Folder = "dataFishing/"+Now+"/datasets/", Speci
                     os.fsync(f.fileno())
                     LogText = "Download %s has been successfully" % Specie
                     LogFile.write(Now+"-"+LogText+"\n")
-                    print(LogText)
+                    print(F"{bcolors.Green}{LogText}{bcolors.End}")
         GetGenes(Path, Folder, Voucher, Specie)
     else:
         LogText = "Download failed: status code {}\n{}".format(Download.status_code, Download.text)
@@ -544,6 +573,7 @@ def GetGenes(File, Folder, Voucher, Specie):
         if rec.features:
             for feature in rec.features:
                 if feature.type == "CDS":
+                    time.sleep(1)
                     if (str(feature.qualifiers["gene"]).replace("'", "") == "[ND1]" or str(feature.qualifiers["gene"]).replace("'", "") == "[nad1]"):
                         print("Processing NADH1 fasta")
                         f = open(Folder+"NADH1.fasta", "a+")
@@ -628,16 +658,19 @@ def BoldData(File):
     df2 = pd.read_csv(File, sep = '\t', header = 0, encoding = 'cp1252', low_memory = False)
     df2 = df2.reset_index()
     for index, row in df2.iterrows():
-        if (str(row['genbank_accession']) != "nan") and (str(row['species_name']) != "nan"):
-            if not ("-SUPPRESSED" in row['genbank_accession']):
-               BoldSpeciesName.append(row['species_name'])
-               BoldSampleID.append(row['sampleid'])
-               BoldLat.append(row['lat'])
-               BoldLon.append(row['lon'])
-               BoldCountry.append(row['country'])
-               BoldState.append(row['province_state'])
-               BoldRegion.append(row['region'])
-               BoldAccession.append(row['genbank_accession'])
+        if (str(row['species_name']) != "nan"):
+            BoldSpeciesName.append(row['species_name'])
+            BoldSampleID.append(row['sampleid'])
+            BoldLat.append(row['lat'])
+            BoldLon.append(row['lon'])
+            BoldCountry.append(row['country'])
+            BoldState.append(row['province_state'])
+            BoldRegion.append(row['region'])
+            BoldAccession.append(row['genbank_accession'])
+            Bin.append(row['bin_uri'])
+            Code.append(row['markercode'])
+            MarkerCode.append(row['marker_codes'])
+            BoldSpecie.append("fromBOLD_"+str(row['species_name']).replace(":", "").replace(".", "")+"_"+str(row['recordID'])+".fasta")
 if __name__ == "__main__":
     File    = sys.argv[1]
     Email   = sys.argv[2]
@@ -645,7 +678,7 @@ if __name__ == "__main__":
     ReadFile(File, Email, int(Time))
     BoldData(File)
     df1 = pd.DataFrame({
-        'Specie': SpecieName, # Species Name No-Redundant
+        'Specie': SpecieName,
         'mtGenome': Genome,
         'mtGenome Vouchers': GenVouchers,
         'mtGenome Samples': SampleGenome,
@@ -672,9 +705,13 @@ if __name__ == "__main__":
         'CYTB Samples': SampleCYTB
         })
     df2 = pd.DataFrame({
+        'File Name' : BoldSpecie,
         'Accession': BoldAccession,
         'Sample ID': BoldSampleID,
         'Species Name': BoldSpeciesName,
+        'Bin': Bin,
+        'Code' : Code,
+        'Marker Codes' : MarkerCode,
         'Country': BoldCountry,
         'State': BoldState,
         'Region': BoldRegion,
@@ -682,14 +719,14 @@ if __name__ == "__main__":
         'Lon': BoldLon
         })
     with pd.ExcelWriter(f"dataFishing/{Now}/dataFishingGenesLog.xlsx", engine = 'xlsxwriter') as writer:
-        df1.to_excel(writer, sheet_name='dataFishing Genes', index = False)
-        df2.to_excel(writer, sheet_name='dataFishing Bold' , index = False)
+        df1.to_excel(writer, sheet_name='dataFishing NCBI', index = False)
+        df2.to_excel(writer, sheet_name='dataFishing BOLD' , index = False)
         workbook  = writer.book
         YES = workbook.add_format({'bg_color': '#C6EFCE', 'font_color': '#000000'})
         NO  = workbook.add_format({'bg_color': '#FFC7CE', 'font_color': '#000000'})
         Format = workbook.add_format({'text_wrap': True, 'align': 'center', 'valign': 'vcenter', 'border': 1 })
-        worksheet1 = writer.sheets['dataFishing Genes']
-        worksheet2 = writer.sheets['dataFishing Bold']
+        worksheet1 = writer.sheets['dataFishing NCBI']
+        worksheet2 = writer.sheets['dataFishing BOLD']
         worksheet1.set_column('A:Z', cell_format = Format)
         worksheet1.set_column("A:Z", 20)
         worksheet1.conditional_format('A2:Z1000', {'type': 'text', 'criteria': 'containing', 'value': 'Found', 'format': YES})
@@ -701,6 +738,8 @@ if __name__ == "__main__":
         'subject':  'Created by Luan Rabelo',
         'author':   'Luan Rabelo',
         'comments': f'Created with dataFishing in {time.strftime("%Y/%m/%d - %H:%M:%S")}'})
-    print(File+" dataFishing Done")
-    print(f"Files Downloaded in dataFishing/{Now}")
-    print("Cite US")
+    ReadBoldFile(File)
+    print(f"\n{bcolors.Cyan}{os.path.basename(File)} dataFishing Done{bcolors.End}")
+    print(f"\n{bcolors.Cyan}Files Downloaded in dataFishing/{Now}{bcolors.End}")
+    print(f"\n{bcolors.Bold}{bcolors.Cyan}https://www.buymeacoffee.com/lprabelo{bcolors.End}{bcolors.End}")
+    print(f"\n{bcolors.Cyan}Cite dataFishing{bcolors.End}")
