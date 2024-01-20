@@ -11,6 +11,7 @@ __status__      = "Stable"
 import os
 import re
 import time
+import sys
 class TerminalColors:
     Header      = '\033[95m'
     Blue        = '\033[94m'
@@ -21,6 +22,44 @@ class TerminalColors:
     End         = '\033[0m'
     Bold        = '\033[1m'
     Underline   = '\033[4m'
+
+try:
+    import requests
+    print(f"{TerminalColors.Green}Module 'Requests' found and imported!{TerminalColors.End}")
+except ImportError:
+    print(f"{TerminalColors.Fail}Module 'Requests' not found, please install it with: pip install requests{TerminalColors.End}")
+    print(f"{TerminalColors.Warning}{TerminalColors.Underline}Do you want to install it now? (yes/no){TerminalColors.End}")
+    Choice = str(input())
+    if Choice.lower() == 'y' or Choice.lower() == 'yes':
+        os.system('pip install requests')
+        print(f"{TerminalColors.Green}Module 'Requests' installed successfully!{TerminalColors.End}")
+        try:
+            import requests
+            print(f"{TerminalColors.Green}Module 'Requests' found and imported!{TerminalColors.End}")
+        except ImportError:
+            print(f"{TerminalColors.Fail}Module 'Requests' not found, please reinstall it with: pip install requests{TerminalColors.End}")
+            sys.exit()
+    else:
+        print(f"{TerminalColors.Fail}Installation 'Requests' aborted!{TerminalColors.End}")
+
+try:
+    import pandas as pd
+    print(f"{TerminalColors.Green}Module 'Pandas' found and imported!{TerminalColors.End}")
+except ImportError:
+    print(f"{TerminalColors.Fail}Module 'Pandas' not found, please install it with: pip install pandas{TerminalColors.End}")
+    print(f"{TerminalColors.Warning}{TerminalColors.Underline}Do you want to install it now? (yes/no){TerminalColors.End}")
+    Choice = str(input())
+    if Choice.lower() == 'y' or Choice.lower() == 'yes':
+        os.system('pip install pandas')
+        print(f"{TerminalColors.Green}Module 'Pandas' installed successfully!{TerminalColors.End}")
+        try:
+            import pandas as pd
+            print(f"{TerminalColors.Green}Module 'Pandas' found and imported!{TerminalColors.End}")
+        except ImportError:
+            print(f"{TerminalColors.Fail}Module 'Pandas' not found, please reinstall it with: pip install pandas{TerminalColors.End}")
+            sys.exit()
+    else:
+        print(f"{TerminalColors.Fail}Installation 'Pandas' aborted!{TerminalColors.End}")
 
 class dataFishing:
     def __init__(self, path):
