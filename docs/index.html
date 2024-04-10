@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/x-icon" href="assets/dataFishing.png">
+    <title>dataFishing</title>
+    <link rel="icon" type="image/x-icon" href="assets/dataFishing.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://kit.fontawesome.com/7d94912b47.js" crossorigin="anonymous"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <script src="dataFishing.js"></script>
+    <script src="https://unpkg.com/exceljs/dist/exceljs.min.js"></script>
+
+    <!-- Primary Meta Tags -->
+    <title>SyBA</title>
+    <meta name="title" content="SyBA" />
+    <meta name="description" content="SyBA: a tool and database for standardizing gene names in bacterial genomes" />
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://luanrabelo.github.io/SyBA/" />
+    <meta property="og:title" content="SyBA" />
+    <meta property="og:description"
+        content="SyBA: a tool and database for standardizing gene names in bacterial genomes" />
+    <meta property="og:image" content="https://raw.githubusercontent.com/luanrabelo/SyBA/stable/docs/assets/SyBAsm.png" />
+
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://luanrabelo.github.io/SyBA/" />
+    <meta property="twitter:title" content="SyBA" />
+    <meta property="twitter:description"
+        content="SyBA: a tool and database for standardizing gene names in bacterial genomes" />
+    <meta property="twitter:image"
+        content="https://raw.githubusercontent.com/luanrabelo/SyBA/stable/docs/assets/SyBAsm.png" />
+    
+    <style>
+        a {
+            text-decoration: none;
+            color: #FFFFFF;
+        }
+
+        a:hover {
+            text-decoration: none;
+            color: #909090;
+            cursor: pointer;
+        }
+
+        a:visited::after {
+            text-decoration: none;
+            color: #FFFFFF;
+        }
+
+        body {
+            font-family: "Ubuntu", sans-serif;
+            background-color: #EEEEEE;
+        }
+
+        textarea {
+            font-style: italic;
+        }
+
+        footer {
+            background-color: #202020;
+            color: #EEEEEE;
+            font-size: 0.95em;
+        }
+
+        sup {
+            font-size: 0.45em;
+            vertical-align: super;
+        }
+
+        hr {
+            border: 1px;
+            height: 10px;
+            background: linear-gradient(to right, #000000, #FFFFFF, #000000);
+        }
+        .progress {
+            height: 2.5rem;
+        }
+
+        .progress-bar {
+            background-color: #FF9800;
+            color: #000000;
+            font-size: 1.5em;
+        }
+
+        .progress-container {
+            background-color: #000000;
+            border: none;
+        }
+        .fa-2x{
+            vertical-align: middle;
+        }
+    </style>
+
+</head>
+
+<body>
+    <script>
+        $(document).ready(function () {
+            const spForm = $('#spForm');
+            const searchData = $('#searchData');
+            const _resultsTable = $('#_resultsTable');
+
+            spForm.hide();
+            searchData.hide();
+            _resultsTable.hide();
+        });
+    </script>
+    <!-- Float Button -->
+    <script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js" data-id="lprabelo" data-description="Support me on Buy me a coffee!" data-message="" data-color="#FF813F" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
+
+    <!-- Modals -->
+    <div class="modal fade" id="iucnModal" tabindex="-1" aria-labelledby="iucnModalLabel" aria-hidden="true" data-bs-keyboard="false">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-dark">
+                    <h5 class="modal-title text-white" id="iucnModalLabel">Retrieving data from the <b>IUCN</b> database</h5>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="assets/dataFishing.png" class="rounded me-2" alt="SyBA" width="25%">
+                    <div class="progress mt-5 mb-5">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-dark text-white">
+                    <div class="h4">Retrieving data from the <i><span id="biodiversitydb"></span></i>, please wait...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="gbifModal" tabindex="-1" aria-labelledby="gbifModalLabel" aria-hidden="true" data-bs-keyboard="false">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-dark">
+                    <h5 class="modal-title text-white" id="gbifModalLabel">Retrieving data from the <b>GBIF</b> database</h5>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="assets/dataFishing.png" class="rounded me-2" alt="SyBA" width="25%">
+                    <div class="progress mt-5 mb-5">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-dark text-white">
+                    <div class="h4">Retrieving data from the <i><span id="biodiversitydb"></span></i>, please wait...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="isDoneModal" tabindex="-1" aria-labelledby="isDoneModalLabel" aria-hidden="true" data-bs-keyboard="false">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-dark">
+                    <h5 class="modal-title text-white" id="isDoneModalLabel">dataFishing</h5>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="assets/dataFishing.png" class="rounded me-2" alt="SyBA" width="15%">
+                    <div class="h3">The search for data from the biodiversity database has been completed. Please click on the tabs to view the results.</div>
+                    <!-- GIF -->
+                    <div class="mt-2 mb-2">
+                        <img src="assets/dataFishing.png" class="rounded me-2" alt="SyBA" width="25%">
+                    </div>
+                </div>
+                <div class="modal-footer bg-dark text-white">
+                    <button type="button" class="btn btn-lg btn-success" data-bs-dismiss="modal"><i class="fa-solid fa-circle-check fa-beat"></i> I understand</button> 
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main>
+        <!-- Header -->
+        <div class="container-fluid text-center">
+            <img src="assets/dataFishing.png" class="rounded me-2" alt="dataFishing" width="10%">
+            <div class="display-3 text-center mb-2 mt-2"><b>dataFishing</b><sup class="text-muted">v1.0.0</sup></div>
+            <div class="display-6 text-center mb-2 mt-2"></div>
+            <hr class="mt-2 mb-2">
+        </div>
+
+        <!-- Field Search Options -->
+        <div class="container-fluid mx-auto row mt-2">
+            <div class="h4">Select the data sources to search for biodiversity information:</div>
+            <div class="col-4">
+                <div class="form-check form-switch mt-2 m-2">
+                    <input class="form-check-input" type="checkbox" role="switch" id="optbold" disabled>
+                    <label class="form-check-label" for="optbold">Barcode of Life Data System (<b>BOLD Systems</b>) - <i>em breve</i></label>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="form-check form-switch mt-2 m-2">
+                    <input class="form-check-input" type="checkbox" role="switch" id="optcol" disabled>
+                    <label class="form-check-label" for="optcol">Catalogue of Life (<b>CoL</b>) - <i>em breve</i></label>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="form-check form-switch mt-2 m-2">
+                    <input class="form-check-input" type="checkbox" role="switch" id="optecf" disabled>
+                    <label class="form-check-label" for="optecf">Eschmeyer's Catalog of Fishes - <i>em breve</i></label>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="form-check form-switch mt-2 m-2">
+                    <input class="form-check-input" type="checkbox" role="switch" id="optgbif">
+                    <label class="form-check-label" for="optgbif">Global Biodiversity Information Facility (<b>GBIF</b>)</label>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="form-check form-switch mt-2 m-2">
+                    <input class="form-check-input" type="checkbox" role="switch" id="optiucn">
+                    <label class="form-check-label" for="optiucn">International Union for Conservation of Nature’s (<b>IUCN</b>)</label>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="form-check form-switch mt-2 m-2">
+                    <input class="form-check-input" type="checkbox" role="switch" id="optncbi" disabled>
+                    <label class="form-check-label" for="optncbi">National Center for Biotechnology Information (<b>NCBI</b>) - <i>em breve</i></label>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="form-check form-switch mt-2 m-2">
+                    <input class="form-check-input" type="checkbox" role="switch" id="optfish" disabled>
+                    <label class="form-check-label" for="optfish">The Global Encyclopedia About Fish (<b>Fishbase</b>) - <i>em breve</i></label>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="form-check form-switch mt-2 m-2">
+                    <input class="form-check-input" type="checkbox" role="switch" id="optworms" disabled>
+                    <label class="form-check-label" for="optworms">World Register of Marine Species (<b>WoRMS</b>) - <i>em breve</i></label>
+                </div>
+            </div>
+        </div>
+        <script>
+            $(document).ready(function () {
+                const iucn = document.getElementById('optiucn');
+                const gbif = document.getElementById('optgbif');
+                const spForm = $('#spForm');
+                const searchData = $('#searchData');
+                const _resultsTable = $('#_resultsTable');
+        
+                function checkAndDisplay() {
+                    if (iucn.checked || gbif.checked) {
+                        getBoldSystem('Panthera leo').then(data => console.log(data));
+                        spForm.fadeIn();
+                        searchData.fadeIn();
+                        _resultsTable.fadeIn();
+                    } else {
+                        spForm.fadeOut();
+                        searchData.fadeOut();
+                        _resultsTable.fadeOut();
+                    }
+                }
+                iucn.addEventListener('click', checkAndDisplay);
+                gbif.addEventListener('click', checkAndDisplay);
+            });
+        </script>
+        
+
+
+
+        <!-- Cards -->
+        <div class="mt-2 mb-2 container">
+            <!-- IUCN -->
+            <div id="cardiucn" class="card" style="display: none;">
+                <div class="card-header bg-dark text-white"><i class="fa-solid fa-gear"></i> Search Options of
+                    <b>IUCN</b>
+                </div>
+                <div class="card-body row">
+                    <div class="form-check col-2">
+                        <input class="form-check-input" type="checkbox" value="" id="iucnallopt">
+                        <label class="form-check-label" for="iucnallopt"><b>All IUCN data</b></label>
+                    </div>
+                    <div class="form-check col-2">
+                        <input class="form-check-input" type="checkbox" value="" id="iucntaxonomyopt" checked disabled>
+                        <label class="form-check-label" for="iucntaxonomyopt">Taxonomy</label>
+                    </div>
+                    <div class="form-check col-2">
+                        <input class="form-check-input" type="checkbox" value="" id="iucnstatusopt" checked disabled>
+                        <label class="form-check-label" for="iucnstatusopt">Conservation Status</label>
+                    </div>
+                    <div class="form-check col-2">
+                        <input class="form-check-input" type="checkbox" value="" id="iucnsynonymsopt">
+                        <label class="form-check-label" for="iucnsynonymsopt">Synonyms Names</label>
+                    </div>
+                    <div class="form-check col-2">
+                        <input class="form-check-input" type="checkbox" value="" id="iucncommonopt">
+                        <label class="form-check-label" for="iucncommonopt">Common Names</label>
+                    </div>
+                    <div class="mt-1 mt-1 align-middle"><i class="fa-solid fa-circle-info"></i> Click and select the
+                        options to search for International Union for Conservation of Nature’s Red List of Threatened
+                        Species (<b>IUCN</b>)</div>
+                </div>
+            </div>
+            <!-- GBIF -->
+            <div id="cardgbif" class="card" style="display: none;">
+                <div class="card-header bg-dark text-white"><i class="fa-solid fa-gear"></i> Search Options of
+                    <b>GBIF</b>
+                </div>
+                <div class="card-body row">
+                    <div class="form-check col-2">
+                        <input class="form-check-input" type="checkbox" value="" id="gbifallopt">
+                        <label class="form-check-label" for="gbifallopt"><b>All GBIF data</b></label>
+                    </div>
+                    <div class="form-check col-2">
+                        <input class="form-check-input" type="checkbox" value="" id="gbiftaxonomyopt" checked disabled>
+                        <label class="form-check-label" for="taxonomyopt">Taxonomy</label>
+                    </div>
+                    <div class="form-check col-2">
+                        <input class="form-check-input" type="checkbox" value="" id="gbifoccurrence">
+                        <label class="form-check-label" for="gbifoccurrence">Occurrence</label>
+                    </div>
+                    <div class="mt-1 mt-1 align-middle"><i class="fa-solid fa-circle-info"></i> Click and select the
+                        options to search for Global Biodiversity Information Facility (<b>GBIF</b>)</div>
+                </div>
+            </div>
+
+        </div>
+        <script>
+            $(document).ready(function () {
+                const elements = [
+                    'cardiucn',
+                    'iucnallopt',
+                    'iucntaxonomyopt',
+                    'iucnstatusopt',
+                    'iucnsynonymsopt', 
+                    'iucncommonopt',
+                    'optiucn',
+
+                    'cardgbif',
+                    'gbifallopt',
+                    'gbiftaxonomyopt',
+                    'gbifoccurrence',
+                    'optgbif',
+                
+                    ].reduce((obj, id) => {
+                    obj[id] = document.getElementById(id);
+                    return obj;
+                }, {});
+                
+                elements.optiucn.addEventListener('click', () => {
+                    const isChecked = elements.optiucn.checked;
+                    elements.iucnalliucnopt.checked = false;
+                    elements.iucntaxonomyopt.checked = isChecked;
+                    elements.iucnstatusopt.checked = isChecked;
+                    elements.iucnsynonymsopt.checked = elements.iucnalliucnopt.checked;
+                    elements.iucncommonopt.checked = elements.iucnalliucnopt.checked;
+                    elements.cardiucn.style.display = isChecked ? 'block' : 'none';
+
+                    let animationKeyframes = elements.optiucn.checked
+                        ? [{ transform: 'translateX(-100%)' }, { transform: 'translateX(0)' }]
+                        : [{ transform: 'translateX(0)' }, { transform: 'translateX(-100%)' }];
+
+                    elements.cardiucn.animate(animationKeyframes, {
+                        duration: 250,
+                        iterations: 1
+                    });
+                });
+                elements.iucnallopt.addEventListener('click', () => {
+                    const isChecked = elements.iucnallopt.checked;
+                    elements.iucnsynonymsopt.checked = isChecked;
+                    elements.iucncommonopt.checked = isChecked;
+                });
+
+                // GBIF
+                elements.optgbif.addEventListener('click', () => {
+                    const isChecked = elements.optgbif.checked;
+                    elements.gbifallopt.checked = false;
+                    //elements.gbiftaxonomyopt.checked = isChecked;
+                    //elements.gbifoccurrence.checked = isChecked;
+                    elements.cardgbif.style.display = isChecked ? 'block' : 'none';
+
+                    let animationKeyframes = elements.optgbif.checked
+                        ? [{ transform: 'translateX(-100%)' }, { transform: 'translateX(0)' }]
+                        : [{ transform: 'translateX(0)' }, { transform: 'translateX(-100%)' }];
+
+                    elements.cardgbif.animate(animationKeyframes, {
+                        duration: 250,
+                        iterations: 1
+                    });
+                });
+                elements.gbifallopt.addEventListener('click', () => {
+                    const isChecked = elements.gbifallopt.checked;
+                    //elements.gbiftaxonomyopt.checked = isChecked;
+                    elements.gbifoccurrence.checked = isChecked;
+                });
+            });
+        </script>
+
+        <!-- Txt Area -->
+        <div id="spForm" class="container">
+            <div class="form-group">
+                <div class="form-floating">
+                    <textarea class="form-control form-control-lg" id="speciesNames" style="height: 30vh;" spellcheck="false"></textarea>
+                    <label for="speciesNames">Species Names</label>
+                    <script>
+                        $(document).ready(function () {
+                            const speciesNames = document.getElementById('speciesNames');
+                            speciesNames.focus();
+                            speciesNames.addEventListener('input', function () {
+                                // Split the textarea text into lines
+                                const lines = speciesNames.value.split('\n');
+                                const errorLine = -1;
+                                const errorMessage = '';
+                                const errorDiv = document.getElementById('errorDiv');
+                                const charError = '';
+                                const speciesSet = new Set();
+
+                                // Check if the only line is empty
+                                if (lines.length === 1 && lines[0] === '') {
+                                    speciesNames.style.backgroundColor = '';
+                                    errorDiv.innerHTML = '';
+                                    return;
+                                }
+
+                                // Iterate over each line
+                                for (let i = 0; i < lines.length; i++) {
+                                    // Split the line into words
+                                    const words = lines[i].split(' ');
+                                    // Check if the line contains a space at the beginning or end
+                                    if (lines[i][0] === ' ' || lines[i][lines[i].length - 1] === ' ') {
+                                        charError = 'The line contains a space at the beginning or end, please remove it.';
+                                    }
+                                    // Check if the line is empty
+                                    else if (lines[i].trim() === '') {
+                                        charError = 'The line is empty, add a species name or remove the line.';
+                                    }
+                                    // Check if the line contains exactly two words
+                                    else if (words.length !== 2) {
+                                        charError = 'The line ' + errorLine + ' does not contain exactly two words. It should be in the format "Genus species".';
+                                    }
+                                    // Check if the second word is "sp", "spp", "cf", or "aff"
+                                    else if (words[1] === 'sp' || words[1] === 'spp' || words[1] === 'cf' || words[1] === 'cff' || words[1] === 'aff') {
+                                        charError = 'The second word cannot be "sp", "spp", "cf", "cff" or "aff". It needs to be the species name.';
+                                    }
+                                    // Check if the line contains invalid characters
+                                    else if (!/^[a-zA-Z\s]+$/.test(lines[i])) {
+                                        charError = lines[i].replace(/[a-zA-Z\s]/g, '');
+                                    }
+                                    // Check if the line is duplicated
+                                    else if (speciesSet.has(lines[i])) {
+                                        charError = 'Duplicate species name';
+                                    }
+                                    // Check if the first letter of the first word is uppercase
+                                    else if (words[0][0] !== words[0][0].toUpperCase()) {
+                                        charError = 'The first letter of the first word is not uppercase';
+                                    }
+                                    // Check if the first letter of the second word is lowercase
+                                    else if (words[1][0] !== words[1][0].toLowerCase()) {
+                                        charError = 'The first letter of the second word is not lowercase';
+                                    }
+                                    // Check if each word has at least two characters
+                                    else if (words[0].length < 2 || words[1].length < 2) {
+                                        charError = 'Each word must have at least two characters';
+                                    }
+                                    // If any error was found, set the error message and break the loop
+                                    if (charError) {
+                                        errorLine = i + 1;
+                                        errorMessage = `Invalid input in <b>${lines[i]}</b> - Fix error in <b>Line ${errorLine}</b>: '<b>${charError}</b>' before proceeding.</b>`;
+                                        break;
+                                    }
+
+                                    // Add the line to the species set to check for duplicates
+                                    speciesSet.add(lines[i]);
+                                }
+
+                                // If an error was found, display the error message and change the textarea background color to red
+                                if (errorLine !== -1) {
+                                    speciesNames.style.backgroundColor = '#D71313';
+                                    errorDiv.innerHTML = errorMessage;
+                                } else {
+                                    speciesNames.style.backgroundColor = '';
+                                    errorDiv.innerHTML = '';
+                                }
+                            });
+                        });
+                    </script>
+                </div>
+                <div class="mt-1 align-middle"><i class="fa-solid fa-circle-info"></i> Enter the <b>species names</b>,
+                    each on a <b>new line</b>. <button id="exampleSpecies" class="btn btn-sm btn-outline-dark">Click
+                        here</button> to see an example.</div>
+                <div id="errorDiv" class="text-danger mt-1"></div>
+                <script>
+                    $(document).ready(function () {
+                        const speciesNames = document.getElementById('speciesNames');
+                        const exampleSpecies = document.getElementById('exampleSpecies');
+                        exampleSpecies.addEventListener('click', function () {
+                            const species = [
+                                "Ailuropoda melanoleuca",
+                                "Ara macao",
+                                "Balaenoptera musculus",
+                                "Carcharodon carcharias",
+                                "Dendrobates tinctorius",
+                                "Elephas maximus",
+                                "Eretmochelys imbricata",
+                                "Gorilla gorilla",
+                                "Pan paniscus",
+                                "Panthera tigris"
+                            ];
+                            speciesNames.value = "";
+                            species.forEach((s, i) => setTimeout(() => {
+                                speciesNames.value += s + "\n";
+                                $(speciesNames).trigger('input');
+                            }, i * 500));
+                            setTimeout(() => {
+                                speciesNames.value = speciesNames.value.slice(0, -1);
+                                $(speciesNames).trigger('input');
+                            }, species.length * 500);
+                        });
+                    });
+                </script>
+            </div>
+        </div>
+
+        <div class="mt-2 container text-end">
+            <button id="searchData" class="btn btn-lg btn-dark"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+            <script>
+                $(document).ready(function () {
+                    const searchData = document.getElementById("searchData");
+                    searchData.addEventListener('click', function () {
+                        let iucnModal = new bootstrap.Modal(document.getElementById('iucnModal'));
+                        let gbifModal = new bootstrap.Modal(document.getElementById('gbifModal'));
+
+                        let isDoneModal = new bootstrap.Modal(document.getElementById('isDoneModal'));
+                        if (optiucn.checked) {
+                            iucnModal.show();
+                            getIUCNdata().then(() => {
+                                iucnModal.hide();
+                            });   
+                        }
+                        if (optgbif.checked) {
+                            gbifModal.show();
+                            getGBIFdata().then(() => {
+                                gbifModal.hide();
+                            });
+                        }
+                        isDoneModal.show();
+                    });
+                });
+            </script>
+        </div>
+        
+
+        <div id="_resultsTable" class="mt-2 mb-2 container">
+            <ul class="nav nav-tabs justify-content-center nav-pills nav-fill" id="resultsTable" role="tablist">
+
+                <li class="nav-item" role="GBIF">
+                    <button class="nav-link active" id="gbif" data-bs-toggle="tab" data-bs-target="#gbif-pane" type="button"
+                        role="tab" aria-controls="gbif-pane" aria-selected="true">GBIF <span id="gbifCount"
+                            class="badge text-bg-dark"></span></button>
+                </li>
+
+                <li class="nav-item" role="IUCN">
+                    <button class="nav-link" id="iucn" data-bs-toggle="tab" data-bs-target="#iucn-pane" type="button"
+                        role="tab" aria-controls="iucn-pane" aria-selected="true">IUCN <span id="iucnCount"
+                            class="badge text-bg-dark"></span></button>
+                </li>
+
+            </ul>
+
+            <div class="tab-content" id="myTabContent">
+
+                <div class="tab-pane fade" id="iucn-pane" role="tabpanel" aria-labelledby="iucn" tabindex="0">
+                    <div id="iucnFilters" class="mt-2 mb-2 row">
+                        <div class="d-grid gap-2 col-6 mx-auto">
+                            <button class="btn btn-lg btn-dark" onclick="exportTableToExcel('iucnTableResults')"><i class="fa-solid fa-file-excel"></i> Export to Excel</button>
+                        </div>
+                    </div>
+                    <div id="iucnResults" class="table-responsive"></div>
+                </div>
+
+                <div class="tab-pane fade" id="gbif-pane" role="tabpanel" aria-labelledby="gbif" tabindex="0">
+                    <div id="gbifFilters" class="mt-2 mb-2 row">
+                        <div class="d-grid gap-2 col-6 mx-auto">
+                            <button class="btn btn-lg btn-dark" onclick="exportTableToExcel('gbifTableResults')"><i class="fa-solid fa-file-excel"></i> Export to Excel</button>
+                        </div>
+                    </div>
+                    <div id="gbifResults" class="table-responsive"></div>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="footer text-white">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-12 col-md-3 col-sm-1 verticalDivider">
+                    <div class="h4">About:</div>
+                    <div class="media">
+                        <img src="assets/dataFishing.png" class="mr-3 mx-auto d-block" alt="dataFishing" width="40%">
+                        <div class="media-body">
+                            <p style="text-align: justify;">dataFishing: A Comprehensive Tool for Mining Mitochondrial, and Chloroplast Genes and Synonyms Repository in Genomic Analysis</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-5 verticalDivider ">
+                    <div class="h4">Developers:</div>
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <div class="media">
+                                <img src="assets/Luan.png" class="mr-3 mx-auto d-block" alt="Luan Rabelo" width="45%">
+                                <div class="media-body">
+                                    <h5 class="mt-0">Luan Rabelo</h5>
+                                    <p><a href="mailto:luanrabelo@outlook.com"><i class="bi bi-envelope"></i>
+                                            luanrabelo@outlook.com</a>
+                                    </p>
+                                    <p><a href="https://x.com/luanrabelo" target="_blank"><i
+                                                class="bi bi-twitter-x"></i> @luanrabelo</a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="media">
+                                <img src="assets/Marcelo.png" class="mr-3 mx-auto d-block" alt="Marcelo Vallinoto"
+                                    width="45%">
+                                <div class="media-body">
+                                    <h5 class="mt-0">Marcelo Vallinoto</h5>
+                                    <p><a href="mailto:mvallino@ufpa.br"><i class="bi bi-envelope"></i>
+                                            mvallino@ufpa.br</a></p>
+                                    <p><a href="https://x.com/mvallinoto01" target="_blank"><i
+                                                class="bi bi-twitter-x"></i> @mvallinoto01</a></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="media">
+                                <img src="assets/Davidson.png" class="mr-3 mx-auto d-block" alt="Davidson Sodré"
+                                    width="45%">
+                                <div class="media-body">
+                                    <h5 class="mt-0">Davidson Sodré</h5>
+                                    <p><a href="mailto:davidson.sodre@ufra.edu.br"><i class="bi bi-envelope"></i>
+                                            davidson.sodre@ufra.edu.br</a></p>
+                                    <p><a href="https://x.com/_DSodre_" target="_blank"><i class="bi bi-twitter-x"></i>
+                                            @_DSodre_</a></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4 verticalDivider">
+                    <div class="h4">Institutions:</div>
+                    <div class="row">
+                        <div class="col-md-6 text-center">
+                            <div class="media">
+                                <img src="assets/UFPA.png" class="mr-3 mx-auto d-block"
+                                    alt="Universidade Federal do Pará" width="30%">
+                                <div class="media-body">
+                                    <h5 class="mt-0">Universidade Federal do Pará</h5>
+                                    <p><a href="https://ufpa.br/" target="_blank"><i class="bi bi-globe2"></i>
+                                            Universidade Federal do
+                                            Pará</a></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-center">
+                            <div class="media">
+                                <img src="assets/LEVO.png" class="mr-3 mx-auto d-block" alt="Laboratório de Evolução"
+                                    width="30%">
+                                <div class="media-body">
+                                    <h5 class="mt-0">Laboratório de Evolução</h5>
+                                    <p><a href="https://levo.ufpa.br/" target="_blank"><i class="bi bi-globe2"></i>
+                                            Laboratório de
+                                            Evolução</a></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <small class="text-center bg-white text-black">dataFishing Page was created by Luan Rabelo.</small>
+            </div>
+        </div>
+    </footer>
+
+</body>
+
+<script>
+    $(document).ready(function () {
+        const triggerTabList = document.querySelectorAll('#resultsTable')
+        triggerTabList.forEach(triggerEl => {
+            const tabTrigger = new bootstrap.Tab(triggerEl)
+            triggerEl.addEventListener('click', event => {
+                event.preventDefault()
+                tabTrigger.show()
+            })
+        })
+
+
+    });
+</script>
+
+</html>
