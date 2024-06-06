@@ -106,15 +106,54 @@ Usage: dataFishing.py [options]
 Options:
   -h, --help                    [Show this help message and exit.]
 
-  --input string {Mandatory}    [a text file with species names listed on separate lines or a BOLD System TSV file.]
+  --input string {Mandatory}    [A text file with species names listed on separate lines or a BOLD System TSV file.]
 
   --{databases} True            [Select the database(s) you wish to query. Default is --all True]
                                 {--iucn, --ncbi, --bold, --gbif, --worms}
 
   --email {Mandatory}           [Please include an email address for NCBI to contact in case of any issues.]
 
-  --output                      [The argument specifies the output folder for data storage. Default is dataFishing.]
+  --download {Optional}         [Download sequence data from BOLD System and/or GenBank. Default is False]
+
+  --genesList {Mandatory*}      [A text file with genes names listed on separate lines. See Table below for more information]
+
+  --verbose                     [This argument specifies if the verbose mode should be enabled or disabled. Default is True.]
+
+  --log                         [This argument specifies if the log mode should be enabled or disabled. Default is False.]
+  
+  * if --download True
 ```
+
+| Category | Mitochondrial Genes | Chloroplast Genes |
+|----------|---------------------|-------------------|
+| rRNA | *12S; 16S* | - |
+| Mitochondrial Complex I | *ND1; ND2; ND3; ND4; ND4L; ND5; ND6* | - |
+| Mitochondrial Complex III | *CYTB* | - |
+| Mitochondrial Complex IV | *COI; COII; COIII* | - |
+| Mitochondrial Complex V | *ATP6; ATP8* | - |
+| Control Region | *Control Region* | - |
+| ATP Synthase | - | *atpA; atpB; atpE; atpF; atpH; atpI* |
+| Cytochrome b/6f Complex | - | *petA; petB; petD; petE; petG; petL; petN* |
+| DNA dependent RNA polymerase | - | *rpoA; rpoB; rpoC1; rpoC2* |
+| Large Subunit of Ribosome | - | *rpl2; rpl14; rpl16; rpl20; rpl22; rpl23; rpl32; rpl33; rpl36* |
+| NADH-dehydrogenase | - | *ndhA; ndhB; ndhC; ndhD; ndhE; ndhF; ndhG; ndhH; ndhI; ndhJ; ndhK* |
+| PhotoSystem I-II | - | *psaA; psaB; psaC; psaI; psaJ; psaM; psb30; psbA; psbB; psbC; psbD; psbE; psbF; psbH; psbI; psbJ; psbK; psbL; psbM; psbN; psbZ* |
+| Small Subunit of Ribosome | - | *rps2; rps3; rps4; rps7; rps8; rps11; rps12; rps14; rps15; rps16; rps18; rps19* |
+| Rubisco | - | *rbcL* |
+| Others | - | *accD; ccsA; cemA; chlB; chlL; chlN; clpP; clpP1; cysA; cysT; ftsH; infA; lhbA; matK; pafI; pafII; pbf1; psb30; ycf1; ycf2; ycf3; ycf4; ycf12; ycf15;* |
+
+### Genes List **Text File** Example
+Example Mitocondrial Genes
+```
+COI
+COII
+COIII
+ND5
+CYTB
+Control Region
+```
+> [!NOTE]
+> Copy and paste into a new text document. Be sure to save the file with the correct extension. For example, if you're working with text file, save the file with the `.txt` extension.
 ***  
 ## Run ***dataFishing*** 
 ##### [:rocket: Go to Contents Overview](#contents-overview)
@@ -155,7 +194,7 @@ Panthera tigris
 
 Then, execute the command below.
 ```shell
-luan@lprabelo:~$ dataFishing.py -i Examples/Carangidae.txt --all True --email your@email.com --o dataFishing
+luan@lprabelo:~$ dataFishing.py -i Examples/Carangidae.txt --all True --email your@email.com --download True --geneList Examples/genesList.txt --verbose True --log True
 ```
 
 `dataFishing.py`: The Python script for ***dataFishing*** is available on GitHub:
@@ -166,7 +205,7 @@ luan@lprabelo:~$ dataFishing.py -i Examples/Carangidae.txt --all True --email yo
 `--{databases} True`: Select the database(s) you wish to query. For instance, use `--worms True` to search only in the WoRMS database, or `--all True` to search across all databases (see Table below). You can also use combinations of databases, such as `--bold True` `--gbif True`, to conduct queries in both the BOLD and GBIF databases simultaneously. Default is `--all True`.
 | dataBase | data | Parameters |
 | --- | --- | --- | 
-| `IUCN` | Common Names; Country Occurrence; Habitats; Status Conservation; Synonyms Names; Taxonomy | `--iucn True` |
+| `IUCN` | Common Names; Habitats; Status Conservation; Synonyms Names; Taxonomy | `--iucn True` |
 | `NCBI GenBank` | Sequences; Taxonomy | `--ncbi True` |
 | `Bold Systems` | BINs; Collection Site; Depository; Sample IDs; Sequences; Taxonomy | `--bold True` |
 | `GBIF` | Occurrence; Synonyms; Vernacular Names; Verbatim Name; Taxonomy | `--gbif True` |
@@ -174,7 +213,13 @@ luan@lprabelo:~$ dataFishing.py -i Examples/Carangidae.txt --all True --email yo
 
 `--email`: Please include an email address for NCBI to contact in case of any issues*. 
 
-`--output`: The argument specifies the output folder for data storage. Default is `dataFishing`.
+`--download`: Download sequence data from BOLD System and/or GenBank. `Default is False`.
+
+`--genesList`: A text file with genes names listed on separate lines.
+
+`--verbose`: This argument specifies if the verbose mode should be enabled or disabled. `Default is True`.
+
+`--log`: This argument specifies if the log mode should be enabled or disabled. `Default is False`.
 
 > [!NOTE]
 > \* Mandatory 
@@ -219,3 +264,6 @@ For reporting bugs, requesting assistance, or providing feedback, please reach o
 luanrabelo@outlook.com
 ```
 ***  
+
+
+
