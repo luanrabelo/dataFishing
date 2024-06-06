@@ -194,7 +194,7 @@ Panthera tigris
 
 Then, execute the command below.
 ```shell
-luan@lprabelo:~$ dataFishing.py -i Examples/Carangidae.txt --all True --email your@email.com --download True --geneList Examples/genesList.txt --verbose True --log True
+luan@lprabelo:~$ dataFishing.py -i Examples/Carangidae.txt --all True --email your@email.com --download True --genesList Examples/genesList.txt --verbose True --log True
 ```
 
 `dataFishing.py`: The Python script for ***dataFishing*** is available on GitHub:
