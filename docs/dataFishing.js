@@ -1,321 +1,194 @@
-async function getIUCNdata() {
-    var progressBar = document.querySelector('.progress-bar');
-    const synonymsopt = document.getElementById('synonymsopt').checked;
-    const commonopt = document.getElementById('commonopt').checked;
+var Cards = {
+    'iucn': ['IUCN_All_data', 'IUCN_Common_Names', 'IUCN_Country_Occurrence', 'IUCN_Habitats', 'IUCN_Species_Author*', 'IUCN_Status_Conservation*', 'IUCN_Synonyms_Names', 'IUCN_Taxonomy*'],
+    'gbif': ['GBIF_All_data', 'GBIF_Taxonomy*', 'GBIF_Occurrence'],
+    'WoRMS': ['WoRMS_All_data*', 'WoRMS_Taxonomy*', 'WoRMS_Species Status*', 'WoRMS_Species_Author*']
 
-    let completed = 0;
+};
+var NamesCards = {
+    'gbif': 'Global Biodiversity Information Facility',
+    'iucn': 'International Union for Conservation of Nature’s Red List of Threatened Species',
+    'ncbi': 'National Center for Biotechnology Information',
+    'WoRMS': 'World Register of Marine Species'
+};
 
-    const StatusIUCN = {
-        'LC': ['Least Concern', '#5FC65A'],
-        'NT': ['Near Threatened', '#CCE226'],
-        'VU': ['Vulnerable', '#F9E814'],
-        'EN': ['Endangered', '#FC7F3F'],
-        'CR': ['Critically Endangered', '#D81E05'],
-        'EW': ['Extinct in the Wild', '#542243'],
-        'EX': ['Extinct', '#000000'],
-        'DD': ['Data Deficient', '#D1D1C7'],
-        'NE': ['Not Evaluated', '#FFFFFF']
+
+// Click on the "Example" button to see an example of species names
+const speciesNames = document.getElementById('speciesNames');
+const exampleSpecies = document.getElementById('exampleSpecies');
+exampleSpecies.addEventListener('click', function () {
+    const species = [
+        "Ailuropoda melanoleuca",
+        "Ara macao",
+        "Balaenoptera musculus",
+        "Carcharodon carcharias",
+        "Dendrobates tinctorius",
+        "Elephas maximus",
+        "Eretmochelys imbricata",
+        "Gorilla gorilla",
+        "Pan paniscus",
+        "Panthera tigris"
+    ];
+    speciesNames.value = "";
+    species.forEach((s, i) => setTimeout(() => {
+        speciesNames.value += s + "\n";
+        $(speciesNames).trigger('input');
+    }, i * 500));
+    setTimeout(() => {
+        speciesNames.value = speciesNames.value.slice(0, -1);
+        $(speciesNames).trigger('input');
+    }, species.length * 500);
+});
+
+
+function getRandomTip() {
+    const toolTips = {
+        SynGenes: [
+            'a Python class for standardizing nomenclatures of mitochondrial and chloroplast genes and a web form for enhancing searches for evolutionary analyses.',
+            'https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-024-05781-y'
+        ],
+        ForAlexa: [
+            "an online tool for the rapid development of artificial intelligence skills for the teaching of evolutionary biology using Amazon's Alexa.",
+            'https://link.springer.com/article/10.1186/s12052-022-00169-z'
+        ],
     };
-
-    const speciesNames = document.getElementById('speciesNames').value.split('\n');
-    const _token = '9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee';
-
-    const _iucnTable = document.createElement('table');
-    _iucnTable.id = 'iucnTableResults';
-    _iucnTable.innerHTML = `
-<thead>
-    <tr>
-        <th scope="col">Kingdom</th>
-        <th scope="col">Phylum</th>
-        <th scope="col">Class</th>
-        <th scope="col">Order</th>
-        <th scope="col">Family</th>
-        <th scope="col">Genus</th>
-        <th scope="col">Species</th>
-        <th scope="col">Synonyms Names</th>
-        <th scope="col">Common Names</th>
-        <th scope="col">Status</th>
-        <th scope="col">Link</th>
-    </tr>
-</thead>
-`;
-    const _iucnTableBody = _iucnTable.createTBody();
-    _iucnTable.classList.add('table', 'table-striped', 'table-hover', 'mt-5', 'align-middle', 'mb-5');
-
-    const _iucnTableWrapper = document.createElement('div');
-    _iucnTableWrapper.style.maxHeight = '1000px';
-    _iucnTableWrapper.style.overflowY = 'auto';
-    _iucnTableWrapper.appendChild(_iucnTable);
-
-    const iucnResults = document.getElementById('iucnResults');
-    iucnResults.innerHTML = '';
-    iucnResults.appendChild(_iucnTableWrapper);
-    document.getElementById('iucnCount').textContent = speciesNames.length;
-
-    const promises = speciesNames.map(async (speciesName, index) => {     
-        const biodiversitydb = document.getElementById('biodiversitydb')
-        biodiversitydb.innerHTML = '';
-        const _speciesName = encodeURIComponent(speciesName);
-        const url = `https://apiv3.iucnredlist.org/api/v3/species/${_speciesName}?token=${_token}`;
-        try {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error(`HTTP-Error: ${response.status}`);
-            const json = await response.json();
-            const _synonyms = synonymsopt ? await getSynonymsNames(speciesName) : '-';
-            const _commonNames = commonopt ? await getCommonNames(speciesName) : '-';
-
-            for (const result of json.result) {
-                const row = _iucnTableBody.insertRow();
-                row.innerHTML = `
-            <td>${result.kingdom.charAt(0).toUpperCase() + result.kingdom.slice(1).toLowerCase()}</td>
-            <td>${result.phylum.charAt(0).toUpperCase() + result.phylum.slice(1).toLowerCase()}</td>
-            <td>${result.class.charAt(0).toUpperCase() + result.class.slice(1).toLowerCase()}</td>
-            <td>${result.order.charAt(0).toUpperCase() + result.order.slice(1).toLowerCase()}</td>
-            <td>${result.family.charAt(0).toUpperCase() + result.family.slice(1).toLowerCase()}</td>
-            <td><i>${speciesName.split(' ')[0]}</i></td>
-            <td><i>${speciesName}</i><br>${result.authority}</td>
-            <td>${_synonyms}</td>
-            <td>${_commonNames}</td>
-            <td style="background-color: ${StatusIUCN[result.category][1]};">${StatusIUCN[result.category][0]} (${result.category})</td>
-            <td><a class="btn btn-outline-dark" href="https://www.iucnredlist.org/search?query=${_speciesName}&searchType=species" role="button" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
-        `;
-            }
-        } catch (error) {
-            console.error(error);
-        }
-        biodiversitydb.innerHTML = speciesName;
-        completed += 1;
-        const progressPercentage = (completed / speciesNames.length) * 100;
-        progressBar.style.width = `${progressPercentage}%`;
-        progressBar.setAttribute('aria-valuenow', progressPercentage);
-        progressBar.innerText = 'Searching for the ' + speciesName + ' data in IUCN...';
-    });
-    await Promise.all(promises);
+    const keys = Object.keys(toolTips);
+    const randomKey = keys[Math.floor(Math.random() * keys.length)];
+    return { key: randomKey, description: toolTips[randomKey][0], link: toolTips[randomKey][1] };
 }
 
-
-async function getSynonymsNames(speciesName) {
-    const _speciesName = speciesName.replace(' ', '%20');
-    const _token = '9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee';
-    const url = `https://apiv3.iucnredlist.org/api/v3/species/synonym/${_speciesName}?token=${_token}`;
-    let response = await fetch(url);
-    if (response.ok) {
-        let json = await response.json();
-        if (json.result.length > 0) {
-            let synonyms = '';
-            for (let _i = 0; _i < json.result.length; _i++) {
-                if (`${json.result[_i].syn_authority}` === 'null') {
-                    synonyms += `<p><i>${json.result[_i].synonym}</i></p>`;
-                } else {
-                    synonyms += `<p><i>${json.result[_i].synonym}</i> ${json.result[_i].syn_authority}</p>`;
-                }
-            }
-            return synonyms;
-        } else {
-            return '-';
-        }
-    } else {
-        return `Error ${response.status}`;
-    }
-}
-
-async function getCommonNames(speciesName) {
-    const _speciesName = speciesName.replace(' ', '%20');
-    const _token = '9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee';
-    const url = `https://apiv3.iucnredlist.org/api/v3/species/common_names/${_speciesName}?token=${_token}`;
-    let response = await fetch(url);
-    if (response.ok) {
-        let json = await response.json();
-        if (json.result.length > 0) {
-            let commonNames = '';
-            for (let _i = 0; _i < json.result.length; _i++) {
-                commonNames += `<p>${json.result[_i].taxonname} <sup>${json.result[_i].language}</sup></p>`;
-            }
-            return commonNames;
-        } else {
-            return '-';
-        }
-    } else {
-        return `Error ${response.status}`;
-    }
-}
-
-async function exportTableToExcel(tableId) {
-    const StatusIUCN = {
-        'Least Concern (LC)': ['#5FC65A'],
-        'Near Threatened (NT)': ['#CCE226'],
-        'Vulnerable (VU)': ['#F9E814'],
-        'Endangered (EN)': ['#FC7F3F'],
-        'Critically Endangered (CR)': ['#D81E05'],
-        'Extinct in the Wild (EW)': ['#542243'],
-        'Extinct (EX)': ['#000000'],
-        'Data Deficient (DD)': ['#D1D1C7'],
-        'Not Evaluated (NE)': ['#FFFFFF']
-    };
-    const table = document.getElementById(tableId);
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet(tableId);
-    const data = Array.from(table.rows).map(r => Array.from(r.cells).map(c => c.innerText.replace(/<p>/g, '\n').replace(/<sup>/g, ' ')));
-    data.forEach((row, rowIndex) => {
-        row.forEach((cell, cellIndex) => {
-            if (cellIndex !== 10) {
-                let excelCell = worksheet.getCell(rowIndex + 1, cellIndex < 3 ? cellIndex + 1 : cellIndex);
-                excelCell.value = cell;
-                excelCell.alignment = { vertical: 'middle', wrapText: true };
-                if (cellIndex === 5 || cellIndex === 6 || cellIndex === 7) {
-                    excelCell.font = { italic: true };
-                }
-                if (cellIndex === 4 && StatusIUCN[cell]) {
-                    excelCell.fill = {
-                        type: 'pattern',
-                        pattern: 'solid',
-                        fgColor: { argb: StatusIUCN[cell][0].replace('#', '') }
-                    };
-                }
-            }
-        });
-    });
-    worksheet.getRow(1).font = { bold: true };
-    worksheet.columns.forEach(column => {
-        let maxColumnLength = 0;
-        column.eachCell({ includeEmpty: true }, cell => {
-            let columnLength = cell.text.length;
-            if (columnLength > maxColumnLength) {
-                maxColumnLength = columnLength;
-            }
-        });
-        column.width = maxColumnLength < 10 ? 10 : maxColumnLength > 50 ? 50 : maxColumnLength;
-    });
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = tableId + '.xlsx';
-    a.click();
-}
-
-
-async function getGBIFdata() {
-    var progressBar = document.querySelector('.progress-bar');
-    const gbifoccurrence = document.getElementById('gbifoccurrence').checked;
-    let completed = 0;
-
-    const speciesNames = document.getElementById('speciesNames').value.split('\n');
-    const _gbifTable = document.createElement('table');
-    _gbifTable.id = 'gbifTableResults';
-    _gbifTable.innerHTML = `
-<thead>
-    <tr>
-        <th scope="col">Kingdom</th>
-        <th scope="col">Phylum</th>
-        <th scope="col">Class</th>
-        <th scope="col">Order</th>
-        <th scope="col">Family</th>
-        <th scope="col">Genus</th>
-        <th scope="col">Species</th>
-        <th scope="col">Basionym</th>
-        <th scope="col">Vernacular Name</th>
-        <th scope="col">Taxonomic Status</th>
-        <th scope="col">Countries’ Occurrenc</th>
-        <th scope="col">Lat</th>
-        <th scope="col">Lon</th>
-        <th scope="col">Link</th>
-    </tr>
-</thead>
-`;
-    const _gbifTableBody = _gbifTable.createTBody();
-    _gbifTable.classList.add('table', 'table-striped', 'table-hover', 'mt-5', 'align-middle', 'mb-5');
-
-    const _gbifTableWrapper = document.createElement('div');
-    _gbifTableWrapper.style.maxHeight = '1000px';
-    _gbifTableWrapper.style.overflowY = 'auto';
-    _gbifTableWrapper.appendChild(_gbifTable);
-
-    const gbifResults = document.getElementById('gbifResults');
-    gbifResults.innerHTML = '';
-    gbifResults.appendChild(_gbifTableWrapper);
-    document.getElementById('gbifCount').textContent = speciesNames.length;
-
-    const promises = speciesNames.map(async (speciesName, index) => {
-        //const biodiversitydb = document.getElementById('biodiversitydb')
-        //biodiversitydb.innerHTML = '';
-        const _speciesName = encodeURIComponent(speciesName);
-        const url = `https://api.gbif.org/v1/species?name=${_speciesName}`;
-        try {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error(`HTTP-Error: ${response.status}`);
-            const json = await response.json();
-            const occurrence = gbifoccurrence ? await getOccurrence(speciesName) : ['-','-'];
+function displayTip() {
+    const tip = getRandomTip();
+    const container = document.querySelector('.tip-container');
+    container.classList.remove('fade-out');
+    container.classList.add('fade-in');
+    container.style.display = 'block';
+    container.innerHTML = `
+    <div class="bg-gray-600 overflow-hidden px-4 py-4">
+        <div class="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
             
-            const row = _gbifTableBody.insertRow();
-            for (const results of json.results) {
-                if (results.taxonomicStatus === 'ACCEPTED' && results.taxonID.includes('gbif:')) {
-                    console.log(results);
-                    row.innerHTML = `
-                <td>${results.kingdom ? results.kingdom.charAt(0).toUpperCase() + results.kingdom.slice(1).toLowerCase() : '-'}</td>
-                <td>${results.phylum ? results.phylum.charAt(0).toUpperCase() + results.phylum.slice(1).toLowerCase() : '-'}</td>
-                <td>${results.class ? results.class.charAt(0).toUpperCase() + results.class.slice(1).toLowerCase() : '-'}</td>
-                <td>${results.order ? results.order.charAt(0).toUpperCase() + results.order.slice(1).toLowerCase() : '-'}</td>
-                <td>${results.family ? results.family.charAt(0).toUpperCase() + results.family.slice(1).toLowerCase() : '-'}</td>
-                <td><i>${speciesName.split(' ')[0]}</i></td>
-                <td><i>${speciesName}</i><br>${results.authorship}</td>
-                <td><i>${results.basionym ? results.basionym : '-'}<i></td>
-                <td>${results.vernacularName ? results.vernacularName : '-'}</td>
-                <td>${results.taxonomicStatus ? results.taxonomicStatus.charAt(0).toUpperCase() + results.taxonomicStatus.slice(1).toLowerCase() : '-'}</td>
-                <td>${occurrence[0].join('<br>')}</td>
-                <td>${occurrence[1].join('<br>')}</td>
-                <td>${occurrence[2].join('<br>')}</td>
-                <td><a class="btn btn-outline-dark" href="https://www.gbif.org/species/${results.taxonID.split(':')[1]}" role="button" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
-                `;
-                }
+            <!-- Título da seção -->
+            <div class="flex-shrink-0 text-center sm:text-left sm:mr-5">
+                <span class="text-white text-lg font-semibold leading-6 rounded-full bg-gray-800 px-3 py-3">Explore other tools:</span>
+            </div>
+            
+            <!-- Descrição da ferramenta -->
+            <div class="flex-grow text-center sm:text-left sm:mr-5">
+                <div class="text-white text-2xl font-semibold leading-6"><strong>${tip.key}</strong> ${tip.description}</div>
+            </div>
+            
+            <!-- Botão 'Saiba Mais' (centralizado) -->
+            <div class="flex-shrink-0 text-center sm:text-left sm:mr-2">
+                <a href="${tip.link}" target="_blank" class="rounded-full bg-gray-800 px-3 py-3 text-base font-semibold text-white transition-colors duration-300 hover:bg-gray-700 hover:ring-2 hover:ring-white">
+                Learn More <span aria-hidden="true">→</span>
+                </a>
+            </div>
+            
+            <!-- Botão de fechar -->
+            <div class="flex-shrink-0 text-center sm:text-right mt-4 sm:mt-0">
+                <button id="toolsClose" type="button" class="rounded-full bg-gray-800 px-3 py-3 text-base font-semibold text-white transition-colors duration-200 hover:bg-red-600 hover:ring-2 hover:ring-red-600">
+                    <span class="sr-only">Fechar</span>
+                    <i class="fa-regular fa-2x fa-circle-xmark"></i>
+                </button>
+            </div>
+
+        </div>
+    </div>
+    `;
+    const closeButton = document.getElementById('toolsClose');
+    closeButton.onclick = function () {
+        container.classList.remove('fade-in');
+        container.classList.add('fade-out');
+        container.style.display = 'none';
+        setTimeout(() => {
+            displayTip();
+        }, 25000);
+    };
+}
+
+
+function createCard(cardTitle, options) {
+    const cardContainer = document.createElement('div');
+    cardContainer.id = cardTitle + 'Card';
+    cardContainer.className = 'bg-white shadow-md rounded pt-4 pb-4 border-1 bg-gray-800 mb-5 ml-5 mr-5 hidden';
+
+    const cardHeader = document.createElement('div');
+    cardHeader.className = 'bg-gray-800 text-white font-bold py-4 px-4 rounded';
+    cardHeader.innerHTML = `<i class="fas fa-2x fa-gear"></i> Search Options of ${NamesCards[cardTitle]} <b>(${cardTitle.toUpperCase()})`;
+    cardContainer.appendChild(cardHeader);
+
+    const cardBody = document.createElement('div');
+    cardBody.className = 'pt-2 grid grid-cols-1 sm:grid-cols-1 md:grid-cols-4 lg:grid-cols-8 xl:grid-cols-8 2xl:grid-cols-8 gap-1 justify-items-center sm:justify-items-center';
+    cardContainer.appendChild(cardBody);
+
+    function handleAllDataChange(event) {
+        const allDataInput = event.target;
+        const allDataStatus = allDataInput.checked;
+        const allInputs = Array.from(cardBody.querySelectorAll('.toggle-checkbox')).filter(input => input.id != 'all_dataopt');
+
+        allInputs.forEach(input => {
+            if (!input.id.endsWith('*opt')) {
+                input.checked = allDataStatus;
+                input.disabled = allDataStatus;
             }
-        } catch (error) {
-            console.error(error);
-        }
-    });
-    await Promise.all(promises);
-}
+        });
+    }
 
-async function getOccurrence(speciesName) {
-    const dataParams = { 'scientificName': speciesName , 'limit': 1000000};
-    const url = `https://api.gbif.org/v1/occurrence/search?${new URLSearchParams(dataParams)}`;
-
-    let response = await fetch(url);
-    if (response.ok) {
-        let json = await response.json();
-        console.log(json);
-        if (json.results.length > 0) {
-            let countries = [...new Set(json.results.filter(result => result.country !== undefined).map(result => result.country))];
-            let latitudes = json.results.filter(result => result.decimalLatitude !== undefined).map(result => result.decimalLatitude);
-            let longitudes = json.results.filter(result => result.decimalLongitude !== undefined).map(result => result.decimalLongitude);
-            return [countries, latitudes, longitudes];
+    options.forEach(option => {
+        const toggleContainer = document.createElement('div');
+        if (option.endsWith('*')) {
+            toggleContainer.className = 'flex items-center mb-4 w-full cursor-not-allowed';
         } else {
-            return [[], [], []];
+            toggleContainer.className = 'flex items-center mb-4 w-full';
         }
-    } else {
-        throw new Error(`Request failed with status ${response.status}`);
-    }
-}
 
+        const toggleLabel = document.createElement('label');
+        toggleLabel.className = 'switch';
 
-// BOLD Systems //
+        const toggleInput = document.createElement('input');
+        toggleInput.type = 'checkbox';
+        toggleInput.id = option.toLowerCase().replace(cardTitle.toLowerCase() + '_', '') + 'opt';
+        toggleInput.className = 'toggle-checkbox';
 
-async function getBoldSystem(speciesName) {
-    const url = `https://v3.boldsystems.org/index.php/API_Tax/TaxonSearch?taxName=${speciesName}`;
-    try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error('A resposta da rede não foi ok.');
+        if (option.endsWith('*')) {
+            toggleInput.checked = true;
+            toggleInput.disabled = true;
         }
-        const json = await response.json();
-        return json;
-    } catch (error) {
-        console.error('Falha ao buscar dados do sistema BOLD:', error);
-    }
+
+        if (option.includes('_All_data')) {
+            toggleInput.addEventListener('change', handleAllDataChange);
+
+        }
+
+        toggleLabel.appendChild(toggleInput);
+
+        const toggleSpan = document.createElement('span');
+        if (option.endsWith('*')) {
+            toggleSpan.className = 'toggle-slider cursor-not-allowed';
+        } else {
+            toggleSpan.className = 'toggle-slider';
+        }
+        toggleLabel.appendChild(toggleSpan);
+
+        const labelText = document.createElement('span');
+        labelText.className = 'ml-1 text-lg';
+
+        labelText.textContent = option.replace(new RegExp('^' + cardTitle + '_', 'i'), '').replace(/_/g, ' ');
+        toggleContainer.appendChild(toggleLabel);
+        toggleContainer.appendChild(labelText);
+        cardBody.appendChild(toggleContainer);
+    });
+
+    const infoText = document.createElement('div');
+    infoText.className = 'bg-gray-200 text-lg col-span-1 sm:col-span-1 md:col-span-2 lg:col-span-4 xl:col-span-12 px-4 pt-4 pb-4';
+    infoText.innerHTML = `<p class="font-bold">* Mandatory Fields</p><p><i class="fas fa-info-circle"></i> Click and select the options to search for ${NamesCards[cardTitle]} <b>(${cardTitle.toUpperCase()})</p>`;
+    cardBody.appendChild(infoText);
+
+    return cardContainer;
 }
+Object.keys(Cards).forEach(key => {
+    const cardElement = createCard(key, Cards[key]);
+    document.getElementById('CardsOpt').appendChild(cardElement);
+  });
 
-// Uso
-getBoldSystem('Diplura').then(data => console.log(data));
 
-
+  
