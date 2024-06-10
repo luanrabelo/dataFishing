@@ -1,6 +1,6 @@
 var Cards = {
     'iucn': ['IUCN_All_data', 'IUCN_Common_Names', 'IUCN_Country_Occurrence', 'IUCN_Habitats', 'IUCN_Species_Author*', 'IUCN_Status_Conservation*', 'IUCN_Synonyms_Names', 'IUCN_Taxonomy*'],
-    'gbif': ['GBIF_All_data', 'GBIF_Taxonomy*', 'Country_Presence'],
+    'gbif': ['GBIF_All_data', 'GBIF_Taxonomy*', "GBIF_Basionym*", "GBIF_Vernacular_Name*", "GBIF_Taxonomic_Status*", 'GBIF_Country_Presence'],
     'WoRMS': ['WoRMS_All_data*', 'WoRMS_Taxonomy*', 'WoRMS_Species Status*', 'WoRMS_Species_Author*']
 
 };
