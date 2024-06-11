@@ -295,7 +295,7 @@ async function getIUCN() {
         } catch (error) {
             console.error(error);
         }
-        progress += 10;
+        progress += (100/speciesNames.length);
         progressBar.style.width = progress + '%';
         if (progress >= 100) {
             setTimeout(() => {
@@ -484,7 +484,7 @@ async function getWoRMS() {
         } catch (error) {
             console.error(error);
         }
-        progress += 10;
+        progress += (100/speciesNames.length);
         progressBar.style.width = progress + '%';
         if (progress >= 100) {
             setTimeout(() => {
@@ -565,7 +565,7 @@ async function getGBIF() {
         } catch (error) {
             console.error(error);
         }
-        progress += 10;
+        progress += (100/speciesNames.length);
         progressBar.style.width = progress + '%';
         if (progress >= 100) {
             setTimeout(() => {

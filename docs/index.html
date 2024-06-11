@@ -487,26 +487,19 @@
     container.className = 'grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-4 justify-items-center sm:justify-items-center md:justify-items-center lg:justify-items-center xl:justify-items-center px-8 py-8'; // Adicionei classes para ajustar o layout responsivo
 
     Object.keys(Cards).forEach(key => {
-        // Criar o checkbox
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.id = key + '-checkbox';
         checkbox.checked = false;
         checkbox.className = 'form-checkbox h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500';
-
-        // Criar o label
         const label = document.createElement('label');
         label.htmlFor = key + '-checkbox';
         label.className = 'ml-3 font-medium text-lg';
         label.innerHTML = `${NamesCards[key]} (<strong>${key.toUpperCase()}</strong>)`;
-
-        // Criar um wrapper div para estilização
         const wrapperDiv = document.createElement('div');
-        wrapperDiv.className = 'my-2'; // Margem para separação e largura total
-
-        // Adicionar evento para mostrar/ocultar o card com animação
+        wrapperDiv.className = 'my-2';
         checkbox.addEventListener('change', function () {
-            const card = document.getElementById(key + 'Card'); // Substitua pelo ID do seu card
+            const card = document.getElementById(key + 'Card');
             if (this.checked) {
                 card.classList.remove('hidden');
                 card.classList.add('fade-in');
@@ -515,21 +508,15 @@
                 setTimeout(() => {
                     card.classList.add('hidden');
                     card.classList.remove('fade-out');
-                }, 500); // Duração da animação de saída
+                }, 500);
             }
         });
-
-        // Anexar o checkbox e o label ao wrapper div
         wrapperDiv.appendChild(checkbox);
         wrapperDiv.appendChild(label);
-
-        // Anexar o wrapper div ao container
         container.appendChild(wrapperDiv);
     });
 }
-// Chame esta função passando o dicionário de cards
 createCheckboxesForCards(Cards);
-
   </script>
 </body>
 
