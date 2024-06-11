@@ -167,7 +167,10 @@ function createCard(cardTitle, options) {
 
     const infoText = document.createElement('div');
     infoText.className = 'bg-gray-200 text-lg col-span-1 sm:col-span-1 md:col-span-2 lg:col-span-4 xl:col-span-12 px-4 pt-4 pb-4';
-    infoText.innerHTML = `<p class="font-bold">* Mandatory Fields</p><p><i class="fas fa-info-circle"></i> Click and select the options to search for ${NamesCards[cardTitle]} <b>(${cardTitle.toUpperCase()})</p>`;
+    infoText.innerHTML = `
+    <p class="font-bold">* Mandatory Fields</p>
+    <p><i class="fas fa-info-circle"></i> Click and select the options to search for ${NamesCards[cardTitle]} <b>(${cardTitle.toUpperCase()})</p>
+    <p><i class="fas fa-info-circle"></i> Please note that a full data search may take considerable time. We appreciate your patience during processing.</p>`;
     cardBody.appendChild(infoText);
 
     return cardContainer;
