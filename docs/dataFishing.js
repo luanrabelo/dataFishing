@@ -1,6 +1,6 @@
 var Cards = {
     'iucn': ['IUCN_All_data', 'IUCN_Common_Names', 'IUCN_Country_Occurrence', 'IUCN_Habitats', 'IUCN_Species_Author*', 'IUCN_Status_Conservation*', 'IUCN_Synonyms_Names', 'IUCN_Taxonomy*'],
-    'gbif': ['GBIF_All_data', 'GBIF_Taxonomy*', "GBIF_Basionym*", "GBIF_Vernacular_Name*", "GBIF_Taxonomic_Status*", 'GBIF_Country_Presence'],
+    'gbif': ['GBIF_All_data*', 'GBIF_Taxonomy*', "GBIF_Basionym*", "GBIF_Vernacular_Name*", "GBIF_Taxonomic_Status*"],
     'WoRMS': ['WoRMS_All_data*', 'WoRMS_Taxonomy*', 'WoRMS_Species Status*', 'WoRMS_Species_Author*']
 
 };
@@ -12,33 +12,44 @@ var NamesCards = {
 };
 
 
-// Click on the "Example" button to see an example of species names
-const speciesNames = document.getElementById('speciesNames');
-const exampleSpecies = document.getElementById('exampleSpecies');
-exampleSpecies.addEventListener('click', function () {
-    const species = [
-        "Ailuropoda melanoleuca",
-        "Ara macao",
-        "Balaenoptera musculus",
-        "Carcharodon carcharias",
-        "Dendrobates tinctorius",
-        "Elephas maximus",
-        "Eretmochelys imbricata",
-        "Gorilla gorilla",
-        "Pan paniscus",
-        "Panthera tigris"
-    ];
-    speciesNames.value = "";
-    species.forEach((s, i) => setTimeout(() => {
-        speciesNames.value += s + "\n";
-        $(speciesNames).trigger('input');
-    }, i * 500));
-    setTimeout(() => {
-        speciesNames.value = speciesNames.value.slice(0, -1);
-        $(speciesNames).trigger('input');
-    }, species.length * 500);
+document.addEventListener('DOMContentLoaded', function () {
+    const speciesNames = document.getElementById('speciesNames');
+    const exampleSpecies = document.getElementById('exampleSpecies');
+    exampleSpecies.addEventListener('click', function () {
+        const species = [
+            "Ailuropoda melanoleuca",
+            "Ara macao",
+            "Balaenoptera musculus",
+            "Carcharodon carcharias",
+            "Dendrobates tinctorius",
+            "Elephas maximus",
+            "Eretmochelys imbricata",
+            "Gorilla gorilla",
+            "Pan paniscus",
+            "Panthera tigris"
+        ];
+        speciesNames.value = ""; // Limpa o campo antes de inserir os exemplos
+        species.forEach((s, i) => {
+            setTimeout(() => {
+                speciesNames.value += s + "\n";
+                // Dispara o evento input para cada inserção
+                const event = new Event('input', {
+                    bubbles: true,
+                    cancelable: true,
+                });
+                speciesNames.dispatchEvent(event);
+            }, i * 500);
+        });
+        setTimeout(() => {
+            speciesNames.value = speciesNames.value.trim(); // Remove o último caractere de nova linha
+            const event = new Event('input', {
+                bubbles: true,
+                cancelable: true,
+            });
+            speciesNames.dispatchEvent(event);
+        }, species.length * 500);
+    });
 });
-
 
 function getRandomTip() {
     const toolTips = {
@@ -63,46 +74,22 @@ function displayTip() {
     container.classList.add('fade-in');
     container.style.display = 'block';
     container.innerHTML = `
-    <div class="bg-gray-600 overflow-hidden px-4 py-4">
+    <div class="bg-gray-600 overflow-hidden px-5 py-5">
         <div class="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
-            
-            <!-- Título da seção -->
             <div class="flex-shrink-0 text-center sm:text-left sm:mr-5">
                 <span class="text-white text-lg font-semibold leading-6 rounded-full bg-gray-800 px-3 py-3">Explore other tools:</span>
             </div>
-            
-            <!-- Descrição da ferramenta -->
             <div class="flex-grow sm:text-center text-left sm:mr-5">
                 <div class="text-white text-2xl font-semibold leading-6"><strong>${tip.key}</strong> ${tip.description}</div>
             </div>
-            
-            <!-- Botão 'Saiba Mais' (centralizado) -->
             <div class="flex-shrink-0 text-center sm:text-left sm:mr-2">
                 <a href="${tip.link}" target="_blank" class="rounded-full bg-gray-800 px-3 py-3 text-base font-semibold text-white transition-colors duration-300 hover:bg-gray-700 hover:ring-2 hover:ring-white">
                 Learn More <span aria-hidden="true">→</span>
                 </a>
             </div>
-            
-            <!-- Botão de fechar -->
-            <div class="flex-shrink-0 text-center sm:text-right mt-4 sm:mt-0">
-                <button id="toolsClose" type="button" class="rounded-full bg-gray-800 px-3 py-3 text-base font-semibold text-white transition-colors duration-200 hover:bg-red-600 hover:ring-2 hover:ring-red-600">
-                    <span class="sr-only">Fechar</span>
-                    <i class="fa-regular fa-2x fa-circle-xmark"></i>
-                </button>
-            </div>
-
         </div>
     </div>
     `;
-    const closeButton = document.getElementById('toolsClose');
-    closeButton.onclick = function () {
-        container.classList.remove('fade-in');
-        container.classList.add('fade-out');
-        container.style.display = 'none';
-        setTimeout(() => {
-            displayTip();
-        }, 25000);
-    };
 }
 
 
@@ -185,6 +172,7 @@ function createCard(cardTitle, options) {
 
     return cardContainer;
 }
+
 Object.keys(Cards).forEach(key => {
     const cardElement = createCard(key, Cards[key]);
     document.getElementById('CardsOpt').appendChild(cardElement);
@@ -223,8 +211,8 @@ async function getIUCN() {
         'NE': ['Not Evaluated', '#FFFFFF']
     };
 
-    const progressModal = document.getElementById('progressModalIUCN');
-    const progressBar = document.getElementById('progressBarIUCN');
+    const progressModal = document.getElementById('progressModal');
+    const progressBar = document.getElementById('progressBar');
     progressModal.classList.remove('hidden');
 
     const iucnSynonymsOpt = document.getElementById('synonyms_namesopt').checked;
@@ -233,19 +221,11 @@ async function getIUCN() {
     const iucnHabitatsOpt = document.getElementById('habitatsopt').checked;
 
     let progress = 0;
-    const _Tabs = document.getElementById('tabs');
-    let iucnTab = document.getElementById('iucnTab');
-    if (!iucnTab) {
-        iucnTab = document.createElement('li');
-        iucnTab.className = 'mr-2';
-        iucnTab.innerHTML = '<a href="#" class="inline-block text-gray-500 hover:text-gray-600 hover:bg-gray-50 rounded-t-lg py-4 px-4 text-sm font-medium text-center" id="iucnTab">Data Results</a>';
-        _Tabs.appendChild(iucnTab);
-    }
     const speciesNames = document.getElementById('speciesNames').value.split('\n');
     const _token = '9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee';
 
     const _iucnTable = document.createElement('table');
-    _iucnTable.id = 'iucnTableResults';
+    _iucnTable.id = 'TableResults';
     _iucnTable.classList.add("w-full", "text-lg", "text-center", "text-gray-500", "dark:text-gray-400", "flex-grow");
     _iucnTable.innerHTML = `
     <thead class="text-base text-white bg-gray-800 top-0">
@@ -276,7 +256,7 @@ async function getIUCN() {
     _iucnTableWrapper.classList.add("max-h-50", "overflow-y-auto");
     _iucnTableWrapper.appendChild(_iucnTable);
 
-    const iucnResults = document.getElementById('iucnResults');
+    const iucnResults = document.getElementById('Results');
     iucnResults.innerHTML = '';
     iucnResults.appendChild(_iucnTableWrapper);
 
@@ -324,6 +304,7 @@ async function getIUCN() {
         }
     });
     await Promise.all(promises);
+    updateDataResults();
 }
 
 async function getSynonymsNames(speciesName) {
@@ -422,24 +403,14 @@ async function getWoRMS() {
         'accepted': '#BACD92',
         'unaccepted': '#FA7070',
     }
-    const progressModal = document.getElementById('progressModalIUCN');
-    const progressBar = document.getElementById('progressBarIUCN');
+    const progressModal = document.getElementById('progressModal');
+    const progressBar = document.getElementById('progressBar');
     progressModal.classList.remove('hidden');
-
     let progress = 0;
-
-    const _Tabs = document.getElementById('tabs');
-    let iucnTab = document.getElementById('iucnTab');
-    if (!iucnTab) {
-        iucnTab = document.createElement('li');
-        iucnTab.className = 'mr-2';
-        iucnTab.innerHTML = '<a href="#" class="inline-block text-gray-500 hover:text-gray-600 hover:bg-gray-50 rounded-t-lg py-4 px-4 text-sm font-medium text-center" id="iucnTab">Data Results</a>';
-        _Tabs.appendChild(iucnTab);
-    }
     const speciesNames = document.getElementById('speciesNames').value.split('\n');
 
     const _wormsTable = document.createElement('table');
-    _wormsTable.id = 'iucnTableResults';
+    _wormsTable.id = 'TableResults';
     _wormsTable.classList.add("w-full", "text-lg", "text-center", "text-gray-500", "dark:text-gray-400", "flex-grow");
     _wormsTable.innerHTML = `
     <thead class="text-base text-white bg-gray-800 top-0">
@@ -467,12 +438,11 @@ async function getWoRMS() {
     _wormsTableWrapper.classList.add("max-h-50", "overflow-y-auto");
     _wormsTableWrapper.appendChild(_wormsTable);
 
-    const wormsResults = document.getElementById('iucnResults');
+    const wormsResults = document.getElementById('Results');
     wormsResults.innerHTML = '';
     wormsResults.appendChild(_wormsTableWrapper);
 
     const promises = speciesNames.map(async (speciesName) => {
-        console.log(speciesName);
         const _speciesName = encodeURIComponent(speciesName);
         const url = `https://www.marinespecies.org/rest/AphiaRecordsByName/${_speciesName}`;
         try {
@@ -523,29 +493,18 @@ async function getWoRMS() {
         }
     });
     await Promise.all(promises);
+    updateDataResults();
 }
 
 async function getGBIF() {
-    const progressModal = document.getElementById('progressModalIUCN');
-    const progressBar = document.getElementById('progressBarIUCN');
+    const progressModal = document.getElementById('progressModal');
+    const progressBar = document.getElementById('progressBar');
     progressModal.classList.remove('hidden');
-
-    const gbifOccurrence = document.getElementById('country_presenceopt').checked;
-
     let progress = 0;
-
-    const _Tabs = document.getElementById('tabs');
-    let iucnTab = document.getElementById('iucnTab');
-    if (!iucnTab) {
-        iucnTab = document.createElement('li');
-        iucnTab.className = 'mr-2';
-        iucnTab.innerHTML = '<a href="#" class="inline-block text-gray-500 hover:text-gray-600 hover:bg-gray-50 rounded-t-lg py-4 px-4 text-sm font-medium text-center" id="iucnTab">Data Results</a>';
-        _Tabs.appendChild(iucnTab);
-    }
     const speciesNames = document.getElementById('speciesNames').value.split('\n');
 
     const _gbifTable = document.createElement('table');
-    _gbifTable.id = 'iucnTableResults';
+    _gbifTable.id = 'TableResults';
     _gbifTable.classList.add("w-full", "text-lg", "text-center", "text-gray-500", "dark:text-gray-400", "flex-grow");
     _gbifTable.innerHTML = `
     <thead class="text-base text-white bg-gray-800 top-0">
@@ -560,7 +519,6 @@ async function getGBIF() {
             <th scope="col" class="px-6 py-3">Basionym</th>
             <th scope="col" class="px-6 py-3">Vernacular Name</th>
             <th scope="col" class="px-6 py-3">Taxonomic Status</th>
-            <th scope="col" class="px-6 py-3">Countries Occurrenc</th>
             <th scope="col" class="px-6 py-3">Link</th>
         </tr>
     </thead>
@@ -574,7 +532,7 @@ async function getGBIF() {
     _gbifTableWrapper.classList.add("max-h-50", "overflow-y-auto");
     _gbifTableWrapper.appendChild(_gbifTable);
 
-    const gbifResults = document.getElementById('iucnResults');
+    const gbifResults = document.getElementById('Results');
     gbifResults.innerHTML = '';
     gbifResults.appendChild(_gbifTableWrapper);
     const promises = speciesNames.map(async (speciesName) => {
@@ -584,7 +542,7 @@ async function getGBIF() {
             const response = await fetch(url);
             if (!response.ok) throw new Error(`HTTP-Error: ${response.status}`);
             const json = await response.json();
-            const occurrence = gbifOccurrence ? await getOccurrence(speciesName) : ['-', '-', '-'];
+            //const occurrence = gbifOccurrence ? await getOccurrence(speciesName) : '-';
             const row = _gbifTableBody.insertRow();
             row.classList.add('bg-gray-50', 'hover:bg-gray-100', 'text-black');
             for (const results of json.results) {
@@ -600,7 +558,6 @@ async function getGBIF() {
                 <td><i>${results.basionym ? results.basionym : '-'}<i></td>
                 <td>${results.vernacularName ? results.vernacularName : '-'}</td>
                 <td>${results.taxonomicStatus ? results.taxonomicStatus.charAt(0).toUpperCase() + results.taxonomicStatus.slice(1).toLowerCase() : '-'}</td>
-                <td>${occurrence[0].join('<br>')}</td>
                 <td><a class="btn btn-outline-dark" href="https://www.gbif.org/species/${results.taxonID.split(':')[1]}" role="button" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
                 `;
                 }
@@ -617,64 +574,23 @@ async function getGBIF() {
         }
     });
     await Promise.all(promises);
-}
-
-async function getOccurrence(speciesName) {
-    const dataParams = { 'scientificName': speciesName, 'limit': 1000000 };
-    const url = `https://api.gbif.org/v1/occurrence/search?${new URLSearchParams(dataParams)}`;
-
-    let response = await fetch(url);
-    if (response.ok) {
-        let json = await response.json();
-        console.log(json);
-        if (json.results.length > 0) {
-            let countries = [...new Set(json.results.filter(result => result.country !== undefined).map(result => result.country))];
-            let latitudes = json.results.filter(result => result.decimalLatitude !== undefined).map(result => result.decimalLatitude);
-            let longitudes = json.results.filter(result => result.decimalLongitude !== undefined).map(result => result.decimalLongitude);
-            return [countries, latitudes, longitudes];
-        } else {
-            return [[], [], []];
-        }
-    } else {
-        throw new Error(`Request failed with status ${response.status}`);
-    }
+    updateDataResults();
 }
 
 async function exportTableToExcel(tableId) {
-    const StatusIUCN = {
-        'Least Concern (LC)': ['#5FC65A'],
-        'Near Threatened (NT)': ['#CCE226'],
-        'Vulnerable (VU)': ['#F9E814'],
-        'Endangered (EN)': ['#FC7F3F'],
-        'Critically Endangered (CR)': ['#D81E05'],
-        'Extinct in the Wild (EW)': ['#542243'],
-        'Extinct (EX)': ['#000000'],
-        'Data Deficient (DD)': ['#D1D1C7'],
-        'Not Evaluated (NE)': ['#FFFFFF']
-    };
     const table = document.getElementById(tableId);
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet(tableId);
-    //const data = Array.from(table.rows).map(r => Array.from(r.cells).map(c => c.innerText.replace(/<p>/g, '\n').replace(/<sup>/g, ' ')));
-    //data.forEach((row, rowIndex) => {
-    //    row.forEach((cell, cellIndex) => {
-    //        if (cellIndex !== 10) {
-    //            let excelCell = worksheet.getCell(rowIndex + 1, cellIndex < 3 ? cellIndex + 1 : cellIndex);
-    //            excelCell.value = cell;
-    //            excelCell.alignment = { vertical: 'middle', wrapText: true };
-    //            if (cellIndex === 5 || cellIndex === 6 || cellIndex === 7) {
-    //                excelCell.font = { italic: true };
-    //            }
-    //            if (cellIndex === 4 && StatusIUCN[cell]) {
-    //                excelCell.fill = {
-    //                    type: 'pattern',
-    //                    pattern: 'solid',
-    //                    fgColor: { argb: StatusIUCN[cell][0] }
-    //                };
-    //            }
-    //        }
-    //    });
-    //});
+    const data = Array.from(table.rows).map(r => Array.from(r.cells).map(c => c.innerText.replace(/<p>/g, '\n').replace(/<sup>/g, ' ')));
+    data.forEach((row, rowIndex) => {
+        row.forEach((cell, cellIndex) => {
+            if (cellIndex !== 10) {
+                let excelCell = worksheet.getCell(rowIndex + 1, cellIndex < 3 ? cellIndex + 1 : cellIndex);
+                excelCell.value = cell;
+                excelCell.alignment = { vertical: 'middle', wrapText: true };
+            }
+        });
+    });
     worksheet.getRow(1).font = { bold: true };
     worksheet.columns.forEach(column => {
         let maxColumnLength = 0;
@@ -691,6 +607,24 @@ async function exportTableToExcel(tableId) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = tableId + '.xlsx';
+    a.download = 'dataFishing_' + tableId + '.xlsx';
     a.click();
+}
+
+function updateDataResults() {
+    const dataResults = document.getElementById('dataResults');
+    dataResults.innerHTML = '';
+    const newContent = `
+        <div class="flex items-center py-5 px-5 select-none hover:cursor-pointer">
+            <div class="flex items-center justify-center h-12 w-12 rounded-full bg-gray-800 text-white mr-2 font-bold text-xl">2</div>
+            <div class="text-3xl font-bold hover:underline">Visualize and export the results</div>
+        </div>
+        <div class="flex justify-center mt-2 mb-2">
+            <button id="btnExcel" onclick="exportTableToExcel('TableResults')" class="bg-gray-800 text-2xl w-96 sm:w-w-96 hover:bg-blue-900 text-white font-bold py-3 px-3 rounded-lg focus:outline-none focus:shadow-outline">
+                <i class="fa-solid fa-file-excel mr-2"></i> Export Result data to Excel
+            </button>
+        </div>
+    `;
+    
+    dataResults.innerHTML = newContent;
 }

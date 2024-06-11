@@ -155,22 +155,10 @@
           <h1 class="text-lg font-bold select-none">dataFishing<sup class="text-sm">v1.0.0</sup></h1>
         </div>
         <div class="hidden sm:flex space-x-4">
-          <a href="#home"
-            class="px-3 py-2 rounded-md text-base font-bold text-white hover:bg-gray-600 transition-colors duration-300 select-none">
-            <i class="fa-brands fa-github mr-2"></i>GitHub
-          </a>
-          <a href="#home"
-            class="px-3 py-2 rounded-md text-base font-bold text-white hover:bg-gray-600 transition-colors duration-300 select-none">
-            <i class="fa-solid fa-newspaper mr-2"></i>Cite US
-          </a>
-          <a href="#home"
-            class="px-3 py-2 rounded-md text-base font-bold text-white hover:bg-gray-600 transition-colors duration-300 select-none">
-            <i class="fa-solid fa-mug-hot mr-2"></i>Donate
-          </a>
-          <a href="#home"
-            class="px-3 py-2 rounded-md text-base font-bold text-white hover:bg-gray-600 transition-colors duration-300 select-none">
-            <i class="fa-solid fa-circle-info mr-2"></i>About
-          </a>
+          <a href="https://github.com/luanrabelo/dataFishing" target="_blank" class="px-3 py-2 rounded-md text-base font-bold text-white hover:bg-gray-600 transition-colors duration-300 select-none"><i class="fa-brands fa-github mr-2"></i>GitHub</a>
+          <!--<a href="#home" class="px-3 py-2 rounded-md text-base font-bold text-white hover:bg-gray-600 transition-colors duration-300 select-none"> <i class="fa-solid fa-newspaper mr-2"></i>Cite US</a>-->
+          <a href="https://www.buymeacoffee.com/lprabelo" target="_blank" class="px-3 py-2 rounded-md text-base font-bold text-white hover:bg-gray-600 transition-colors duration-300 select-none"><i class="fa-solid fa-mug-hot mr-2"></i>Donate</a>
+          <!--<a href="#home" class="px-3 py-2 rounded-md text-base font-bold text-white hover:bg-gray-600 transition-colors duration-300 select-none"><i class="fa-solid fa-circle-info mr-2"></i>About</a>-->
         </div>
         <div class="sm:hidden">
           <button id="menuBtn" class="p-3 rounded-md text-white hover:bg-gray-700 transition-colors duration-300">
@@ -205,6 +193,7 @@
 
   <main class="flex-grow">
     <div class="tip-container"></div>
+    
     <script>
       $(document).ready(function () {
         displayTip();
@@ -212,36 +201,26 @@
     </script>
     </div>
 
-    <div class="flex items-center py-5 px-5 select-none hover:cursor-pointer">
-      <div
-        class="flex items-center justify-center h-12 w-12 rounded-full bg-gray-800 text-white mr-2 font-bold text-xl">
-        1
-      </div>
-      <div class="text-3xl font-bold hover:underline">Select the data source to search for biodiversity information:
-      </div>
+    <div class="flex items-center py-5 px-5">
+      <div class="flex items-center justify-center h-12 w-12 rounded-full bg-gray-800 text-white mr-2 font-bold text-xl">1</div>
+      <div class="text-3xl font-bold">Select the data source to search for biodiversity information:</div>
     </div>
 
     <div id="checkbox-container"></div>
+    
     <div id="CardsOpt"></div>
 
     <div id="spForm" class="max-w-screen-2xl mx-auto px-5 py-5">
       <label for="speciesNames" class="text-lg font-bold">Species Names:</label>
-      <textarea id="speciesNames" class="rounded-lg border-2 border-gray-800/50 w-full text-lg py-5 px-5"
-        style="height: 30vh;" spellcheck="false"></textarea>
-      <div class="mt-1 text-justify"><i class="fa-solid fa-circle-info"></i> Enter the <b>Species Names</b>, each on a
-        <b>new line</b>, <b>without any special characters</b>. <button type="button" id="exampleSpecies"
-          class="rounded-md py-2 px-4 cursor-pointer text-md text-center bg-gray-800/75 text-white font-bold hover:bg-gray-800">Click
-          here</button> to see an example.</div>
+      <textarea id="speciesNames" class="rounded-lg border-2 border-gray-800/50 w-full text-lg py-5 px-5" style="height: 30vh;" spellcheck="false"></textarea>
+      <div class="mt-1 text-justify"><i class="fa-solid fa-circle-info"></i> Enter the <b>Species Names</b>, each on a <b>new line</b>, <b>without any special characters</b>. <button type="button" id="exampleSpecies" class="rounded-md py-2 px-4 cursor-pointer text-md text-center bg-gray-800/75 text-white font-bold hover:bg-gray-800"> Click here</button> to see an example.</div>
       <div id="errorDiv" class="text-danger mt-1"></div>
       <div class="flex justify-end">
-        <button id="startSearch"
-          class="bg-gray-800 text-2xl w-96 sm:w-w-96 hover:bg-blue-900 text-white font-bold py-5 px-5 rounded-lg focus:outline-none focus:shadow-outline"
-          type="button"><i class="fa-solid fa-magnifying-glass"></i> Start dataFishing</button>
+        <button id="startSearch" class="bg-gray-800 text-2xl w-96 sm:w-w-96 hover:bg-blue-900 text-white font-bold py-5 px-5 rounded-lg focus:outline-none focus:shadow-outline" type="button"><i class="fa-solid fa-magnifying-glass"></i> Start dataFishing</button>
       </div>
       <script>
         $(document).ready(function () {
           const startSearch = $('#startSearch');
-          //startSearch.disabled = true;
           const speciesNames = document.getElementById('speciesNames');
           speciesNames.focus();
           speciesNames.addEventListener('input', function () {
@@ -310,14 +289,21 @@
             }
             // If an error was found, display the error message and change the textarea background color to red
             if (errorLine !== -1) {
-
               speciesNames.style.backgroundColor = '#FA7070';
               errorDiv.innerHTML = errorMessage;
+              startSearch.disabled = true;
               startSearch.removeClass('bg-gray-800');
+              startSearch.removeClass('hover:bg-blue-900');
+              startSearch.addClass('bg-gray-200');
+              startSearch.addClass('cursor-not-allowed');
             } else {
               speciesNames.style.backgroundColor = '';
               errorDiv.innerHTML = '';
               startSearch.disabled = false;
+              startSearch.removeClass('bg-gray-200');
+              startSearch.removeClass('cursor-not-allowed');
+              startSearch.addClass('bg-gray-800');
+              startSearch.addClass('hover:bg-blue-900');
             }
           });
         });
@@ -325,23 +311,19 @@
     </div>
 
     <!-- Modal -->
-    <div id="progressModalIUCN" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75 hidden">
+    <div id="progressModal" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75 hidden">
       <div class="bg-white rounded-lg p-5 max-w-sm w-full">
         <h3 class="text-lg font-bold mb-4">Processing data...</h3>
         <div class="w-full bg-gray-200 rounded-full h-4">
-          <div id="progressBarIUCN" class="bg-blue-500 h-4 rounded-full" style="width: 0%;"></div>
+          <div id="progressBar" class="bg-blue-500 h-4 rounded-full" style="width: 0%;"></div>
         </div>
       </div>
     </div>
 
-    <ul class="flex flex-wrap border-b border-gray-200" id="tabs"></ul>
-    <div class="flex justify-center mt-2 mb-2">
-      <button onclick="exportTableToExcel('iucnTableResults')" class="bg-gray-800 text-2xl w-96 sm:w-w-96 hover:bg-blue-900 text-white font-bold py-3 px-3 rounded-lg focus:outline-none focus:shadow-outline">
-        <i class="fa-solid fa-file-excel mr-2"></i> Export data to Excel</button>
-    </div>
+    <div id="dataResults"></div>
     
   
-    <div id="iucnResults" class="flex-grow"></div>
+    <div id="Results" class="flex-grow"></div>
   </main>
 
   <!-- Footer -->
@@ -433,48 +415,82 @@
   <script>
     $(document).ready(function () {
       
-      const iucnCheckbox = document.getElementById('iucn-checkbox');
-      const gbifCheckbox = document.getElementById('gbif-checkbox');
-      const wormsCheckbox = document.getElementById('WoRMS-checkbox');
+    const iucnCheckbox = $('#iucn-checkbox');
+    const gbifCheckbox = $('#gbif-checkbox');
+    const wormsCheckbox = $('#WoRMS-checkbox');
+    const startSearch   = $('#startSearch');
 
-      iucnCheckbox.addEventListener('change', function () {
-        if (this.checked) {
-          document.getElementById('gbif-checkbox').disabled = true;
-          document.getElementById('WoRMS-checkbox').disabled = true;
-        } else {
-          document.getElementById('gbif-checkbox').disabled = false;
-          document.getElementById('WoRMS-checkbox').disabled = false;
-        }
-      });
+    const spForm = $('#spForm');
+    const btnExcel = $('#btnExcel');
+    spForm.hide();
+    btnExcel.hide();
 
-      gbifCheckbox.addEventListener('change', function () {
-        if (this.checked) {
-          document.getElementById('iucn-checkbox').disabled = true;
-          document.getElementById('WoRMS-checkbox').disabled = true;
-        } else {
-          document.getElementById('iucn-checkbox').disabled = false;
-          document.getElementById('WoRMS-checkbox').disabled = false;
-        }
-      });
+    function disableOtherCheckboxes(checkbox) {
+        $('#iucn-checkbox, #gbif-checkbox, #WoRMS-checkbox').not(checkbox).prop('disabled', true);
+    }
 
-      wormsCheckbox.addEventListener('change', function () {
+    function enableOtherCheckboxes() {
+        $('#iucn-checkbox, #gbif-checkbox, #WoRMS-checkbox').prop('disabled', false);
+    }
+
+    function showElements() {
+        spForm.fadeIn(500);
+        btnExcel.fadeIn(500);
+        startSearch.disabled = true;
+        startSearch.removeClass('bg-gray-800');
+        startSearch.removeClass('hover:bg-blue-900');
+        startSearch.addClass('bg-gray-200');
+        startSearch.addClass('cursor-not-allowed');
+    }
+
+    function hideElements() {
+        spForm.fadeOut(500);
+        btnExcel.fadeOut(500);
+        startSearch.disabled = false;
+        startSearch.removeClass('bg-gray-200');
+        startSearch.removeClass('cursor-not-allowed');
+        startSearch.addClass('bg-gray-800');
+        startSearch.addClass('hover:bg-blue-900');
+    }
+
+    iucnCheckbox.change(function () {
         if (this.checked) {
-          document.getElementById('iucn-checkbox').disabled = true;
-          document.getElementById('gbif-checkbox').disabled = true;
+            disableOtherCheckboxes(this);
+            showElements();
         } else {
-          document.getElementById('iucn-checkbox').disabled = false;
-          document.getElementById('gbif-checkbox').disabled = false;
+            enableOtherCheckboxes();
+            hideElements();
         }
-      });
     });
+
+    gbifCheckbox.change(function () {
+        if (this.checked) {
+            disableOtherCheckboxes(this);
+            showElements();
+        } else {
+            enableOtherCheckboxes();
+            hideElements();
+        }
+    });
+
+    wormsCheckbox.change(function () {
+        if (this.checked) {
+            disableOtherCheckboxes(this);
+            showElements();
+        } else {
+            enableOtherCheckboxes();
+            hideElements();
+        }
+    });
+  });
 
 
     function createCheckboxesForCards(Cards) {
-      const container = document.getElementById('checkbox-container');
-      container.innerHTML = '';
-      container.className = 'grid justify-items-center sm:justify-items-center xl:justify-items-center gap-2 grid-cols-1 sm:grid-cols-1 md:grid-cols-6 lg:grid-cols-6 xl:grid-cols-6 px-8 py-8';
+    const container = document.getElementById('checkbox-container');
+    container.innerHTML = '';
+    container.className = 'grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-4 justify-items-center sm:justify-items-center md:justify-items-center lg:justify-items-center xl:justify-items-center px-8 py-8'; // Adicionei classes para ajustar o layout responsivo
 
-      Object.keys(Cards).forEach(key => {
+    Object.keys(Cards).forEach(key => {
         // Criar o checkbox
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
@@ -488,24 +504,23 @@
         label.className = 'ml-3 font-medium text-lg';
         label.innerHTML = `${NamesCards[key]} (<strong>${key.toUpperCase()}</strong>)`;
 
-
         // Criar um wrapper div para estilização
         const wrapperDiv = document.createElement('div');
         wrapperDiv.className = 'my-2'; // Margem para separação e largura total
 
         // Adicionar evento para mostrar/ocultar o card com animação
         checkbox.addEventListener('change', function () {
-          const card = document.getElementById(key + 'Card'); // Substitua pelo ID do seu card
-          if (this.checked) {
-            card.classList.remove('hidden');
-            card.classList.add('fade-in');
-          } else {
-            card.classList.add('fade-out');
-            setTimeout(() => {
-              card.classList.add('hidden');
-              card.classList.remove('fade-out');
-            }, 500); // Duração da animação de saída
-          }
+            const card = document.getElementById(key + 'Card'); // Substitua pelo ID do seu card
+            if (this.checked) {
+                card.classList.remove('hidden');
+                card.classList.add('fade-in');
+            } else {
+                card.classList.add('fade-out');
+                setTimeout(() => {
+                    card.classList.add('hidden');
+                    card.classList.remove('fade-out');
+                }, 500); // Duração da animação de saída
+            }
         });
 
         // Anexar o checkbox e o label ao wrapper div
@@ -514,11 +529,11 @@
 
         // Anexar o wrapper div ao container
         container.appendChild(wrapperDiv);
-      }
-      );
-    }
-    // Chame esta função passando o dicionário de cards
-    createCheckboxesForCards(Cards);
+    });
+}
+// Chame esta função passando o dicionário de cards
+createCheckboxesForCards(Cards);
+
   </script>
 </body>
 
