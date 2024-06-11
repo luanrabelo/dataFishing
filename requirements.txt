@@ -1,0 +1,7 @@
+aiohttp
+requests
+pandas
+biopython
+xlsxwriter
+openpyxl
+SynGenes
