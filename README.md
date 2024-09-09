@@ -111,7 +111,7 @@ Options:
   --{databases} True            [Select the database(s) you wish to query. Default is --all True]
                                 {--iucn, --ncbi, --bold, --gbif, --worms}
 
-  --email {Mandatory}           [Please include an email address for NCBI to contact in case of any issues.]
+  --email {Mandatory}           [Please include a previously registered email with NCBI using this link: https://account.ncbi.nlm.nih.gov/signup/]
 
   --download {Optional}         [Download sequence data from BOLD System and/or GenBank. Default is False]
 
@@ -211,7 +211,7 @@ luan@lprabelo:~$ dataFishing.py -i Examples/Carangidae.txt --all True --email yo
 | `GBIF` | Occurrence; Synonyms; Vernacular Names; Verbatim Name; Taxonomy | `--gbif True` |
 | `WoRMS` | Taxonomy; Species Status Vernaculars; Authors | `--worms True` |
 
-`--email`: Please include an email address for NCBI to contact in case of any issues*. 
+`--email`: Please include a previously registered email with NCBI using this link: https://account.ncbi.nlm.nih.gov/signup/*. 
 
 `--download`: Download sequence data from BOLD System and/or GenBank. `Default is False`.
 
