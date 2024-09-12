@@ -35,7 +35,7 @@
   <img src="docs/assets/dataFishing.png" alt="dataFishing Logo" width="15%">
 </p>
 
-***dataFishing*** is an efficient Python tool and user-friendly web-form for mining genomic and biodiversity data. It is designed to facilitate and automate access to information from various databases, including **NCBI GenBank**, **Bold Systems**, **GBIF**, **WoRMS**, and **IUCN**. ***dataFishing*** is faster and more efficient than other tools for obtaining taxonomic information from the databases consulted. It also allows the retrieval of **DNA sequences**, **common names**, **synonyms**, **conservation status**, and **occurrence points** of species. The ***dataFishing*** repository, hosted on **GitHub** and **licensed under MIT**, is a **freely accessible** resource for the **scientific community**.
+***dataFishing*** is an efficient Python tool and user-friendly web-form for mining genomic and biodiversity data. It is designed to facilitate and automate access to information from various databases, including **NCBI GenBank**, **Bold Systems**, **GBIF**, **WoRMS**, and **IUCN**. ***dataFishing*** is faster and more efficient than other tools for obtaining taxonomic information from the databases consulted. It also allows the retrieval of **DNA sequences**, **Common Names**, **Synonyms**, **Conservation Status**, and **Occurrence Points** of species. The ***dataFishing*** repository, hosted on **GitHub** and **licensed under MIT**, is a **freely accessible** resource for the **scientific community**.
 ***  
 # Licence
 ***dataFishing*** is released under the **MIT License**. This license permits reuse within proprietary software provided that all copies of the licensed software include a copy of the MIT License terms and the copyright notice.
@@ -48,7 +48,7 @@ For more details, please see the MIT License.
 - ## Prerequisites
 Before you run ***dataFishing***, make sure you have the following prerequisites installed on your system:
 - **Python Environment**
-    - Python **version 3.10 or higher**
+    - Python **version 3.12 or higher**
     - conda (optional)
 - Dependencies
     - `aiohttp`
@@ -61,7 +61,7 @@ Before you run ***dataFishing***, make sure you have the following prerequisites
 ***  
 ### Installation of dependencies
 ##### [:rocket: Go to Contents Overview](#contents-overview)
-There are two ways to install ***dataFishing*** dependencies:
+There are tree ways to install ***dataFishing*** dependencies:
 1. Through pip: Install ***dataFishing*** dependencies directly using pip: 
 - 1.1. Open the **Terminal** or **Python Environment**
 - 1.2. Execute the Following Code:
@@ -79,6 +79,12 @@ pip install -r requirements.txt
 ```
 > [!NOTE]
 > This command will clone the repository, and then you should navigate to the cloned directory to install ***dataFishing*** and its dependencies using pip.  
+3. With **Conda Environment**
+```shell
+conda create -n dataFishing python=3.12
+conda activate dataFishing
+pip install aiohttp requests pandas biopython openpyxl xlsxwriter SynGenes
+```
 
 ***  
 ## Download the ***dataFishing*** script file
@@ -111,7 +117,7 @@ Options:
   --{databases} True            [Select the database(s) you wish to query. Default is --all True]
                                 {--iucn, --ncbi, --bold, --gbif, --worms}
 
-  --email {Mandatory}           [Please include a previously registered email with NCBI using this link: https://account.ncbi.nlm.nih.gov/signup/]
+  --email {Mandatory}*          [Please include a previously registered email with NCBI using this link: https://account.ncbi.nlm.nih.gov/signup/]
 
   --download {Optional}         [Download sequence data from BOLD System and/or GenBank. Default is False]
 
@@ -194,13 +200,13 @@ Panthera tigris
 
 Then, execute the command below.
 ```shell
-luan@lprabelo:~$ dataFishing.py -i Examples/Carangidae.txt --all True --email your@email.com --download True --genesList Examples/genesList.txt --verbose True --log True
+dataFishing.py --input Examples/SpeciesNames.txt --all True --email your@email.com --download True --genesList Examples/genesList.txt --verbose True --log True
 ```
 
 `dataFishing.py`: The Python script for ***dataFishing*** is available on GitHub:
  github.com/luanrabelo/dataFishing.
 
-`-i Examples/Carangidae.txt`: Input file from the `Examples` folder, sourced from Bold Systems*.
+`-i Examples/SpeciesNames.txt`: Input file from the `Examples` folder*.
 
 `--{databases} True`: Select the database(s) you wish to query. For instance, use `--worms True` to search only in the WoRMS database, or `--all True` to search across all databases (see Table below). You can also use combinations of databases, such as `--bold True` `--gbif True`, to conduct queries in both the BOLD and GBIF databases simultaneously. Default is `--all True`.
 | dataBase | data | Parameters |
@@ -264,6 +270,3 @@ For reporting bugs, requesting assistance, or providing feedback, please reach o
 luanrabelo@outlook.com
 ```
 ***  
-
-
-
