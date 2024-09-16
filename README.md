@@ -68,7 +68,8 @@ There are tree ways to install ***dataFishing*** dependencies:
 ```shell
 pip install aiohttp requests pandas biopython openpyxl xlsxwriter SynGenes
 ```
->This command will install the necessary packages specified in the command. If any required packages are missing, the script will handle their installation.
+> [!NOTE]
+> This command will install the necessary packages specified in the command. If any required packages are missing, the script will handle their installation.
 2. By cloning the GitHub repository: Clone the source code of ***dataFishing*** from GitHub:
 - 2.1. Open the **Terminal** or **Python Environment**
 - 2.2. Execute the Following Code:
@@ -85,6 +86,8 @@ conda create -n dataFishing python=3.12
 conda activate dataFishing
 pip install aiohttp requests pandas biopython openpyxl xlsxwriter SynGenes
 ```
+> [!NOTE]
+> This command creates an **environment in conda** with **Python version 3.12**, then activates the created environment, and finally installs the necessary libraries for **dataFishing**.  
 
 ***  
 ## Download the ***dataFishing*** script file
