@@ -1,0 +1,40 @@
+Family,Function,Start,End
+Bufonidae,dataFishing Script,2024/09/10 - 13:24:50,2024/09/10 - 13:25:08
+Bufonidae,rgbif Package,2024/09/09 - 10:00:26,2024/09/09 - 10:03:49
+Bufonidae,taxize Package,2024/09/09 - 10:03:49,2024/09/09 - 10:06:45
+
+Carangidae,dataFishing Script,2024/09/10 - 13:40:11,2024/09/10 - 13:40:31
+Carangidae,rgbif Package,2024/09/09 - 10:06:45,2024/09/09 - 10:08:38
+Carangidae,taxize Package,2024/09/09 - 10:08:38,2024/09/09 - 10:10:12
+
+Carcharhinidae,dataFishing Script,2024/09/10 - 13:58:36,2024/09/10 - 13:58:40
+Carcharhinidae,rgbif Package,2024/09/09 - 10:10:13,2024/09/09 - 10:11:12
+Carcharhinidae,taxize Package,2024/09/09 - 10:11:12,2024/09/09 - 10:11:56
+
+Cercopithecidae,dataFishing Script,2024/09/10 - 14:09:57,2024/09/10 - 14:10:01
+Cercopithecidae,rgbif Package,2024/09/09 - 10:11:57,2024/09/09 - 10:13:31
+Cercopithecidae,taxize Package,2024/09/09 - 10:13:31,2024/09/09 - 10:14:53
+
+Clupeidae,dataFishing Script,2024/09/10 - 14:12:59,2024/09/10 - 14:13:04
+Clupeidae,rgbif Package,2024/09/09 - 10:14:53,2024/09/09 - 10:17:30
+Clupeidae,taxize Package,2024/09/09 - 10:17:30,2024/09/09 - 10:19:37
+
+Columbidae,dataFishing Script,2024/09/10 - 14:14:57,2024/09/10 - 14:15:02
+Columbidae,rgbif Package,2024/09/09 - 10:19:37,2024/09/09 - 10:21:53
+Columbidae,taxize Package,2024/09/09 - 10:21:53,2024/09/09 - 10:23:50
+
+Lacertidae,dataFishing Script,2024/09/10 - 14:15:45,2024/09/10 - 14:15:50
+Lacertidae,rgbif Package,2024/09/09 - 10:23:51,2024/09/09 - 10:25:49
+Lacertidae,taxize Package,2024/09/09 - 10:25:49,2024/09/09 - 10:27:26
+
+Loricariidae,dataFishing Script,2024/09/10 - 14:17:04,2024/09/10 - 14:17:14
+Loricariidae,rgbif Package,2024/09/09 - 10:27:26,2024/09/09 - 10:35:12
+Loricariidae,taxize Package,2024/09/09 - 10:35:12,2024/09/09 - 10:41:40
+
+Sciaenidae,dataFishing Script,2024/09/10 - 14:18:08,2024/09/10 - 14:18:14
+Sciaenidae,rgbif Package,2024/09/09 - 10:41:40,2024/09/09 - 10:44:18
+Sciaenidae,taxize Package,2024/09/09 - 10:44:18,2024/09/09 - 10:46:32
+
+Vespertilionidae,dataFishing Script,2024/09/10 - 14:19:43,2024/09/10 - 14:19:50
+Vespertilionidae,rgbif Package,2024/09/09 - 10:46:32,2024/09/09 - 10:51:48
+Vespertilionidae,taxize Package,2024/09/09 - 10:51:48,2024/09/09 - 10:56:12

@@ -1,0 +1,30 @@
+Family,Function,Start,End
+Bufonidae,dataFishing Script,2024/09/10 - 15:12:40,2024/09/10 - 15:15:06
+Bufonidae,taxize Package,2024/09/09 - 11:02:26,2024/09/09 - 11:07:35
+
+Carangidae,dataFishing Script,2024/09/10 - 15:16:10,2024/09/10 - 15:17:32
+Carangidae,taxize Package,2024/09/09 - 11:07:35,2024/09/09 - 11:10:22
+
+Carcharhinidae,dataFishing Script,2024/09/10 - 15:11:26,2024/09/10 - 15:12:11
+Carcharhinidae,taxize Package,2024/09/09 - 11:10:22,2024/09/09 - 11:11:44
+
+Cercopithecidae,dataFishing Script,2024/09/10 - 15:17:49,2024/09/10 - 15:19:03
+Cercopithecidae,taxize Package,2024/09/09 - 11:11:44,2024/09/09 - 11:14:05
+
+Clupeidae,dataFishing Script,2024/09/10 - 15:19:49,2024/09/10 - 15:21:39
+Clupeidae,taxize Package,2024/09/09 - 11:14:05,2024/09/09 - 11:18:00
+
+Columbidae,dataFishing Script,2024/09/10 - 15:07:17,2024/09/10 - 15:09:05
+Columbidae,taxize Package,2024/09/09 - 11:18:00,2024/09/09 - 11:21:28
+
+Lacertidae,dataFishing Script,2024/09/10 - 15:05:38,2024/09/10 - 15:07:02
+Lacertidae,taxize Package,2024/09/09 - 11:21:28,2024/09/09 - 11:24:00
+
+Loricariidae,dataFishing Script,2024/09/10 - 15:00:19,2024/09/10 - 15:05:21
+Loricariidae,taxize Package,2024/09/09 - 11:24:00,2024/09/09 - 11:35:04
+
+Sciaenidae,dataFishing Script,2024/09/10 - 14:57:54,2024/09/10 - 14:59:42
+Sciaenidae,taxize Package,2024/09/09 - 11:35:04,2024/09/09 - 11:38:54
+
+Vespertilionidae,dataFishing Script,2024/09/10 - 14:52:35,2024/09/10 - 14:57:15
+Vespertilionidae,taxize Package,2024/09/09 - 11:38:54,2024/09/09 - 11:46:24

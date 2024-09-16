@@ -1,0 +1,11 @@
+Family,Function,Start,End
+Carangidae,dataFishing Script,2024/04/23 - 15:06:14,2024/04/23 - 15:06:17
+Carcharhinidae,dataFishing Script,2024/04/23 - 15:06:17,2024/04/23 - 15:06:23
+Clupeidae,dataFishing Script,2024/04/23 - 15:06:23,2024/04/23 - 15:06:27
+Loricariidae,dataFishing Script,2024/04/23 - 15:06:27,2024/04/23 - 15:06:36
+Sciaenidae,dataFishing Script,2024/04/23 - 15:06:36,2024/04/23 - 15:06:46
+Carangidae,worrms Package,2024/04/22 - 22:24:10,2024/04/22 - 22:27:42
+Carcharhinidae,worrms Package,2024/04/22 - 22:27:42,2024/04/22 - 22:29:26
+Clupeidae,worrms Package,2024/04/22 - 22:29:26,2024/04/22 - 22:34:16
+Loricariidae,worrms Package,2024/04/22 - 22:34:16,2024/04/22 - 22:48:15
+Sciaenidae,worrms Package,2024/04/22 - 22:48:15,2024/04/22 - 22:53:05

@@ -1,0 +1,40 @@
+Family,Function,Start,End
+Bufonidae,dataFishing Script,2024/09/10 - 16:51:19,2024/09/10 - 16:52:26
+Bufonidae,bold Package,2024/09/10 - 23:54:44,2024/09/10 - 23:57:36
+Bufonidae,taxize Package,2024/09/10 - 23:57:36,2024/09/10 - 23:59:31
+
+Carangidae,dataFishing Script,2024/04/26 - 16:35:46,2024/04/26 - 16:36:18
+Carangidae,bold Package,2024/04/25 - 17:24:06,2024/04/25 - 17:24:56
+Carangidae,taxize Package,2024/04/25 - 18:38:47,2024/04/25 - 18:39:40
+
+Carcharhinidae,dataFishing Script,2024/09/10 - 16:49:19,2024/09/10 - 16:49:47
+Carcharhinidae,bold Package,2024/09/11 - 00:01:24,2024/09/11 - 00:01:48
+Carcharhinidae,taxize Package,2024/09/11 - 00:01:48,2024/09/11 - 00:02:16
+
+Cercopithecidae,dataFishing Script,2024/09/10 - 16:59:31,2024/09/10 - 17:00:21
+Cercopithecidae,bold Package,2024/09/11 - 00:02:17,2024/09/11 - 00:02:56
+Cercopithecidae,taxize Package,2024/09/11 - 00:02:56,2024/09/11 - 00:03:47
+
+Clupeidae,dataFishing Script,2024/09/10 - 18:25:56,2024/09/10 - 18:26:57
+Clupeidae,bold Package,2024/09/11 - 00:03:47,2024/09/11 - 00:05:06
+Clupeidae,taxize Package,2024/09/11 - 00:05:06,2024/09/11 - 00:06:42
+
+Columbidae,dataFishing Script,2024/09/10 - 16:44:06,2024/09/10 - 16:45:16
+Columbidae,bold Package,2024/09/11 - 00:06:42,2024/09/11 - 00:08:14
+Columbidae,taxize Package,2024/09/11 - 00:08:14,2024/09/11 - 00:09:26
+
+Lacertidae,dataFishing Script,2024/04/26 - 16:36:18,2024/04/26 - 16:36:52
+Lacertidae,bold Package,2024/04/25 - 17:24:57,2024/04/25 - 17:25:52
+Lacertidae,taxize Package,2024/04/25 - 18:39:41,2024/04/25 - 18:40:42
+
+Loricariidae,dataFishing Script,2024/09/10 - 16:33:36,2024/09/10 - 16:34:30
+Loricariidae,bold Package,2024/09/09 - 12:24:24,2024/09/09 - 12:27:17
+Loricariidae,taxize Package,2024/09/09 - 12:27:17,2024/09/09 - 12:30:46
+
+Sciaenidae,dataFishing Script,2024/04/26 - 16:36:52,2024/04/26 - 16:37:28
+Sciaenidae,bold Package,2024/04/25 - 17:25:53,2024/04/25 - 17:26:57
+Sciaenidae,taxize Package,2024/04/25 - 18:40:42,2024/04/25 - 18:42:10
+
+Vespertilionidae,dataFishing Script,2024/09/10 - 16:25:30,2024/09/10 - 16:26:30
+Vespertilionidae,bold Package,2024/04/25 - 17:26:58,2024/04/25 - 17:29:24
+Vespertilionidae,taxize Package,2024/04/25 - 18:42:11,2024/04/25 - 18:45:05
