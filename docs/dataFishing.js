@@ -1,7 +1,29 @@
 var Cards = {
-    'iucn': ['IUCN_All_data', 'IUCN_Common_Names', 'IUCN_Country_Occurrence', 'IUCN_Habitats', 'IUCN_Species_Author*', 'IUCN_Status_Conservation*', 'IUCN_Synonyms_Names', 'IUCN_Taxonomy*'],
-    'gbif': ['GBIF_All_data*', 'GBIF_Taxonomy*', "GBIF_Basionym*", "GBIF_Vernacular_Name*", "GBIF_Taxonomic_Status*"],
-    'WoRMS': ['WoRMS_All_data*', 'WoRMS_Taxonomy*', 'WoRMS_Species Status*', 'WoRMS_Species_Author*']
+    'iucn': [
+        'IUCN_All_data',
+        'IUCN_Common_Names',
+        'IUCN_Country_Occurrence',
+        'IUCN_Habitats',
+        'IUCN_Species_Author*',
+        'IUCN_Status_Conservation*',
+        'IUCN_Synonyms_Names',
+        'IUCN_Taxonomy*',
+        'IUCN_Threats'
+
+    ],
+    'gbif': [
+        'GBIF_All_data*',
+        'GBIF_Taxonomy*',
+        "GBIF_Basionym*",
+        "GBIF_Vernacular_Name*",
+        "GBIF_Taxonomic_Status*"
+    ],
+    'WoRMS': [
+        'WoRMS_All_data*',
+        'WoRMS_Taxonomy*',
+        'WoRMS_Species Status*',
+        'WoRMS_Species_Author*'
+    ]
 
 };
 var NamesCards = {
@@ -28,11 +50,10 @@ document.addEventListener('DOMContentLoaded', function () {
             "Pan paniscus",
             "Panthera tigris"
         ];
-        speciesNames.value = ""; // Limpa o campo antes de inserir os exemplos
+        speciesNames.value = "";
         species.forEach((s, i) => {
             setTimeout(() => {
                 speciesNames.value += s + "\n";
-                // Dispara o evento input para cada inserção
                 const event = new Event('input', {
                     bubbles: true,
                     cancelable: true,
@@ -41,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }, i * 500);
         });
         setTimeout(() => {
-            speciesNames.value = speciesNames.value.trim(); // Remove o último caractere de nova linha
+            speciesNames.value = speciesNames.value.trim();
             const event = new Event('input', {
                 bubbles: true,
                 cancelable: true,
@@ -60,6 +81,10 @@ function getRandomTip() {
         ForAlexa: [
             "an online tool for the rapid development of artificial intelligence skills for the teaching of evolutionary biology using Amazon's Alexa.",
             'https://link.springer.com/article/10.1186/s12052-022-00169-z'
+        ],
+        dataFishing: [
+            "An efficient Python tool and user-friendly web-form for mining mitochondrial and chloroplast sequences, taxonomic, and biodiversity data.",
+            'https://doi.org/10.1016/j.ecoinf.2024.102970'
         ],
     };
     const keys = Object.keys(toolTips);
@@ -104,69 +129,90 @@ function createCard(cardTitle, options) {
     cardContainer.appendChild(cardHeader);
 
     const cardBody = document.createElement('div');
-    cardBody.className = 'pt-2 grid grid-cols-1 sm:grid-cols-1 md:grid-cols-4 lg:grid-cols-8 xl:grid-cols-8 2xl:grid-cols-8 gap-1 justify-items-center sm:justify-items-center';
+    cardBody.className = 'pt-2 grid grid-cols-1 sm:grid-cols-1 md:grid-cols-5 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-5 gap-4 justify-items-start';
     cardContainer.appendChild(cardBody);
 
     function handleAllDataChange(event) {
         const allDataInput = event.target;
         const allDataStatus = allDataInput.checked;
-        const allInputs = Array.from(cardBody.querySelectorAll('.toggle-checkbox')).filter(input => input.id != 'all_dataopt');
+        const allInputs = Array.from(cardBody.querySelectorAll('.toggle-checkbox')).filter(input => !input.id.endsWith('*opt'));
 
         allInputs.forEach(input => {
-            if (!input.id.endsWith('*opt')) {
-                input.checked = allDataStatus;
-                input.disabled = allDataStatus;
-            }
+            input.checked = allDataStatus;
+            input.disabled = false;
+            updateInputStyle(input);
         });
+    }
+
+    function updateInputStyle(input) {
+        const label = input.parentElement;
+        const icon = label.querySelector('i');
+
+        if (input.checked) {
+            label.classList.remove('bg-orange-500');
+            label.classList.add('bg-gray-800');
+            icon.className = 'fas fa-check text-white text-2xl absolute';
+        } else {
+            label.classList.remove('bg-gray-800');
+            label.classList.add('bg-orange-500');
+            icon.className = 'fas fa-times text-white text-2xl absolute';
+        }
     }
 
     options.forEach(option => {
         const toggleContainer = document.createElement('div');
-        if (option.endsWith('*')) {
-            toggleContainer.className = 'flex items-center mb-4 w-full cursor-not-allowed';
-        } else {
-            toggleContainer.className = 'flex items-center mb-4 w-full';
-        }
+        toggleContainer.className = 'flex items-center space-x-4';
 
-        const toggleLabel = document.createElement('label');
-        toggleLabel.className = 'switch';
+        const label = document.createElement('label');
+        label.className = 'relative inline-flex items-center cursor-pointer w-16 h-8 rounded-full transition duration-300';
 
         const toggleInput = document.createElement('input');
         toggleInput.type = 'checkbox';
+        toggleInput.checked = option.endsWith('*'); // Ligado apenas para obrigatórios
         toggleInput.id = option.toLowerCase().replace(cardTitle.toLowerCase() + '_', '') + 'opt';
-        toggleInput.className = 'toggle-checkbox';
+        toggleInput.className = 'toggle-checkbox sr-only peer';
 
+        // Desativa os inputs obrigatórios
         if (option.endsWith('*')) {
-            toggleInput.checked = true;
             toggleInput.disabled = true;
         }
 
+        // Evento para "All Data"
         if (option.includes('_All_data')) {
             toggleInput.addEventListener('change', handleAllDataChange);
-
         }
 
-        toggleLabel.appendChild(toggleInput);
+        // Ícone inicial
+        const stateIcon = document.createElement('i');
+        stateIcon.className = toggleInput.checked
+            ? 'fas fa-check text-white text-2xl absolute'
+            : 'fas fa-times text-white text-2xl absolute';
 
-        const toggleSpan = document.createElement('span');
-        if (option.endsWith('*')) {
-            toggleSpan.className = 'toggle-slider cursor-not-allowed';
-        } else {
-            toggleSpan.className = 'toggle-slider';
-        }
-        toggleLabel.appendChild(toggleSpan);
+        toggleInput.addEventListener('change', function () {
+            updateInputStyle(toggleInput);
+        });
 
-        const labelText = document.createElement('span');
-        labelText.className = 'ml-1 text-lg';
+        // Estilo inicial
+        label.classList.add(toggleInput.checked ? 'bg-gray-800' : 'bg-orange-500');
 
-        labelText.textContent = option.replace(new RegExp('^' + cardTitle + '_', 'i'), '').replace(/_/g, ' ');
-        toggleContainer.appendChild(toggleLabel);
-        toggleContainer.appendChild(labelText);
+        // Ícone centralizado no fundo
+        stateIcon.style.top = '50%';
+        stateIcon.style.left = '50%';
+        stateIcon.style.transform = 'translate(-50%, -50%)';
+        label.appendChild(toggleInput);
+        label.appendChild(stateIcon);
+
+        const columnLabel = document.createElement('span');
+        columnLabel.textContent = option.replace(new RegExp('^' + cardTitle + '_', 'i'), '').replace(/_/g, ' ');
+        columnLabel.className = 'text-lg text-gray-800';
+
+        toggleContainer.appendChild(label);
+        toggleContainer.appendChild(columnLabel);
         cardBody.appendChild(toggleContainer);
     });
 
     const infoText = document.createElement('div');
-    infoText.className = 'bg-gray-200 text-lg col-span-1 sm:col-span-1 md:col-span-2 lg:col-span-4 xl:col-span-12 px-4 pt-4 pb-4';
+    infoText.className = 'bg-gray-200 text-lg col-span-1 md:col-span-5 px-4 pt-4 pb-4';
     infoText.innerHTML = `
     <p class="font-bold">* Mandatory Fields</p>
     <p><i class="fas fa-info-circle"></i> Click and select the options to search for ${NamesCards[cardTitle]} <b>(${cardTitle.toUpperCase()})</p>
@@ -175,6 +221,9 @@ function createCard(cardTitle, options) {
 
     return cardContainer;
 }
+
+
+
 
 Object.keys(Cards).forEach(key => {
     const cardElement = createCard(key, Cards[key]);
@@ -222,6 +271,7 @@ async function getIUCN() {
     const iucnCommonOpt = document.getElementById('common_namesopt').checked;
     const iucnCountryOpt = document.getElementById('country_occurrenceopt').checked;
     const iucnHabitatsOpt = document.getElementById('habitatsopt').checked;
+    const iucnThreatsOpt = document.getElementById('threatsopt').checked;
 
     let progress = 0;
     const speciesNames = document.getElementById('speciesNames').value.split('\n');
@@ -229,9 +279,18 @@ async function getIUCN() {
 
     const _iucnTable = document.createElement('table');
     _iucnTable.id = 'TableResults';
-    _iucnTable.classList.add("w-full", "text-lg", "text-center", "text-gray-500", "dark:text-gray-400", "flex-grow");
+    _iucnTable.classList.add(
+        "w-full", 
+        "text-lg", 
+        "text-center", 
+        "text-gray-500", 
+        "dark:text-gray-400", 
+        "flex-grow", 
+        "even:bg-blue-gray-50/50",
+        "table-fixed"
+    );
     _iucnTable.innerHTML = `
-    <thead class="text-base text-white bg-gray-800 top-0">
+    <thead class="text-base text-white bg-gray-800 top-0 sticky top-0 z-10">
         <tr>
             <th scope="col" class="px-6 py-3">Kingdom</th>
             <th scope="col" class="px-6 py-3">Phylum</th>
@@ -240,12 +299,13 @@ async function getIUCN() {
             <th scope="col" class="px-6 py-3">Family</th>
             <th scope="col" class="px-6 py-3">Genus</th>
             <th scope="col" class="px-6 py-3">Species</th>
-            <th scope="col" class="px-6 py-3">Common Names</th>
-            <th scope="col" class="px-6 py-3">Country Occurrence</th>
-            <th scope="col" class="px-6 py-3">Habitats</th>
+            ${iucnCommonOpt ? '<th scope="col" class="px-6 py-3">Common Names</th>' : ''}
+            ${iucnCountryOpt ? '<th scope="col" class="px-6 py-3">Country Occurrence</th>' : ''}
+            ${iucnHabitatsOpt ? '<th scope="col" class="px-6 py-3">Habitats</th>' : ''}
             <th scope="col" class="px-6 py-3">Species Citation</th>
             <th scope="col" class="px-6 py-3">Status Conservation</th>
-            <th scope="col" class="px-6 py-3">Synonyms Names</th>
+            ${iucnSynonymsOpt ? '<th scope="col" class="px-6 py-3">Synonyms Names</th>' : ''}
+            ${iucnThreatsOpt ? '<th scope="col" class="px-6 py-3">Threats</th>' : ''}
             <th scope="col" class="px-6 py-3">Link</th>
         </tr>
     </thead>
@@ -274,6 +334,7 @@ async function getIUCN() {
             const _commonNames = iucnCommonOpt ? await getCommonNames(speciesName) : '-';
             const _country = iucnCountryOpt ? await getCountryOccurrence(speciesName) : '-';
             const _habitats = iucnHabitatsOpt ? await getHabitat(speciesName) : '-';
+            const _threats = iucnThreatsOpt ? await getThreats(speciesName) : '-';
 
             for (const result of json.result) {
                 const row = _iucnTableBody.insertRow();
@@ -285,20 +346,21 @@ async function getIUCN() {
                         <td>${result.order.charAt(0).toUpperCase() + result.order.slice(1).toLowerCase()}</td>
                         <td>${result.family.charAt(0).toUpperCase() + result.family.slice(1).toLowerCase()}</td>
                         <td><i>${speciesName.split(' ')[0]}</i></td>
-                        <td><i>${speciesName}</i><br>${result.authority}</td>
-                        <td>${_commonNames}</td>
-                        <td>${_country}</td>
-                        <td>${_habitats}</td>
+                        <td><i>${speciesName}</i></td>
+                        ${iucnCommonOpt ? `<td>${_commonNames}</td>` : ''}
+                        ${iucnCountryOpt ? `<td>${_country}</td>` : ''}
+                        ${iucnHabitatsOpt ? `<td><ul class="list-disc pl-4 text-left marker:text-gray-800">${_habitats}</ul></td>` : ''}
                         <td>${result.authority}</td>
                         <td style="background-color: ${StatusIUCN[result.category][1]};">${StatusIUCN[result.category][0]} (${result.category})</td>
-                        <td>${_synonyms}</td>
+                        ${iucnSynonymsOpt ? `<td>${_synonyms}</td>` : ''}
+                        ${iucnThreatsOpt ? `<td><ul class="list-disc pl-4 text-left marker:text-gray-800">${_threats}</ul></td>` : ''}
                         <td><a class="btn btn-outline-dark" href="https://www.iucnredlist.org/search?query=${_speciesName}&searchType=species" role="button" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
             `;
             }
         } catch (error) {
             console.error(error);
         }
-        progress += (100/speciesNames.length);
+        progress += (100 / speciesNames.length);
         progressBar.style.width = progress + '%';
         if (progress >= 100) {
             setTimeout(() => {
@@ -309,6 +371,7 @@ async function getIUCN() {
     await Promise.all(promises);
     updateDataResults();
 }
+
 
 async function getSynonymsNames(speciesName) {
     const _speciesName = speciesName.replace(' ', '%20');
@@ -327,6 +390,56 @@ async function getSynonymsNames(speciesName) {
                 }
             }
             return synonyms;
+        } else {
+            return '-';
+        }
+    } else {
+        return `Error ${response.status}`;
+    }
+}
+
+async function getThreats(speciesName) {
+    threats_dict = {
+        1: 'Residential & commercial development',
+        2: 'Agriculture & aquaculture',
+        3: 'Energy production & mining',
+        4: 'Transportation & service corridors',
+        5: 'Biological resource use',
+        6: 'Human intrusions & disturbance',
+        7: 'Natural system modifications',
+        8: 'Invasive & other problematic species, genes & diseases',
+        9: 'Pollution',
+        10: 'Geological events',
+        11: 'Climate change & severe weather',
+        12: 'Other threats'
+    };
+    const _speciesName = speciesName.replace(' ', '%20');
+    const _token = '9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee';
+    const url = `https://apiv3.iucnredlist.org/api/v3/threats/species/name/${_speciesName}?token=${_token}`;
+    let response = await fetch(url);
+    if (response.ok) {
+        let json = await response.json();
+        if (json.result.length > 0) {
+            let threats = [];
+            for (let _i = 0; _i < json.result.length; _i++) {
+                let code = `${json.result[_i].code}`;
+                code = code.split('.')[0];
+                console.log(code);
+                if (threats_dict[code]) {
+                    if (!threats.includes(threats_dict[code])) {
+                        threats.push(threats_dict[code]);
+                    }
+                } else {
+                    if (!threats.includes(json.result[_i].code)) {
+                        threats.push(json.result[_i].code);
+                    }
+                }
+            }
+            for (let _j = 0; _j < threats.length; _j++) {
+                threats[_j] = `<li>&nbsp;&nbsp;&nbsp;${threats[_j]};</li>`;
+            }
+            threats = threats.join('');
+            return threats;
         } else {
             return '-';
         }
@@ -388,7 +501,7 @@ async function getHabitat(speciesName) {
         if (json.result.length > 0) {
             let habitats = '';
             for (let _i = 0; _i < json.result.length; _i++) {
-                habitats += `${json.result[_i].habitat};\n`;
+                habitats += `<li>${json.result[_i].habitat};</li>`;
             }
             return habitats;
         } else {
@@ -622,12 +735,100 @@ function updateDataResults() {
             <div class="flex items-center justify-center h-12 w-12 rounded-full bg-gray-800 text-white mr-2 font-bold text-xl">2</div>
             <div class="text-3xl font-bold hover:underline">Visualize and export the results</div>
         </div>
-        <div class="flex justify-center mt-2 mb-2">
-            <button id="btnExcel" onclick="exportTableToExcel('TableResults')" class="bg-gray-800 text-2xl w-96 sm:w-w-96 hover:bg-blue-900 text-white font-bold py-3 px-3 rounded-lg focus:outline-none focus:shadow-outline">
-                <i class="fa-solid fa-file-excel mr-2"></i> Export Result data to Excel
-            </button>
-        </div>
     `;
     
     dataResults.innerHTML = newContent;
+    createColumnFilters('TableResults', 'columnFilters');
+    dataResults.innerHTML = `
+    <div class="flex justify-center mt-2 mb-2">
+        <button id="btnExcel" onclick="exportTableToExcel('TableResults')" class="bg-gray-800 text-2xl w-96 sm:w-w-96 hover:bg-blue-900 text-white font-bold py-3 px-3 rounded-lg focus:outline-none focus:shadow-outline"><i class="fa-solid fa-file-excel mr-2"></i> Export Result data to Excel</button>
+    </div>`;
+}
+
+function createColumnFilters(tableId, filterContainerId) {
+    const table = document.getElementById(tableId);
+    const filterContainer = document.getElementById(filterContainerId);
+
+    // Certifique-se de que a tabela e o contêiner existem
+    if (!table || !filterContainer) return;
+
+    const headerRow = table.querySelector('thead tr');
+    filterContainer.innerHTML = ''; // Limpar filtros existentes
+
+    const filterTitle = document.createElement('h3');
+    filterTitle.className = 'text-xl font-bold text-gray-800 mb-6';
+    filterTitle.textContent = 'Show/Hide Columns of the Results';
+    filterContainer.appendChild(filterTitle);
+
+    const filterGrid = document.createElement('div');
+    filterGrid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6';
+
+    // Criar switches para cada coluna
+    Array.from(headerRow.cells).forEach((cell, index) => {
+        const filterItem = document.createElement('div');
+        filterItem.className = 'flex items-center space-x-6';
+
+        const label = document.createElement('label');
+        label.className =
+            'relative inline-flex items-center cursor-pointer w-16 h-8 rounded-full transition duration-300';
+
+        const switchInput = document.createElement('input');
+        switchInput.type = 'checkbox';
+        switchInput.checked = true; // Todos ligados por padrão
+        switchInput.id = `filter-col-${index}`;
+        switchInput.dataset.columnIndex = index;
+        switchInput.className = 'sr-only peer';
+
+        switchInput.addEventListener('change', function () {
+            const colIndex = switchInput.dataset.columnIndex;
+            const isVisible = switchInput.checked;
+
+            // Alterna visibilidade da coluna
+            toggleColumnVisibility(tableId, colIndex, isVisible);
+
+            // Altera o fundo e o ícone
+            if (isVisible) {
+                label.classList.remove('bg-gray-400');
+                label.classList.add('bg-gray-800');
+                switchIcon.className = 'fas fa-eye text-white text-2xl absolute';
+            } else {
+                label.classList.remove('bg-gray-800');
+                label.classList.add('bg-gray-400');
+                switchIcon.className = 'fas fa-eye-slash text-white text-2xl absolute';
+            }
+        });
+
+        // Fundo do switch
+        label.classList.add('bg-gray-800');
+
+        // Ícone centralizado
+        const switchIcon = document.createElement('i');
+        switchIcon.className = 'fas fa-eye text-white text-2xl absolute';
+        switchIcon.style.top = '50%';
+        switchIcon.style.left = '50%';
+        switchIcon.style.transform = 'translate(-50%, -50%)';
+
+        label.appendChild(switchInput);
+        label.appendChild(switchIcon);
+
+        const columnLabel = document.createElement('span');
+        columnLabel.textContent = cell.textContent.trim();
+        columnLabel.className = 'text-xl text-gray-800 ml-4';
+
+        filterItem.appendChild(label);
+        filterItem.appendChild(columnLabel);
+        filterGrid.appendChild(filterItem);
+    });
+
+    filterContainer.appendChild(filterGrid);
+}
+
+function toggleColumnVisibility(tableId, colIndex, isVisible) {
+    const table = document.getElementById(tableId);
+    Array.from(table.rows).forEach(row => {
+        const cell = row.cells[colIndex];
+        if (cell) {
+            cell.style.display = isVisible ? '' : 'none';
+        }
+    });
 }

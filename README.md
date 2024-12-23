@@ -35,7 +35,7 @@
   <img src="docs/assets/dataFishing.png" alt="dataFishing Logo" width="15%">
 </p>
 
-***dataFishing*** is an efficient Python tool and user-friendly web-form for mining genomic and biodiversity data. It is designed to facilitate and automate access to information from various databases, including **NCBI GenBank**, **Bold Systems**, **GBIF**, **WoRMS**, and **IUCN**. ***dataFishing*** is faster and more efficient than other tools for obtaining taxonomic information from the databases consulted. It also allows the retrieval of **DNA sequences**, **Common Names**, **Synonyms**, **Conservation Status**, and **Occurrence Points** of species. The ***dataFishing*** repository, hosted on **GitHub** and **licensed under MIT**, is a **freely accessible** resource for the **scientific community**.
+***dataFishing*** is an efficient Python tool and user-friendly web-form for mining Mitochondrial/Chloroplast Sequences and biodiversity data. It is designed to facilitate and automate access to information from various databases, including **NCBI GenBank**, **Bold Systems**, **GBIF**, **WoRMS**, and **IUCN**. ***dataFishing*** is faster and more efficient than other tools for obtaining taxonomic information from the databases consulted. It also allows the retrieval of **DNA sequences**, **Common Names**, **Synonyms**, **Conservation Status**, and **Occurrence Points** of species. The ***dataFishing*** repository, hosted on **GitHub** and **licensed under MIT**, is a **freely accessible** resource for the **scientific community**.
 ***  
 # Licence
 ***dataFishing*** is released under the **MIT License**. This license permits reuse within proprietary software provided that all copies of the licensed software include a copy of the MIT License terms and the copyright notice.
@@ -85,6 +85,11 @@ pip install -r requirements.txt
 conda create -n dataFishing python=3.12
 conda activate dataFishing
 pip install aiohttp requests pandas biopython openpyxl xlsxwriter SynGenes
+```
+or
+```shell
+conda env create -f environment.yml
+conda activate dataFishing
 ```
 > [!NOTE]
 > This command creates an **environment in conda** with **Python version 3.12**, then activates the created environment, and finally installs the necessary libraries for **dataFishing**.  
@@ -214,7 +219,7 @@ dataFishing.py --input Examples/SpeciesNames.txt --all True --email your@email.c
 `--{databases} True`: Select the database(s) you wish to query. For instance, use `--worms True` to search only in the WoRMS database, or `--all True` to search across all databases (see Table below). You can also use combinations of databases, such as `--bold True` `--gbif True`, to conduct queries in both the BOLD and GBIF databases simultaneously. Default is `--all True`.
 | dataBase | data | Parameters |
 | --- | --- | --- | 
-| `IUCN` | Common Names; Habitats; Status Conservation; Synonyms Names; Taxonomy | `--iucn True` |
+| `IUCN` | Common Names; Habitats; Status Conservation; Synonyms Names; Taxonomy; Threats | `--iucn True` |
 | `NCBI GenBank` | Sequences; Taxonomy | `--ncbi True` |
 | `Bold Systems` | BINs; Collection Site; Depository; Sample IDs; Sequences; Taxonomy | `--bold True` |
 | `GBIF` | Occurrence; Synonyms; Vernacular Names; Verbatim Name; Taxonomy | `--gbif True` |
@@ -236,10 +241,10 @@ dataFishing.py --input Examples/SpeciesNames.txt --all True --email your@email.c
 ### Outputs Files
 ##### [:rocket: Go to Contents Overview](#contents-overview)
 - #### IUCN Example
-| Kingdom | Phylum | Class | Order | Family | *Genus* | *Species* | Synonyms Names | Common Names | Status Conservation |
+| Kingdom | Phylum | Class | Order | Family | *Genus* | *Species* | Synonyms Names | Common Names | Status Conservation | Threats |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| ... | ... | ... | ... | ... | ... | ... | ... | ... | ... |
-| Animalia | Chordata | Actinopterygii | Perciformes | Carangidae | *Trachurus* | *Trachurus picturatus* | *Trachurus picturatus* (Ayres, 1855)| Blue Scad (eng) | Least Concern |
+| ... | ... | ... | ... | ... | ... | ... | ... | ... | ... | ... |
+| Animalia | Chordata | Actinopterygii | Perciformes | Carangidae | *Trachurus* | *Trachurus picturatus* | *Trachurus picturatus* (Ayres, 1855)| Blue Scad (eng) | Least Concern | ... |
 | ... | ... | ... | ... | ... | ... | ... | ... | ... | ... |
 
 - #### WoRMS Example
@@ -262,6 +267,7 @@ dataFishing.py --input Examples/SpeciesNames.txt --all True --email your@email.c
 ### Citing ***dataFishing***
 ##### [:rocket: Go to Contents Overview](#contents-overview)
 When referencing the ***dataFishing*** tool, please cite it appropriately in your academic or professional work.
+(dataFishing)[https://doi.org/10.1016/j.ecoinf.2024.102970]
 ```
 Soon...
 ```

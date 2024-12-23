@@ -1829,7 +1829,7 @@ async def NCBIGenes(**kwargs):
     # Build the NCBI query to search for the gene in the species
     _query      = ""
     _query      += f'("{_spNames}"[Organism] OR "{_spNames}"[Title]) AND'
-    _querysg    = sg.buildQuery(geneName=_geneName, type=_type, searchType='All Fields')  # Build the gene synonym query
+    _querysg    = sg.build_query(geneName=_geneName, type=_type, searchType='All Fields')  # Build the gene synonym query
     _fquery     = f"{_query} AND ({_querysg}) AND mitochondrion[filter]"  # Full query string
     # Use the semaphore to limit concurrent access to the API
     async with _Semaphore:
@@ -1856,7 +1856,7 @@ if __name__ == '__main__':
     _github     = f"GitHub Page: https://github.com/{__github__}"
     
     parser = argparse.ArgumentParser(
-        description     = "dataFishing: An Efficient Python Tool and User-Friendly Web-Form for Mining Genomic, Taxonomic, and Biodiversity Data\n\nCreated by Luan Rabelo",
+        description     = "dataFishing: An Efficient Python Tool and User-Friendly Web-Form for Mining Mitochondrial and Chloroplast Sequences, Taxonomic, and Biodiversity Data\n\nCreated by Luan Rabelo",
         formatter_class = argparse.RawTextHelpFormatter,
         epilog          = f"Example: python dataFishing.py --input Examples/Carangidae.txt --all True --email your@email.com --download True --genesList Examples/genesList.txt --verbose True --log True",
         add_help        = True,

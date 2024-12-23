@@ -1,0 +1,13 @@
+name: dataFishing_env
+channels:
+  - conda-forge
+  - bioconda
+  - lprabelo
+dependencies:
+  - python=3.12
+  - requests
+  - aiohttp
+  - pandas
+  - biopython
+  - syngenes
+  - xlsxwriter

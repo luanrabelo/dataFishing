@@ -13,20 +13,20 @@
   <!-- Primary Meta Tags -->
   <title>dataFishing</title>
   <meta name="title" content="dataFishing" />
-  <meta name="description" content="dataFishing: An Efficient Python Tool and User-Friendly Web-Form for Mining Genomic, Taxonomic, and Biodiversity Data" />
+  <meta name="description" content="dataFishing: An efficient Python tool and user-friendly web-form for mining mitochondrial and chloroplast sequences, taxonomic, and biodiversity data" />
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://luanrabelo.github.io/dataFishing/" />
   <meta property="og:title" content="dataFishing" />
   <meta property="og:description"
-      content="dataFishing: An Efficient Python Tool and User-Friendly Web-Form for Mining Genomic, Taxonomic, and Biodiversity Data" />
+      content="dataFishing: An efficient Python tool and user-friendly web-form for mining mitochondrial and chloroplast sequences, taxonomic, and biodiversity data" />
   <meta property="og:image" content="https://raw.githubusercontent.com/luanrabelo/dataFishing/stable/docs/assets/dataFishing.png" />
 
   <meta property="twitter:card" content="summary_large_image" />
   <meta property="twitter:url" content="https://luanrabelo.github.io/dataFishing/" />
   <meta property="twitter:title" content="dataFishing" />
   <meta property="twitter:description"
-      content="dataFishing: An Efficient Python Tool and User-Friendly Web-Form for Mining Genomic, Taxonomic, and Biodiversity Data" />
+      content="dataFishing: An efficient Python tool and user-friendly web-form for mining mitochondrial and chloroplast sequences, taxonomic, and biodiversity data" />
   <meta property="twitter:image"
       content="https://raw.githubusercontent.com/luanrabelo/dataFishing/stable/docs/assets/dataFishing.png" />
 
@@ -35,40 +35,29 @@
   .fa-2x {
     vertical-align: middle;
   }
-
   @media (max-width: 640px) {
-
-    /* Ajuste para telas de celular */
     footer.bg-gray-800 {
       position: relative;
-      /* ou 'relative' se você quiser que ele se mova com o conteúdo da página */
       width: 100%;
     }
   }
-
   footer.bg-gray-800 div.max-w-screen-2xl {
     max-width: none;
-    /* Isso remove a limitação de largura máxima */
   }
-
   footer.bg-gray-800 div.grid {
     width: 100%;
-    /* Isso garante que a grade ocupe toda a largura do rodapé */
   }
-
   .switch {
     position: relative;
     display: inline-block;
     width: 60px;
     height: 34px;
   }
-
   .switch input {
     opacity: 0;
     width: 0;
     height: 0;
   }
-
   .toggle-slider {
     position: absolute;
     cursor: pointer;
@@ -81,7 +70,6 @@
     transition: .5s;
     background-color: #FF6500;
   }
-
   .toggle-slider:before {
     position: absolute;
     content: "";
@@ -93,33 +81,26 @@
     -webkit-transition: .4s;
     transition: .4s;
   }
-
   input:checked+.toggle-slider {
-    background-color: #41B06E;
+    background-color: rgb(31 41 55 / var(--tw-bg-opacity, 1));
   }
-
   input:focus+.toggle-slider {
-    box-shadow: 0 0 1px #41B06E;
+    box-shadow: 0 0 1px rgb(31 41 55 / var(--tw-bg-opacity, 1));
   }
-
   input:checked+.toggle-slider:before {
     -webkit-transform: translateX(26px);
     -ms-transform: translateX(26px);
     transform: translateX(26px);
   }
-
   .hidden {
     display: none;
   }
-
   .fade-in {
     animation: fadeIn 0.5s ease-in-out forwards;
   }
-
   .fade-out {
     animation: fadeOut 0.5s ease-in-out forwards;
   }
-
   @keyframes fadeIn {
     from {
       opacity: 0;
@@ -129,7 +110,6 @@
       opacity: 1;
     }
   }
-
   @keyframes fadeOut {
     from {
       opacity: 1;
@@ -152,7 +132,7 @@
       <div class="flex justify-between items-center h-16">
         <div class="flex items-center">
           <img src="assets/dataFishing.png" class="mr-3 h-12 w-12" alt="dataFishing">
-          <h1 class="text-lg font-bold select-none">dataFishing<sup class="text-sm">v1.0.0</sup></h1>
+          <h1 class="text-lg font-bold select-none">dataFishing<sup class="text-sm">v1.1.0</sup></h1>
         </div>
         <div class="hidden sm:flex space-x-4">
           <a href="https://github.com/luanrabelo/dataFishing" target="_blank" class="px-3 py-2 rounded-md text-base font-bold text-white hover:bg-gray-600 transition-colors duration-300 select-none"><i class="fa-brands fa-github mr-2"></i>GitHub</a>
@@ -316,9 +296,9 @@
       </div>
     </div>
 
+    <div id="columnFilters" class="p-4 rounded mb-4"></div>
     <div id="dataResults"></div>
     
-  
     <div id="Results" class="flex-grow"></div>
   </main>
 
@@ -331,8 +311,7 @@
           <h4 class="font-bold text-lg mb-1">About:</h4>
           <div class="flex items-center">
             <img src="assets/dataFishing.png" class="mr-3" alt="dataFishing" width="25%">
-            <p class="text-justify">dataFishing: A Comprehensive Tool for Mining Mitochondrial, and Chloroplast Genes
-              and Synonyms Repository in Genomic Analysis</p>
+            <p class="text-justify">dataFishing: An efficient Python tool and user-friendly web-form for mining mitochondrial and chloroplast sequences, taxonomic, and biodiversity data</p>
           </div>
         </div>
         <hr class="sm:hidden border-t my-2 border-white">
@@ -389,7 +368,7 @@
         <div class="lg:col-span-1">
           <h4 class="font-bold text-lg mb-1">Cite dataFishing:</h4>
           <div class="flex items-center">
-            <p class="text-justify">Soon...</p>
+            <p class="text-justify text-sm">Rabelo, L. et al. (2024). <b>dataFishing: An efficient Python tool and user-friendly web-form for mining mitochondrial and chloroplast sequences, taxonomic, and biodiversity data</b>. Ecological Informatics, 102970. https://doi.org/10.1016/j.ecoinf.2024.102970</p>
           </div>
           <hr class="border-gray-600 mt-4 mb-4">
           <h4 class="font-bold text-lg mb-1">GitHub:</h4>
@@ -481,23 +460,59 @@
   });
 
 
-    function createCheckboxesForCards(Cards) {
+  function createCheckboxesForCards(Cards) {
     const container = document.getElementById('checkbox-container');
     container.innerHTML = '';
-    container.className = 'grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-4 justify-items-center sm:justify-items-center md:justify-items-center lg:justify-items-center xl:justify-items-center px-8 py-8'; // Adicionei classes para ajustar o layout responsivo
+    container.className = 'grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-4 justify-items-start px-8 py-8';
+
+    const allCheckboxes = [];
 
     Object.keys(Cards).forEach(key => {
+        const wrapperDiv = document.createElement('div');
+        wrapperDiv.className = 'flex items-center space-x-4 my-2';
+
+        const label = document.createElement('label');
+        label.className = 'relative inline-flex items-center cursor-pointer w-16 h-8 rounded-full transition duration-300';
+
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.id = key + '-checkbox';
         checkbox.checked = false;
-        checkbox.className = 'form-checkbox h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500';
-        const label = document.createElement('label');
-        label.htmlFor = key + '-checkbox';
-        label.className = 'ml-3 font-medium text-lg';
-        label.innerHTML = `${NamesCards[key]} (<strong>${key.toUpperCase()}</strong>)`;
-        const wrapperDiv = document.createElement('div');
-        wrapperDiv.className = 'my-2';
+        checkbox.className = 'sr-only peer';
+
+        // Ícone dinâmico
+        const stateIcon = document.createElement('i');
+        stateIcon.className = 'fas fa-times text-white text-2xl absolute';
+
+        // Adiciona o checkbox à lista para controle global
+        allCheckboxes.push({ checkbox, label });
+
+        // Atualiza estilos de acordo com o estado do checkbox
+        const updateStyles = () => {
+            if (checkbox.checked) {
+                label.classList.remove('bg-orange-500');
+                label.classList.add('bg-gray-800');
+                stateIcon.className = 'fas fa-check text-white text-2xl absolute';
+            } else {
+                label.classList.remove('bg-gray-800');
+                label.classList.add('bg-orange-500');
+                stateIcon.className = 'fas fa-times text-white text-2xl absolute';
+            }
+
+            // Gerencia a desabilitação de outros checkboxes
+            const anyChecked = allCheckboxes.some(item => item.checkbox.checked);
+            allCheckboxes.forEach(item => {
+                if (!item.checkbox.checked && anyChecked) {
+                    item.label.classList.add('bg-gray-500');
+                    item.label.classList.remove('bg-orange-500', 'bg-gray-800');
+                } else if (!item.checkbox.checked) {
+                    item.label.classList.remove('bg-gray-500');
+                    item.label.classList.add('bg-orange-500');
+                }
+            });
+        };
+
+        // Evento de mudança no estado do checkbox
         checkbox.addEventListener('change', function () {
             const card = document.getElementById(key + 'Card');
             if (this.checked) {
@@ -510,12 +525,30 @@
                     card.classList.remove('fade-out');
                 }, 500);
             }
+            updateStyles();
         });
-        wrapperDiv.appendChild(checkbox);
+
+        // Configuração inicial
+        label.classList.add('bg-orange-500');
+        stateIcon.style.top = '50%';
+        stateIcon.style.left = '50%';
+        stateIcon.style.transform = 'translate(-50%, -50%)';
+
+        label.appendChild(checkbox);
+        label.appendChild(stateIcon);
+
+        const textLabel = document.createElement('span');
+        textLabel.htmlFor = key + '-checkbox';
+        textLabel.className = 'ml-3 font-medium text-lg text-gray-800';
+        textLabel.innerHTML = `${NamesCards[key]} (<strong>${key.toUpperCase()}</strong>)`;
+
         wrapperDiv.appendChild(label);
+        wrapperDiv.appendChild(textLabel);
         container.appendChild(wrapperDiv);
     });
 }
+
+
 createCheckboxesForCards(Cards);
   </script>
 </body>
