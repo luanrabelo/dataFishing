@@ -8,10 +8,13 @@
   </a>
 </p>
 
+[![Published in%20](https://img.shields.io/badge/Published_in-Ecological%20Informatics-blue)](https://doi.org/10.1016/j.ecoinf.2024.102970)
+
 # Contents Overview
 - [System Overview](#system-overview)
 - [License](#license)
   - The Hitchhiker's Guide to ***dataFishing***
+    - [Change Log](#change-log)
     - [Getting Started](#getting-started)
       - [Prerequisites](#prerequisites)
       - [Installation of dependencies](#installation-of-dependencies)
@@ -43,6 +46,14 @@
 For more details, please see the MIT License.
 ***
 # The Hitchhiker's Guide to ***dataFishing***
+## Change Log
+##### [:rocket: Go to Contents Overview](#contents-overview)
+- **Version 1.0.0** (2024-10-01)
+  - Initial release of ***dataFishing***.
+- **Version 1.0.1** (2024-10-15)
+  - Added the ability to download sequence data from BOLD System and/or GenBank.
+  - Added the ability to obtain data of Threats from the IUCN database.
+
 ## Getting Started
 ##### [:rocket: Go to Contents Overview](#contents-overview)
 - ## Prerequisites
@@ -241,11 +252,14 @@ dataFishing.py --input Examples/SpeciesNames.txt --all True --email your@email.c
 ### Outputs Files
 ##### [:rocket: Go to Contents Overview](#contents-overview)
 - #### IUCN Example
-| Kingdom | Phylum | Class | Order | Family | *Genus* | *Species* | Synonyms Names | Common Names | Status Conservation | Threats |
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| ... | ... | ... | ... | ... | ... | ... | ... | ... | ... | ... |
-| Animalia | Chordata | Actinopterygii | Perciformes | Carangidae | *Trachurus* | *Trachurus picturatus* | *Trachurus picturatus* (Ayres, 1855)| Blue Scad (eng) | Least Concern | ... |
-| ... | ... | ... | ... | ... | ... | ... | ... | ... | ... |
+| **Kingdom** | **Phylum**  | **Order**        | **Family**        | **Genus**       | **Species**              | **Common Names**                          | **Status Conservation** | **Synonyms Names**                  | **Threats**                      |
+|:-----------:|:-----------:|:----------------:|:-----------------:|:---------------:|:------------------------:|:-----------------------------------------:|:------------------------:|:------------------------------------:|:---------------------------------:|
+| Animalia    | Chordata    | Lamniformes      | Lamnidae          | *Carcharodon*   | *Carcharodon carcharias* | White Shark, Great White Shark (eng)     | Vulnerable (VU)          | *Squalus carcharias* Linnaeus, 1758 | Biological resource use           |
+| Animalia    | Chordata    | Proboscidea      | Elephantidae      | *Elephas*       | *Elephas maximus*        | Asian Elephant, Indian Elephant (eng)    | Endangered (EN)          | -                                  | Residential & commercial development |
+| Animalia    | Chordata    | Primates         | Hominidae         | *Pan*           | *Pan paniscus*           | Bonobo, Pygmy Chimpanzee (eng)           | Endangered (EN)          | *Pan satyrus*                      | Residential & commercial development |
+| Animalia    | Chordata    | Testudines       | Cheloniidae       | *Eretmochelys*  | *Eretmochelys imbricata* | Hawksbill Turtle (eng)                   | Critically Endangered (CR)| *Testudo imbricata* Linnaeus, 1766  | Climate change & severe weather   |
+| Animalia    | Chordata    | Carnivora        | Felidae           | *Panthera*      | *Panthera tigris*        | Tiger (eng), Tigre (fre, spa)            | Endangered (EN)          | *Felis tigris* Linnaeus, 1758       | Climate change & severe weather   |
+
 
 - #### WoRMS Example
 | AphiaID | Kingdom | Phylum | Class | Order | Family | *Genus* | *Species* | Species Status | Authority | Link |
