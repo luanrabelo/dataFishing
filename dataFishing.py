@@ -401,9 +401,10 @@ async def getIUCNStatusConservation(**kwargs):
         print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Warning}Getting Status Conservation of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Warning} from IUCN Red List...{TerminalColors.End}")
     # Construct the API request URL for the species using the IUCN API
     url = f'https://apiv3.iucnredlist.org/api/v3/species/{_specieName}?token={_token}'
+    timeout = aiohttp.ClientTimeout(total=120) # Set the timeout for the request
     # Use aiohttp to asynchronously send the request to the IUCN Red List API
     async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
+        async with session.get(url, timeout=timeout) as response:
             # If the response status is 200 (OK), process the data
             if response.status == 200:
                 Taxdata = await response.json()  # Parse the JSON response
@@ -498,9 +499,10 @@ async def getIUCNSynonymsNames(**kwargs):
         print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Warning}Getting Synonyms of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Warning} from IUCN Red List...{TerminalColors.End}")
     # Construct the API request URL for the synonyms using the IUCN API
     url = f'https://apiv3.iucnredlist.org/api/v3/species/synonym/{_specieName}?token={_token}'
+    timeout = aiohttp.ClientTimeout(total=120) # Set the timeout for the request
     # Use aiohttp to asynchronously send the request to the IUCN Red List API
     async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
+        async with session.get(url, timeout=timeout) as response:
             # If the response status is 200 (OK), process the data
             if response.status == 200:
                 Taxdata = await response.json()  # Parse the JSON response
@@ -607,9 +609,10 @@ async def getIUCNTaxonomy(**kwargs):
         print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Warning}Getting Taxonomy of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Warning} from IUCN Red List...{TerminalColors.End}")
     # Construct the API request URL for the taxonomy data using the IUCN API
     url = f'https://apiv3.iucnredlist.org/api/v3/species/{_specieName}?token={_token}'
+    timeout = aiohttp.ClientTimeout(total=120) # Set the timeout for the request
     # Use aiohttp to asynchronously send the request to the IUCN Red List API
     async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
+        async with session.get(url, timeout=timeout) as response:
             # If the response status is 200 (OK), process the data
             if response.status == 200:
                 Taxdata = await response.json()  # Parse the JSON response
@@ -710,9 +713,10 @@ async def getIUCNCommonNames(**kwargs):
         print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Warning}Getting Common Names of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Warning} from IUCN Red List...{TerminalColors.End}")
     # Construct the API request URL for common names using the IUCN API
     url = f'https://apiv3.iucnredlist.org/api/v3/species/common_names/{_specieName}?token={_token}'
+    timeout = aiohttp.ClientTimeout(total=120) # Set the timeout for the request
     # Use aiohttp to asynchronously send the request to the IUCN Red List API
     async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
+        async with session.get(url, timeout=timeout) as response:
             # If the response status is 200 (OK), process the data
             if response.status == 200:
                 Taxdata = await response.json()  # Parse the JSON response
@@ -820,9 +824,10 @@ async def getIUCNCountryOccurrence(**kwargs):
         print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Warning}Getting Country Occurrence of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Warning} from IUCN Red List...{TerminalColors.End}")
     # Construct the API request URL for the country occurrence data using the IUCN API
     url = f'https://apiv3.iucnredlist.org/api/v3/species/countries/name/{_specieName}?token={_token}'
+    timeout = aiohttp.ClientTimeout(total=120) # Set the timeout for the request
     # Use aiohttp to asynchronously send the request to the IUCN Red List API
     async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
+        async with session.get(url, timeout=timeout) as response:
             # If the response status is 200 (OK), process the data
             if response.status == 200:
                 Taxdata = await response.json()  # Parse the JSON response
@@ -930,9 +935,10 @@ async def getIUCNHabitats(**kwargs):
         print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Warning}Getting Habitats of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Warning} from IUCN Red List...{TerminalColors.End}")
     # Construct the API request URL for the habitat data using the IUCN API
     url = f'https://apiv3.iucnredlist.org/api/v3/habitats/species/name/{_specieName}?token={_token}'
+    timeout = aiohttp.ClientTimeout(total=120) # Set the timeout for the request
     # Use aiohttp to asynchronously send the request to the IUCN Red List API
     async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
+        async with session.get(url, timeout=timeout) as response:
             # If the response status is 200 (OK), process the data
             if response.status == 200:
                 Taxdata = await response.json()  # Parse the JSON response
@@ -1812,7 +1818,7 @@ async def NCBIGenes(**kwargs):
     _listGenes_mt = ["12S", "16S", "ATP6", "ATP8", "COI", "COII", "COIII", "CYTB", "ND1", "ND2", "ND3", "ND4", "ND4L", "ND5", "ND6", "Control Region"]
     _listGenes_cp = ['accD', 'atpA', 'atpB', 'atpE', 'atpF', 'atpH', 'atpI', 'ccsA', 'cemA', 'chlB', 'chlL', 'chlN', 'clpP', 'clpP1', 'cysA', 'cysT', 'ftsH', 'infA', 'lhbA', 'matK', 'matk', 'ndhA', 'ndhB', 'ndhC', 'ndhD', 'ndhE', 'ndhF', 'ndhG', 'ndhH', 'ndhI', 'ndhJ', 'ndhK', 'pafI', 'pafII', 'pbf1', 'petA', 'petB', 'petD', 'petE', 'petG', 'petL', 'petN', 'psaA', 'psaB', 'psaC', 'psaI', 'psaJ', 'psaM', 'psb30', 'psbA', 'psbB', 'psbC', 'psbD', 'psbE', 'psbF', 'psbG', 'psbH', 'psbI', 'psbJ', 'psbK', 'psbL', 'psbM', 'psbN', 'psbT', 'psbZ', 'rbcL', 'rpl14', 'rpl16', 'rpl2', 'rpl20', 'rpl21', 'rpl22', 'rpl23', 'rpl32', 'rpl33', 'rpl36', 'rpoA', 'rpoB', 'rpoC1', 'rpoC2', 'rps11', 'rps12', 'rps14', 'rps15', 'rps16', 'rps18', 'rps19', 'rps2', 'rps3', 'rps4', 'rps7', 'rps8', 'rrn16S', 'rrn23S', 'rrn4.5S', 'rrn5S']
     # Validate the gene name against the mitochondrial and chloroplast gene lists
-    sg = SynGenes(verbose=_verbose)  # Gene synonym handling utility
+    sg = SynGenes(verbose=False)  # Gene synonym handling utility
     if _geneName in _listGenes_mt:
         _type = 'mt'  # Mitochondrial gene type
     elif _geneName in _listGenes_cp:
@@ -1950,7 +1956,7 @@ if __name__ == '__main__':
     _download       = args.download
     _inputVerbose   = args.verbose
     _inputLog       = args.log
-    _timeSleep      = 10
+    _timeSleep      = 30
 
     print("\n")
     print(f"{TerminalColors.Bold}############################## {__tool__} ##############################\n{TerminalColors.End}")
@@ -2086,5 +2092,5 @@ if __name__ == '__main__':
                 sys.exit(1)
     print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Green}dataFishing process completed successfully!{TerminalColors.End}")
     # Citation
-    print(f"{TerminalColors.Bold}How to cite dataFishing:{TerminalColors.End}")
-    # Soon
+    print(f"{TerminalColors.Bold}\n\nHow to cite dataFishing:{TerminalColors.End}")
+    print(f"Rabelo, L., Sodré, D., Balcázar, O. D. A., do Rosário, M. F., Guimarães-Costa, A. J., Gomes, G., Sampaio, I., & Vallinoto, M. (2025). dataFishing: An efficient Python tool and user-friendly web-form for mining mitochondrial and chloroplast sequences, taxonomic, and biodiversity data. Ecological Informatics, 85, 102970. https://doi.org/10.1016/j.ecoinf.2024.102970")

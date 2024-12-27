@@ -281,9 +281,9 @@ dataFishing.py --input Examples/SpeciesNames.txt --all True --email your@email.c
 ### Citing ***dataFishing***
 ##### [:rocket: Go to Contents Overview](#contents-overview)
 When referencing the ***dataFishing*** tool, please cite it appropriately in your academic or professional work.
-(dataFishing)[https://doi.org/10.1016/j.ecoinf.2024.102970]
+[dataFishing](https://doi.org/10.1016/j.ecoinf.2024.102970)
 ```
-Soon...
+Rabelo, L., Sodré, D., Balcázar, O. D. A., do Rosário, M. F., Guimarães-Costa, A. J., Gomes, G., Sampaio, I., & Vallinoto, M. (2025). dataFishing: An efficient Python tool and user-friendly web-form for mining mitochondrial and chloroplast sequences, taxonomic, and biodiversity data. Ecological Informatics, 85, 102970. https://doi.org/10.1016/j.ecoinf.2024.102970
 ```
 ***  
 ### Contact
