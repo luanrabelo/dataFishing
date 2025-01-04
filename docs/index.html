@@ -122,12 +122,11 @@
 </style>
 
 <body class="flex flex-col min-h-screen">
-  <script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js"
-    data-id="lprabelo" data-description="Support dataFishing on Buy me a coffee!"
-    data-message="Support dataFishing on Buy me a coffee!" data-color="#FF813F" data-position="Right" data-x_margin="20"
-    data-y_margin="20"></script>
+  
+  <script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js" data-id="lprabelo" data-description="Support dataFishing on Buy me a coffee!" data-message="Support dataFishing on Buy me a coffee!" data-color="#FF813F" data-position="Right" data-x_margin="20" data-y_margin="20"></script>
 
   <header class="bg-gray-800 text-white py-3 px-3">
+    
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
         <div class="flex items-center">
@@ -136,9 +135,7 @@
         </div>
         <div class="hidden sm:flex space-x-4">
           <a href="https://github.com/luanrabelo/dataFishing" target="_blank" class="px-3 py-2 rounded-md text-base font-bold text-white hover:bg-gray-600 transition-colors duration-300 select-none"><i class="fa-brands fa-github mr-2"></i>GitHub</a>
-          <!--<a href="#home" class="px-3 py-2 rounded-md text-base font-bold text-white hover:bg-gray-600 transition-colors duration-300 select-none"> <i class="fa-solid fa-newspaper mr-2"></i>Cite US</a>-->
           <a href="https://www.buymeacoffee.com/lprabelo" target="_blank" class="px-3 py-2 rounded-md text-base font-bold text-white hover:bg-gray-600 transition-colors duration-300 select-none"><i class="fa-solid fa-mug-hot mr-2"></i>Donate</a>
-          <!--<a href="#home" class="px-3 py-2 rounded-md text-base font-bold text-white hover:bg-gray-600 transition-colors duration-300 select-none"><i class="fa-solid fa-circle-info mr-2"></i>About</a>-->
         </div>
         <div class="sm:hidden">
           <button id="menuBtn" class="p-3 rounded-md text-white hover:bg-gray-700 transition-colors duration-300">
@@ -149,12 +146,12 @@
         </div>
       </div>
     </div>
+
     <div id="menu" class="sm:hidden hidden">
       <a href="https://github.com/luanrabelo/dataFishing" class="block px-3 py-3 rounded-md text-base font-medium hover:bg-gray-700"><i class="fa-brands fa-2x fa-github"></i> GitHub</a>
-      <!--<a href="#home" class="block px-3 py-3 rounded-md text-base font-medium hover:bg-gray-700"><i class="fa-solid fa-2x fa-newspaper"></i> Cite US</a>-->
       <a href="https://www.buymeacoffee.com/lprabelo" class="block px-3 py-3 rounded-md text-base font-medium hover:bg-gray-700"><i class="fa-solid fa-2x fa-mug-hot"></i> Donate</a>
-      <!--<a href="#home" class="block px-3 py-3 rounded-md text-base font-medium hover:bg-gray-700"><i class="fa-solid fa-2x fa-circle-info"></i> About</a>-->
     </div>
+
     <script>
       document.getElementById('menuBtn').addEventListener('click', function () {
         var menu = document.getElementById('menu');
@@ -165,31 +162,38 @@
         }
       });
     </script>
+
   </header>
 
   <main class="flex-grow">
-    <div class="tip-container"></div>
-    
-    <script>
-      $(document).ready(function () {
-        displayTip();
-      });
-    </script>
+    <div class="tip-container">
+      <script>
+        $(document).ready(function () {
+          displayTip();
+        });
+      </script>
     </div>
 
-    <div class="flex items-center py-5 px-5">
-      <div class="flex items-center justify-center h-12 w-12 rounded-full bg-gray-800 text-white mr-2 font-bold text-xl">1</div>
-      <div class="text-3xl font-bold">Select the data source to search for biodiversity information:</div>
+    <div class="flex items-center py-1 px-1">
+      <div class="flex items-center justify-center h-12 w-12 rounded-full bg-gray-800 text-white mr-3 font-bold text-xl">1</div>
+      <div class="text-2xl font-semibold">Select the data source to search for <span class="font-bold">biodiversity</span> information:</div>
     </div>
 
     <div id="checkbox-container"></div>
     
-    <div id="CardsOpt"></div>
+    <div id="CardsOpt">
+      
+    </div>
 
-    <div id="spForm" class="max-w-screen-2xl mx-auto px-5 py-5">
-      <label for="speciesNames" class="text-lg font-bold">Species Names:</label>
-      <textarea id="speciesNames" class="rounded-lg border-2 border-gray-800/50 w-full text-lg py-5 px-5" style="height: 30vh;" spellcheck="false"></textarea>
-      <div class="mt-1 text-justify"><i class="fa-solid fa-circle-info"></i> Enter the <b>Species Names</b>, each on a <b>new line</b>, <b>without any special characters</b>. <button type="button" id="exampleSpecies" class="rounded-md py-2 px-4 cursor-pointer text-md text-center bg-gray-800/75 text-white font-bold hover:bg-gray-800"> Click here</button> to see an example.</div>
+    <div id="spForm" class="max-w-screen-2xl mx-auto px-1 py-1">
+      <div class="flex items-center py-1 px-1">
+        <div class="flex items-center justify-center h-12 w-12 rounded-full bg-gray-800 text-white mr-3 font-bold text-xl">3</div>
+        <div class="text-2xl font-semibold">Species Names:</div>
+      </div>
+      <textarea id="speciesNames" class="rounded-lg border-2 border-gray-800/50 w-full text-lg py-1 px-1" style="height: 30vh;" spellcheck="false"></textarea>
+      <div class="mt-1 text-justify">
+        <i class="fa-solid fa-circle-info"></i> Enter the <b>Species Names</b>, each on a <b>new line</b>, <b>without any special characters</b>. 
+        <button type="button" id="exampleSpecies" class="rounded-md py-2 px-4 cursor-pointer text-base text-center bg-gray-800 text-white font-bold hover:bg-blue-900"> Click here</button> to see an example.</div>
       <div id="errorDiv" class="text-danger mt-1"></div>
       <div class="flex justify-end">
         <button id="startSearch" class="bg-gray-800 text-2xl w-96 sm:w-w-96 hover:bg-blue-900 text-white font-bold py-5 px-5 rounded-lg focus:outline-none focus:shadow-outline mt-2" type="button"><i class="fa-solid fa-magnifying-glass"></i> Start dataFishing</button>
@@ -307,6 +311,7 @@
     class="bg-gray-800 text-white p-5 inset-x-0 bottom-0 text-xl sm:text-2xl md:text-2xl lg:text-base xl:text-base">
     <div class="max-w-screen-2xl mx-auto">
       <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+        
         <div class="lg:col-span-1">
           <h4 class="font-bold text-lg mb-1">About:</h4>
           <div class="flex items-center">
@@ -314,11 +319,13 @@
             <p class="text-justify">dataFishing: An efficient Python tool and user-friendly web-form for mining mitochondrial and chloroplast sequences, taxonomic, and biodiversity data</p>
           </div>
         </div>
+
         <hr class="sm:hidden border-t my-2 border-white">
+        
         <div class="lg:col-span-2">
           <h4 class="font-bold text-lg mb-2">Developers:</h4>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-1">
-            <div class="text-center">
+          <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-1">
+            <div class="text-center text-base">
               <img src="assets/Luan.png" class="mx-auto" alt="Luan Rabelo" width="35%">
               <h5 class="font-bold mt-2">Luan Rabelo</h5>
               <p><a href="" class="hover:text-blue-300"><i class="fa-brands fa-orcid"></i> ORCID</a></p>
@@ -328,7 +335,7 @@
                     class="fa-brands fa-square-x-twitter"></i> @luanrabelo</a></p>
               <hr class="sm:hidden border-t my-5 border-gray-600">
             </div>
-            <div class="text-center">
+            <div class="text-center text-base">
               <img src="assets/Marcelo.png" class="mx-auto" alt="Marcelo Vallinoto" width="35%">
               <h5 class="font-bold mt-2">Marcelo Vallinoto</h5>
               <p><a href="" class="hover:text-blue-300"><i class="fa-brands fa-orcid"></i> ORCID</a></p>
@@ -338,7 +345,7 @@
                     class="fa-brands fa-square-x-twitter"></i> @mvallinoto01</a></p>
               <hr class="sm:hidden border-t my-5 border-gray-600">
             </div>
-            <div class="text-center">
+            <div class="text-center text-base">
               <img src="assets/Davidson.png" class="mx-auto" alt="Davidson Sodré" width="35%">
               <h5 class="font-bold mt-2">Davidson Sodré</h5>
               <p><a href="" class="hover:text-blue-300"><i class="fa-brands fa-orcid"></i> ORCID</a></p>
@@ -349,6 +356,7 @@
             </div>
           </div>
         </div>
+
         <hr class="sm:hidden border-t my-2 border-white">
         <div class="lg:col-span-1">
           <h4 class="font-bold text-lg mb-1">Institutions:</h4>
@@ -460,93 +468,7 @@
   });
 
 
-  function createCheckboxesForCards(Cards) {
-    const container = document.getElementById('checkbox-container');
-    container.innerHTML = '';
-    container.className = 'grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-4 justify-items-start px-8 py-8';
-
-    const allCheckboxes = [];
-
-    Object.keys(Cards).forEach(key => {
-        const wrapperDiv = document.createElement('div');
-        wrapperDiv.className = 'flex items-center space-x-4 my-2';
-
-        const label = document.createElement('label');
-        label.className = 'relative inline-flex items-center cursor-pointer w-16 h-8 rounded-full transition duration-300';
-
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.id = key + '-checkbox';
-        checkbox.checked = false;
-        checkbox.className = 'sr-only peer';
-
-        // Ícone dinâmico
-        const stateIcon = document.createElement('i');
-        stateIcon.className = 'fas fa-times text-white text-2xl absolute';
-
-        // Adiciona o checkbox à lista para controle global
-        allCheckboxes.push({ checkbox, label });
-
-        // Atualiza estilos de acordo com o estado do checkbox
-        const updateStyles = () => {
-            if (checkbox.checked) {
-                label.classList.remove('bg-orange-500');
-                label.classList.add('bg-gray-800');
-                stateIcon.className = 'fas fa-check text-white text-2xl absolute';
-            } else {
-                label.classList.remove('bg-gray-800');
-                label.classList.add('bg-orange-500');
-                stateIcon.className = 'fas fa-times text-white text-2xl absolute';
-            }
-
-            // Gerencia a desabilitação de outros checkboxes
-            const anyChecked = allCheckboxes.some(item => item.checkbox.checked);
-            allCheckboxes.forEach(item => {
-                if (!item.checkbox.checked && anyChecked) {
-                    item.label.classList.add('bg-gray-500');
-                    item.label.classList.remove('bg-orange-500', 'bg-gray-800');
-                } else if (!item.checkbox.checked) {
-                    item.label.classList.remove('bg-gray-500');
-                    item.label.classList.add('bg-orange-500');
-                }
-            });
-        };
-
-        // Evento de mudança no estado do checkbox
-        checkbox.addEventListener('change', function () {
-            const card = document.getElementById(key + 'Card');
-            if (this.checked) {
-                card.classList.remove('hidden');
-                card.classList.add('fade-in');
-            } else {
-                card.classList.add('fade-out');
-                setTimeout(() => {
-                    card.classList.add('hidden');
-                    card.classList.remove('fade-out');
-                }, 500);
-            }
-            updateStyles();
-        });
-
-        // Configuração inicial
-        label.classList.add('bg-orange-500');
-        stateIcon.style.top = '50%';
-        stateIcon.style.left = '50%';
-        stateIcon.style.transform = 'translate(-50%, -50%)';
-
-        label.appendChild(checkbox);
-        label.appendChild(stateIcon);
-
-        const textLabel = document.createElement('span');
-        textLabel.htmlFor = key + '-checkbox';
-        textLabel.className = 'ml-3 font-medium text-lg text-gray-800';
-        textLabel.innerHTML = `${NamesCards[key]} (<strong>${key.toUpperCase()}</strong>)`;
-
-        wrapperDiv.appendChild(label);
-        wrapperDiv.appendChild(textLabel);
-        container.appendChild(wrapperDiv);
-    });
-}
+  
 
 
 createCheckboxesForCards(Cards);

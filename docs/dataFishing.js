@@ -1,4 +1,11 @@
 var Cards = {
+    'gbif': [
+        'GBIF_All_data*',
+        'GBIF_Taxonomy*',
+        "GBIF_Basionym*",
+        "GBIF_Vernacular_Name*",
+        "GBIF_Taxonomic_Status*"
+    ],
     'iucn': [
         'IUCN_All_data',
         'IUCN_Common_Names',
@@ -11,13 +18,6 @@ var Cards = {
         'IUCN_Threats'
 
     ],
-    'gbif': [
-        'GBIF_All_data*',
-        'GBIF_Taxonomy*',
-        "GBIF_Basionym*",
-        "GBIF_Vernacular_Name*",
-        "GBIF_Taxonomic_Status*"
-    ],
     'WoRMS': [
         'WoRMS_All_data*',
         'WoRMS_Taxonomy*',
@@ -28,7 +28,7 @@ var Cards = {
 };
 var NamesCards = {
     'gbif': 'Global Biodiversity Information Facility',
-    'iucn': 'International Union for Conservation of Nature’s Red List of Threatened Species',
+    'iucn': 'Red List of Threatened Species',
     'ncbi': 'National Center for Biotechnology Information',
     'WoRMS': 'World Register of Marine Species'
 };
@@ -72,6 +72,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+// This function returns a random tip from the toolTips object
 function getRandomTip() {
     const toolTips = {
         SynGenes: [
@@ -92,143 +93,11 @@ function getRandomTip() {
     return { key: randomKey, description: toolTips[randomKey][0], link: toolTips[randomKey][1] };
 }
 
-function displayTip() {
-    const tip = getRandomTip();
-    const container = document.querySelector('.tip-container');
-    container.classList.remove('fade-out');
-    container.classList.add('fade-in');
-    container.style.display = 'block';
-    container.innerHTML = `
-    <div class="bg-gray-600 overflow-hidden px-5 py-5">
-        <div class="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
-            <div class="flex-shrink-0 text-center sm:text-left sm:mr-5">
-                <span class="text-white text-lg font-semibold leading-6 rounded-full bg-gray-800 px-3 py-3">Explore other tools:</span>
-            </div>
-            <div class="flex-grow sm:text-center text-left sm:mr-5">
-                <div class="text-white text-2xl font-semibold leading-6"><strong>${tip.key}</strong> ${tip.description}</div>
-            </div>
-            <div class="flex-shrink-0 text-center sm:text-left sm:mr-2">
-                <a href="${tip.link}" target="_blank" class="rounded-full bg-gray-800 px-3 py-3 text-base font-semibold text-white transition-colors duration-300 hover:bg-gray-700 hover:ring-2 hover:ring-white">
-                Learn More <span aria-hidden="true">→</span>
-                </a>
-            </div>
-        </div>
-    </div>
-    `;
-}
-
-
-function createCard(cardTitle, options) {
-    const cardContainer = document.createElement('div');
-    cardContainer.id = cardTitle + 'Card';
-    cardContainer.className = 'bg-white shadow-md rounded pt-4 pb-4 border-1 bg-gray-800 mb-5 ml-5 mr-5 hidden';
-
-    const cardHeader = document.createElement('div');
-    cardHeader.className = 'bg-gray-800 text-white font-bold py-4 px-4 rounded';
-    cardHeader.innerHTML = `<i class="fas fa-2x fa-gear"></i> Search Options of ${NamesCards[cardTitle]} <b>(${cardTitle.toUpperCase()})`;
-    cardContainer.appendChild(cardHeader);
-
-    const cardBody = document.createElement('div');
-    cardBody.className = 'pt-2 grid grid-cols-1 sm:grid-cols-1 md:grid-cols-5 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-5 gap-4 justify-items-start';
-    cardContainer.appendChild(cardBody);
-
-    function handleAllDataChange(event) {
-        const allDataInput = event.target;
-        const allDataStatus = allDataInput.checked;
-        const allInputs = Array.from(cardBody.querySelectorAll('.toggle-checkbox')).filter(input => !input.id.endsWith('*opt'));
-
-        allInputs.forEach(input => {
-            input.checked = allDataStatus;
-            input.disabled = false;
-            updateInputStyle(input);
-        });
-    }
-
-    function updateInputStyle(input) {
-        const label = input.parentElement;
-        const icon = label.querySelector('i');
-
-        if (input.checked) {
-            label.classList.remove('bg-orange-500');
-            label.classList.add('bg-gray-800');
-            icon.className = 'fas fa-check text-white text-2xl absolute';
-        } else {
-            label.classList.remove('bg-gray-800');
-            label.classList.add('bg-orange-500');
-            icon.className = 'fas fa-times text-white text-2xl absolute';
-        }
-    }
-
-    options.forEach(option => {
-        const toggleContainer = document.createElement('div');
-        toggleContainer.className = 'flex items-center space-x-4';
-
-        const label = document.createElement('label');
-        label.className = 'relative inline-flex items-center cursor-pointer w-16 h-8 rounded-full transition duration-300';
-
-        const toggleInput = document.createElement('input');
-        toggleInput.type = 'checkbox';
-        toggleInput.checked = option.endsWith('*'); // Ligado apenas para obrigatórios
-        toggleInput.id = option.toLowerCase().replace(cardTitle.toLowerCase() + '_', '') + 'opt';
-        toggleInput.className = 'toggle-checkbox sr-only peer';
-
-        // Desativa os inputs obrigatórios
-        if (option.endsWith('*')) {
-            toggleInput.disabled = true;
-        }
-
-        // Evento para "All Data"
-        if (option.includes('_All_data')) {
-            toggleInput.addEventListener('change', handleAllDataChange);
-        }
-
-        // Ícone inicial
-        const stateIcon = document.createElement('i');
-        stateIcon.className = toggleInput.checked
-            ? 'fas fa-check text-white text-2xl absolute'
-            : 'fas fa-times text-white text-2xl absolute';
-
-        toggleInput.addEventListener('change', function () {
-            updateInputStyle(toggleInput);
-        });
-
-        // Estilo inicial
-        label.classList.add(toggleInput.checked ? 'bg-gray-800' : 'bg-orange-500');
-
-        // Ícone centralizado no fundo
-        stateIcon.style.top = '50%';
-        stateIcon.style.left = '50%';
-        stateIcon.style.transform = 'translate(-50%, -50%)';
-        label.appendChild(toggleInput);
-        label.appendChild(stateIcon);
-
-        const columnLabel = document.createElement('span');
-        columnLabel.textContent = option.replace(new RegExp('^' + cardTitle + '_', 'i'), '').replace(/_/g, ' ');
-        columnLabel.className = 'text-lg text-gray-800';
-
-        toggleContainer.appendChild(label);
-        toggleContainer.appendChild(columnLabel);
-        cardBody.appendChild(toggleContainer);
-    });
-
-    const infoText = document.createElement('div');
-    infoText.className = 'bg-gray-200 text-lg col-span-1 md:col-span-5 px-4 pt-4 pb-4';
-    infoText.innerHTML = `
-    <p class="font-bold">* Mandatory Fields</p>
-    <p><i class="fas fa-info-circle"></i> Click and select the options to search for ${NamesCards[cardTitle]} <b>(${cardTitle.toUpperCase()})</p>
-    <p><i class="fas fa-info-circle"></i> Please note that a full data search may take considerable time. We appreciate your patience during processing.</p>`;
-    cardBody.appendChild(infoText);
-
-    return cardContainer;
-}
 
 
 
 
-Object.keys(Cards).forEach(key => {
-    const cardElement = createCard(key, Cards[key]);
-    document.getElementById('CardsOpt').appendChild(cardElement);
-});
+
 
 const startSearch = document.getElementById('startSearch');
 
@@ -250,6 +119,7 @@ startSearch.addEventListener('click', function () {
     });
 });
 
+// This function fetches IUCN data and updates the progress bar
 async function getIUCN() {
     const StatusIUCN = {
         'LC': ['Least Concern', '#5FC65A'],
@@ -372,7 +242,7 @@ async function getIUCN() {
     updateDataResults();
 }
 
-
+// This function fetches synonyms for the given species from IUCN
 async function getSynonymsNames(speciesName) {
     const _speciesName = speciesName.replace(' ', '%20');
     const _token = '9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee';
@@ -398,6 +268,7 @@ async function getSynonymsNames(speciesName) {
     }
 }
 
+// This function fetches threats data for the given species from IUCN
 async function getThreats(speciesName) {
     threats_dict = {
         1: 'Residential & commercial development',
@@ -448,6 +319,7 @@ async function getThreats(speciesName) {
     }
 }
 
+// This function fetches common names data for the given species from IUCN
 async function getCommonNames(speciesName) {
     const _speciesName = speciesName.replace(' ', '%20');
     const _token = '9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee';
@@ -469,6 +341,7 @@ async function getCommonNames(speciesName) {
     }
 }
 
+// This function fetches country occurrence data for the given species from IUCN
 async function getCountryOccurrence(speciesName) {
     const _speciesName = speciesName.replace(' ', '%20');
     const _token = '9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee';
@@ -491,6 +364,7 @@ async function getCountryOccurrence(speciesName) {
     }
 }
 
+// This function fetches habitat data for the given species from IUCN
 async function getHabitat(speciesName) {
     const _speciesName = speciesName.replace(' ', '%20');
     const _token = '9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee';
@@ -513,7 +387,7 @@ async function getHabitat(speciesName) {
 
 }
 
-// WoRMS //
+// This function fetches data from WoRMS for the given species
 async function getWoRMS() {
     const statusColor = {
         'accepted': '#BACD92',
@@ -612,6 +486,7 @@ async function getWoRMS() {
     updateDataResults();
 }
 
+// This function fetches data from GBIF for the given species
 async function getGBIF() {
     const progressModal = document.getElementById('progressModal');
     const progressBar = document.getElementById('progressBar');
@@ -693,6 +568,7 @@ async function getGBIF() {
     updateDataResults();
 }
 
+// This function exports an HTML table to an Excel file
 async function exportTableToExcel(tableId) {
     const table = document.getElementById(tableId);
     const workbook = new ExcelJS.Workbook();
@@ -727,6 +603,7 @@ async function exportTableToExcel(tableId) {
     a.click();
 }
 
+// This function updates the data results and column filters
 function updateDataResults() {
     const dataResults = document.getElementById('dataResults');
     dataResults.innerHTML = '';
@@ -745,6 +622,7 @@ function updateDataResults() {
     </div>`;
 }
 
+// This function creates filters to toggle table columns
 function createColumnFilters(tableId, filterContainerId) {
     const table = document.getElementById(tableId);
     const filterContainer = document.getElementById(filterContainerId);
@@ -823,6 +701,7 @@ function createColumnFilters(tableId, filterContainerId) {
     filterContainer.appendChild(filterGrid);
 }
 
+// This function toggles the visibility of a table column
 function toggleColumnVisibility(tableId, colIndex, isVisible) {
     const table = document.getElementById(tableId);
     Array.from(table.rows).forEach(row => {
@@ -831,4 +710,235 @@ function toggleColumnVisibility(tableId, colIndex, isVisible) {
             cell.style.display = isVisible ? '' : 'none';
         }
     });
+}
+
+
+// 
+
+// This function displays the randomly selected tip on the screen
+function displayTip() {
+    const tip = getRandomTip(); // Get a random tip
+    const container = document.querySelector('.tip-container');
+    container.classList.remove('fade-out');
+    container.classList.add('fade-in');
+    container.style.display = 'block';
+    container.innerHTML = `
+    <div class="bg-gray-700 overflow-hidden px-5 py-5">
+        <div class="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
+            
+            <div class="flex-shrink-0 text-center sm:text-center md:text-left lg:text-left xl:text-left">
+                <span class="text-white font-semibold leading-6 rounded-full bg-gray-800 px-3 py-3 text-base">Explore other tools:</span>
+            </div>
+            
+            <div class="flex-grow sm:text-justify md:text-center lg:text-center xl:text-center">
+                <div class="text-white text-base font-semibold leading-6"><strong>${tip.key}</strong> ${tip.description}</div>
+            </div>
+
+            <div class="flex-shrink-0 text-center sm:text-center md:text-left lg:text-left xl:text-left">
+                <a href="${tip.link}" target="_blank" class="rounded-full bg-gray-800 px-3 py-3 text-base font-semibold text-white transition-all duration-300 hover:bg-gray-400 hover:ring-2 hover:ring-white hover:scale-105">Learn More <span aria-hidden="true">→</span></a>
+            </div>
+
+        </div>
+    </div>
+    `;
+}
+
+function createCheckboxesForCards(Cards) {
+    const container = document.getElementById('checkbox-container');
+    container.innerHTML = '';
+    container.className = 'grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-1 justify-items-start px-1 py-1';
+
+    const allCheckboxes = [];
+
+    Object.keys(Cards).forEach(key => {
+        const wrapperDiv = document.createElement('div');
+        wrapperDiv.className = 'flex items-center space-x-3 my-3';
+
+        const label = document.createElement('label');
+        label.className = 'relative inline-flex items-center cursor-pointer w-12 h-8 rounded-full transition duration-300';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = key + '-checkbox';
+        checkbox.checked = false;
+        checkbox.className = 'sr-only peer';
+
+        // Ícone dinâmico
+        const stateIcon = document.createElement('i');
+        stateIcon.className = 'fas fa-times text-black text-xl absolute';
+
+        // Adiciona o checkbox à lista para controle global
+        allCheckboxes.push({ checkbox, label });
+
+        // Atualiza estilos de acordo com o estado do checkbox
+        const updateStyles = () => {
+            if (checkbox.checked) {
+                label.classList.remove('bg-orange-500');
+                label.classList.add('bg-gray-800');
+                stateIcon.className = 'fas fa-check text-white text-xl absolute';
+            } else {
+                label.classList.remove('bg-gray-800');
+                label.classList.add('bg-orange-500');
+                stateIcon.className = 'fas fa-times text-black text-xl absolute';
+            }
+
+            // Gerencia a desabilitação de outros checkboxes
+            const anyChecked = allCheckboxes.some(item => item.checkbox.checked);
+            allCheckboxes.forEach(item => {
+                if (!item.checkbox.checked && anyChecked) {
+                    item.label.classList.add('bg-gray-200', 'cursor-not-allowed');
+                    item.label.classList.remove('bg-orange-500', 'bg-gray-800');
+                } else if (!item.checkbox.checked) {
+                    item.label.classList.remove('bg-gray-200', 'cursor-not-allowed');
+                    item.label.classList.add('bg-orange-500');
+                }
+            });
+        };
+
+        // Evento de mudança no estado do checkbox
+        checkbox.addEventListener('change', function () {
+            const card = document.getElementById(key + 'Card');
+            if (this.checked) {
+                card.classList.remove('hidden');
+                card.classList.add('fade-in');
+            } else {
+                card.classList.add('fade-out');
+                setTimeout(() => {
+                    card.classList.add('hidden');
+                    card.classList.remove('fade-out');
+                }, 500);
+            }
+            updateStyles();
+        });
+
+        // Configuração inicial
+        label.classList.add('bg-orange-500');
+        stateIcon.style.top = '50%';
+        stateIcon.style.left = '50%';
+        stateIcon.style.transform = 'translate(-50%, -50%)';
+
+        label.appendChild(checkbox);
+        label.appendChild(stateIcon);
+
+        const textLabel = document.createElement('span');
+        textLabel.htmlFor = key + '-checkbox';
+        textLabel.className = 'ml-3 font-medium text-base text-gray-800';
+        textLabel.innerHTML = `${NamesCards[key]} (<strong>${key.toUpperCase()}</strong>)`;
+
+        wrapperDiv.appendChild(label);
+        wrapperDiv.appendChild(textLabel);
+        container.appendChild(wrapperDiv);
+    });
+}
+
+Object.keys(Cards).forEach(key => {
+    const cardElement = createCard(key, Cards[key]);
+    document.getElementById('CardsOpt').appendChild(cardElement);
+});
+
+// This function creates a card element for the selected data source
+function createCard(cardTitle, options) {
+    const cardContainer = document.createElement('div');
+    cardContainer.id = cardTitle + 'Card';
+    cardContainer.className = 'bg-white rounded hidden';
+
+    const cardHeader = document.createElement('div');
+    cardHeader.className = 'bg-gray-800 flex items-center text-white py-1 px-1 rounded';
+    cardHeader.innerHTML = `
+        <div class="flex items-center justify-center h-12 w-12 rounded-full bg-gray-200 text-black mr-3 font-bold text-xl">2</div>
+        <div class="text-2xl font-semibold">Search Options of <span class="font-bold">${NamesCards[cardTitle]}</span></div>
+        `;
+    cardContainer.appendChild(cardHeader);
+
+    const cardBody = document.createElement('div');
+    cardBody.className = 'grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-1 justify-items-start px-1 py-1';
+    cardContainer.appendChild(cardBody);
+
+    function handleAllDataChange(event) {
+        const allDataInput = event.target;
+        const allDataStatus = allDataInput.checked;
+        const allInputs = Array.from(cardBody.querySelectorAll('.toggle-checkbox')).filter(input => !input.id.endsWith('*opt'));
+
+        allInputs.forEach(input => {
+            input.checked = allDataStatus;
+            input.disabled = false;
+            updateInputStyle(input);
+        });
+    }
+
+    function updateInputStyle(input) {
+        const label = input.parentElement;
+        const icon = label.querySelector('i');
+
+        if (input.checked) {
+            label.classList.remove('bg-orange-500');
+            label.classList.add('bg-gray-800');
+            icon.className = 'fas fa-check text-white text-xl absolute';
+        } else {
+            label.classList.remove('bg-gray-800');
+            label.classList.add('bg-orange-500');
+            icon.className = 'fas fa-times text-black text-xl absolute';
+        }
+    }
+
+    options.forEach(option => {
+        const toggleContainer = document.createElement('div');
+        toggleContainer.className = 'flex items-center space-x-2 my-1 col-span-1'; // Garantia de que cada item ocupa 1 coluna
+        const label = document.createElement('label');
+        label.className = 'relative inline-flex items-center cursor-pointer w-12 h-8 rounded-full transition duration-300';
+
+        const toggleInput = document.createElement('input');
+        toggleInput.type = 'checkbox';
+        toggleInput.checked = option.endsWith('*'); // Ligado apenas para obrigatórios
+        toggleInput.id = option.toLowerCase().replace(cardTitle.toLowerCase() + '_', '') + 'opt';
+        toggleInput.className = 'toggle-checkbox sr-only peer';
+
+        // Desativa os inputs obrigatórios
+        if (option.endsWith('*')) {
+            toggleInput.disabled = true;
+        }
+
+        // Evento para "All Data"
+        if (option.includes('_All_data')) {
+            toggleInput.addEventListener('change', handleAllDataChange);
+        }
+
+        // Ícone inicial
+        const stateIcon = document.createElement('i');
+        stateIcon.className = toggleInput.checked
+            ? 'fas fa-check text-white text-xl absolute'
+            : 'fas fa-times text-black text-xl absolute';
+
+        toggleInput.addEventListener('change', function () {
+            updateInputStyle(toggleInput);
+        });
+
+        // Estilo inicial
+        label.classList.add(toggleInput.checked ? 'bg-gray-800' : 'bg-orange-500');
+
+        // Ícone centralizado no fundo
+        stateIcon.style.top = '50%';
+        stateIcon.style.left = '50%';
+        stateIcon.style.transform = 'translate(-50%, -50%)';
+        label.appendChild(toggleInput);
+        label.appendChild(stateIcon);
+
+        const columnLabel = document.createElement('span');
+        columnLabel.textContent = option.replace(new RegExp('^' + cardTitle + '_', 'i'), '').replace(/_/g, ' ');
+        columnLabel.className = 'text-lg text-gray-800';
+
+        toggleContainer.appendChild(label);
+        toggleContainer.appendChild(columnLabel);
+        cardBody.appendChild(toggleContainer);
+    });
+
+    const infoText = document.createElement('div');
+    infoText.className = 'bg-gray-200 text-lg col-span-full px-4 pt-4 pb-4';
+    infoText.innerHTML = `
+    <p class="font-bold">* Mandatory Fields</p>
+    <p><i class="fas fa-info-circle"></i> Click and select the options to search for ${NamesCards[cardTitle]} <b>(${cardTitle.toUpperCase()})</p>
+    <p><i class="fas fa-info-circle"></i> Please note that a full data search may take considerable time. We appreciate your patience during processing.</p>`;
+    cardBody.appendChild(infoText);
+
+    return cardContainer;
 }
