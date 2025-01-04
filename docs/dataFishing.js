@@ -634,21 +634,20 @@ function createColumnFilters(tableId, filterContainerId) {
     filterContainer.innerHTML = ''; // Limpar filtros existentes
 
     const filterTitle = document.createElement('h3');
-    filterTitle.className = 'text-xl font-bold text-gray-800 mb-6';
+    filterTitle.className = 'text-xl font-bold text-gray-800 mb-5';
     filterTitle.textContent = 'Show/Hide Columns of the Results';
     filterContainer.appendChild(filterTitle);
 
     const filterGrid = document.createElement('div');
-    filterGrid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6';
+    filterGrid.className = 'grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-10 xxl:grid-cols-10 gap-2';
 
     // Criar switches para cada coluna
     Array.from(headerRow.cells).forEach((cell, index) => {
         const filterItem = document.createElement('div');
-        filterItem.className = 'flex items-center space-x-6';
+        filterItem.className = 'flex items-center space-x-2';
 
         const label = document.createElement('label');
-        label.className =
-            'relative inline-flex items-center cursor-pointer w-16 h-8 rounded-full transition duration-300';
+        label.className = 'relative inline-flex items-center cursor-pointer w-12 h-8 rounded-full transition duration-300';
 
         const switchInput = document.createElement('input');
         switchInput.type = 'checkbox';
@@ -668,11 +667,11 @@ function createColumnFilters(tableId, filterContainerId) {
             if (isVisible) {
                 label.classList.remove('bg-gray-400');
                 label.classList.add('bg-gray-800');
-                switchIcon.className = 'fas fa-eye text-white text-2xl absolute';
+                switchIcon.className = 'fas fa-eye text-white text-xl absolute';
             } else {
                 label.classList.remove('bg-gray-800');
                 label.classList.add('bg-gray-400');
-                switchIcon.className = 'fas fa-eye-slash text-white text-2xl absolute';
+                switchIcon.className = 'fas fa-eye-slash text-white text-xl absolute';
             }
         });
 
@@ -681,7 +680,7 @@ function createColumnFilters(tableId, filterContainerId) {
 
         // Ícone centralizado
         const switchIcon = document.createElement('i');
-        switchIcon.className = 'fas fa-eye text-white text-2xl absolute';
+        switchIcon.className = 'fas fa-eye text-white text-xl absolute';
         switchIcon.style.top = '50%';
         switchIcon.style.left = '50%';
         switchIcon.style.transform = 'translate(-50%, -50%)';
@@ -731,7 +730,9 @@ function displayTip() {
             </div>
             
             <div class="flex-grow sm:text-justify md:text-center lg:text-center xl:text-center">
-                <div class="text-white text-base font-semibold leading-6"><strong>${tip.key}</strong> ${tip.description}</div>
+                <div class="text-white font-semibold leading-6 sm:text-base md:text-lg lg:text-2xl xl:text-2xl xxl:text-2xl">
+                    <strong>${tip.key}</strong> ${tip.description}
+                </div>
             </div>
 
             <div class="flex-shrink-0 text-center sm:text-center md:text-left lg:text-left xl:text-left">
@@ -745,31 +746,28 @@ function displayTip() {
 
 function createCheckboxesForCards(Cards) {
     const container = document.getElementById('checkbox-container');
+    // Limpa o TextField
+    const textField = document.getElementById('speciesNames');
+    textField.value = '';
+
     container.innerHTML = '';
-    container.className = 'grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-1 justify-items-start px-1 py-1';
-
+    container.className = 'grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 xxl:grid-cols-5 gap-1 justify-items-center px-1 py-1';
     const allCheckboxes = [];
-
     Object.keys(Cards).forEach(key => {
         const wrapperDiv = document.createElement('div');
-        wrapperDiv.className = 'flex items-center space-x-3 my-3';
-
+        wrapperDiv.className = 'flex items-center space-x-2 my-5';
         const label = document.createElement('label');
         label.className = 'relative inline-flex items-center cursor-pointer w-12 h-8 rounded-full transition duration-300';
-
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.id = key + '-checkbox';
         checkbox.checked = false;
         checkbox.className = 'sr-only peer';
-
         // Ícone dinâmico
         const stateIcon = document.createElement('i');
         stateIcon.className = 'fas fa-times text-black text-xl absolute';
-
         // Adiciona o checkbox à lista para controle global
         allCheckboxes.push({ checkbox, label });
-
         // Atualiza estilos de acordo com o estado do checkbox
         const updateStyles = () => {
             if (checkbox.checked) {
@@ -781,15 +779,14 @@ function createCheckboxesForCards(Cards) {
                 label.classList.add('bg-orange-500');
                 stateIcon.className = 'fas fa-times text-black text-xl absolute';
             }
-
             // Gerencia a desabilitação de outros checkboxes
             const anyChecked = allCheckboxes.some(item => item.checkbox.checked);
             allCheckboxes.forEach(item => {
                 if (!item.checkbox.checked && anyChecked) {
-                    item.label.classList.add('bg-gray-200', 'cursor-not-allowed');
+                    item.label.classList.add('bg-gray-200', 'cursor-not-allowed', 'disabled');
                     item.label.classList.remove('bg-orange-500', 'bg-gray-800');
                 } else if (!item.checkbox.checked) {
-                    item.label.classList.remove('bg-gray-200', 'cursor-not-allowed');
+                    item.label.classList.remove('bg-gray-200', 'cursor-not-allowed', 'disabled');
                     item.label.classList.add('bg-orange-500');
                 }
             });
@@ -822,7 +819,7 @@ function createCheckboxesForCards(Cards) {
 
         const textLabel = document.createElement('span');
         textLabel.htmlFor = key + '-checkbox';
-        textLabel.className = 'ml-3 font-medium text-base text-gray-800';
+        textLabel.className = 'ml-5 text-xl text-gray-800';
         textLabel.innerHTML = `${NamesCards[key]} (<strong>${key.toUpperCase()}</strong>)`;
 
         wrapperDiv.appendChild(label);
@@ -851,7 +848,7 @@ function createCard(cardTitle, options) {
     cardContainer.appendChild(cardHeader);
 
     const cardBody = document.createElement('div');
-    cardBody.className = 'grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-1 justify-items-start px-1 py-1';
+    cardBody.className = 'grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-10 xxl:grid-cols-10 gap-1 justify-items-start px-1 py-1';
     cardContainer.appendChild(cardBody);
 
     function handleAllDataChange(event) {
@@ -925,7 +922,7 @@ function createCard(cardTitle, options) {
 
         const columnLabel = document.createElement('span');
         columnLabel.textContent = option.replace(new RegExp('^' + cardTitle + '_', 'i'), '').replace(/_/g, ' ');
-        columnLabel.className = 'text-lg text-gray-800';
+        columnLabel.className = 'text-xl text-gray-800 ml-3';
 
         toggleContainer.appendChild(label);
         toggleContainer.appendChild(columnLabel);
@@ -933,7 +930,7 @@ function createCard(cardTitle, options) {
     });
 
     const infoText = document.createElement('div');
-    infoText.className = 'bg-gray-200 text-lg col-span-full px-4 pt-4 pb-4';
+    infoText.className = 'bg-gray-200 text-lg px-4 pt-4 pb-4 rounded text-center col-span-full w-full mx-auto my-4';
     infoText.innerHTML = `
     <p class="font-bold">* Mandatory Fields</p>
     <p><i class="fas fa-info-circle"></i> Click and select the options to search for ${NamesCards[cardTitle]} <b>(${cardTitle.toUpperCase()})</p>
