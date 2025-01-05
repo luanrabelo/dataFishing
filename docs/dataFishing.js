@@ -93,12 +93,6 @@ function getRandomTip() {
     return { key: randomKey, description: toolTips[randomKey][0], link: toolTips[randomKey][1] };
 }
 
-
-
-
-
-
-
 const startSearch = document.getElementById('startSearch');
 
 startSearch.addEventListener('click', function () {
@@ -151,16 +145,14 @@ async function getIUCN() {
     _iucnTable.id = 'TableResults';
     _iucnTable.classList.add(
         "w-full", 
-        "text-lg", 
+        "text-base", 
         "text-center", 
-        "text-gray-500", 
-        "dark:text-gray-400", 
+        "text-blue-800", 
         "flex-grow", 
-        "even:bg-blue-gray-50/50",
-        "table-fixed"
+        "table-auto"
     );
     _iucnTable.innerHTML = `
-    <thead class="text-base text-white bg-gray-800 top-0 sticky top-0 z-10">
+    <thead class="text-base text-white bg-gray-800">
         <tr>
             <th scope="col" class="px-6 py-3">Kingdom</th>
             <th scope="col" class="px-6 py-3">Phylum</th>
@@ -181,12 +173,13 @@ async function getIUCN() {
     </thead>
     `;
     const _iucnTableBody = _iucnTable.createTBody();
-    _iucnTableBody.classList.add("text-center");
+    _iucnTableBody.classList.add("text-left", 'divide-y', 'divide-blue-800', 'divide-dashed');
 
     const _iucnTableWrapper = document.createElement('div');
-    _iucnTableWrapper.style.maxHeight = '1000px';
+    //_iucnTableWrapper.style.maxHeight = '1000px';
     _iucnTableWrapper.style.overflowY = 'auto';
-    _iucnTableWrapper.classList.add("max-h-50", "overflow-y-auto");
+    _iucnTableWrapper.style.overflowX = 'auto';
+    //_iucnTableWrapper.classList.add("max-h-full", "overflow-y-auto");
     _iucnTableWrapper.appendChild(_iucnTable);
 
     const iucnResults = document.getElementById('Results');
@@ -208,7 +201,7 @@ async function getIUCN() {
 
             for (const result of json.result) {
                 const row = _iucnTableBody.insertRow();
-                row.classList.add('bg-gray-50', 'hover:bg-gray-100', 'text-black');
+                row.classList.add('bg-gray-50', 'hover:bg-gray-100', 'text-black', 'whitespace-nowrap', 'odd:bg-gray-200', 'even:bg-white');
                 row.innerHTML = `
                         <td>${result.kingdom.charAt(0).toUpperCase() + result.kingdom.slice(1).toLowerCase()}</td>
                         <td>${result.phylum.charAt(0).toUpperCase() + result.phylum.slice(1).toLowerCase()}</td>
@@ -219,11 +212,11 @@ async function getIUCN() {
                         <td><i>${speciesName}</i></td>
                         ${iucnCommonOpt ? `<td>${_commonNames}</td>` : ''}
                         ${iucnCountryOpt ? `<td>${_country}</td>` : ''}
-                        ${iucnHabitatsOpt ? `<td><ul class="list-disc pl-4 text-left marker:text-gray-800">${_habitats}</ul></td>` : ''}
+                        ${iucnHabitatsOpt ? `<td>${_habitats}</td>` : ''}
                         <td>${result.authority}</td>
                         <td style="background-color: ${StatusIUCN[result.category][1]};">${StatusIUCN[result.category][0]} (${result.category})</td>
                         ${iucnSynonymsOpt ? `<td>${_synonyms}</td>` : ''}
-                        ${iucnThreatsOpt ? `<td><ul class="list-disc pl-4 text-left marker:text-gray-800">${_threats}</ul></td>` : ''}
+                        ${iucnThreatsOpt ? `<td>${_threats}</td>` : ''}
                         <td><a class="btn btn-outline-dark" href="https://www.iucnredlist.org/search?query=${_speciesName}&searchType=species" role="button" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
             `;
             }
@@ -254,9 +247,9 @@ async function getSynonymsNames(speciesName) {
             let synonyms = '';
             for (let _i = 0; _i < json.result.length; _i++) {
                 if (`${json.result[_i].syn_authority}` === 'null') {
-                    synonyms += `<p><i>${json.result[_i].synonym}</i></p>\n`;
+                    synonyms += `<div class="py-2"><i>${json.result[_i].synonym}</i></div>\n`;
                 } else {
-                    synonyms += `<p><i>${json.result[_i].synonym}</i> ${json.result[_i].syn_authority}</p>\n`;
+                    synonyms += `<div class="py-2"><i>${json.result[_i].synonym}</i> ${json.result[_i].syn_authority}</div>\n`;
                 }
             }
             return synonyms;
@@ -307,7 +300,7 @@ async function getThreats(speciesName) {
                 }
             }
             for (let _j = 0; _j < threats.length; _j++) {
-                threats[_j] = `<li>&nbsp;&nbsp;&nbsp;${threats[_j]};</li>`;
+                threats[_j] = `<div class="py-2">${threats[_j]}</div>`;
             }
             threats = threats.join('');
             return threats;
@@ -330,7 +323,7 @@ async function getCommonNames(speciesName) {
         if (json.result.length > 0) {
             let commonNames = '';
             for (let _i = 0; _i < json.result.length; _i++) {
-                commonNames += `<p>${json.result[_i].taxonname} <sup>${json.result[_i].language}</sup></p>\n`;
+                commonNames += `<div class="py-2">${json.result[_i].taxonname} <sup>${json.result[_i].language}</sup></div>\n`;
             }
             return commonNames;
         } else {
@@ -353,7 +346,7 @@ async function getCountryOccurrence(speciesName) {
             let countries = '';
             for (let _i = 0; _i < json.result.length; _i++) {
                 //countries += `<p>${json.result[_i].country} <sup><b>Presence:</b> ${json.result[_i].presence}</sup> <sup><b>Origin:</b> ${json.result[_i].origin}</sup> <sup><b>Distribution:</b> ${json.result[_i].distribution_code}</sup></p>`;
-                countries += `${json.result[_i].country};\n`;
+                countries += `<div class"py-2">${json.result[_i].country};\n</div>`;
             }
             return countries;
         } else {
@@ -375,7 +368,7 @@ async function getHabitat(speciesName) {
         if (json.result.length > 0) {
             let habitats = '';
             for (let _i = 0; _i < json.result.length; _i++) {
-                habitats += `<li>${json.result[_i].habitat};</li>`;
+                habitats += `<div class="py-2">${json.result[_i].habitat};</div>`;
             }
             return habitats;
         } else {
@@ -751,7 +744,7 @@ function createCheckboxesForCards(Cards) {
     textField.value = '';
 
     container.innerHTML = '';
-    container.className = 'grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 xxl:grid-cols-5 gap-1 justify-items-center px-1 py-1';
+    container.className = 'grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 xxl:grid-cols-5 gap-1 px-1 py-1';
     const allCheckboxes = [];
     Object.keys(Cards).forEach(key => {
         const wrapperDiv = document.createElement('div');
@@ -820,7 +813,7 @@ function createCheckboxesForCards(Cards) {
         const textLabel = document.createElement('span');
         textLabel.htmlFor = key + '-checkbox';
         textLabel.className = 'ml-5 text-xl text-gray-800';
-        textLabel.innerHTML = `${NamesCards[key]} (<strong>${key.toUpperCase()}</strong>)`;
+        textLabel.innerHTML = `${NamesCards[key]}<br>(<strong>${key.toUpperCase()}</strong>)`;
 
         wrapperDiv.appendChild(label);
         wrapperDiv.appendChild(textLabel);
