@@ -944,7 +944,7 @@ async function get_BOLD_Systems() {
 
     const promises = speciesNames.map(async (speciesName, index) => {
         const _speciesName = encodeURIComponent(speciesName);
-        const url = `https://v3.boldsystems.org/index.php/API_Tax/TaxonSearch?taxName=${_speciesName}`;
+        const url = `https://v4.boldsystems.org/index.php/API_Public/specimen?taxon=${_speciesName}&format=json`;
         try {
             const response = await fetch(url);
             if (!response.ok) throw new Error(`HTTP-Error: ${response.status}`);
