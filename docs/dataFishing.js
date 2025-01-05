@@ -26,6 +26,7 @@ var Cards = {
     ]
 
 };
+
 var NamesCards = {
     'gbif': 'Global Biodiversity Information Facility',
     'iucn': 'Red List of Threatened Species',
@@ -36,6 +37,7 @@ var NamesCards = {
 
 document.addEventListener('DOMContentLoaded', function () {
     const speciesNames = document.getElementById('speciesNames');
+    speciesNames.value = "";
     const exampleSpecies = document.getElementById('exampleSpecies');
     exampleSpecies.addEventListener('click', function () {
         const species = [
@@ -72,7 +74,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-// This function returns a random tip from the toolTips object
+
 function getRandomTip() {
     const toolTips = {
         SynGenes: [
@@ -94,13 +96,13 @@ function getRandomTip() {
 }
 
 const startSearch = document.getElementById('startSearch');
-
 startSearch.addEventListener('click', function () {
     const iucn = document.getElementById('iucn-checkbox').checked;
     const gbif = document.getElementById('gbif-checkbox').checked;
     const WoRMS = document.getElementById('WoRMS-checkbox').checked;
     if (iucn) {
         getIUCN();
+        get_BOLD_Systems();
     } else if (gbif) {
         getGBIF();
     } else if (WoRMS) {
@@ -146,29 +148,28 @@ async function getIUCN() {
     _iucnTable.classList.add(
         "w-full", 
         "text-base", 
-        "text-center", 
         "text-blue-800", 
         "flex-grow", 
         "table-auto"
     );
     _iucnTable.innerHTML = `
-    <thead class="text-base text-white bg-gray-800">
+    <thead class="text-base text-white bg-gray-800 text-left">
         <tr>
-            <th scope="col" class="px-6 py-3">Kingdom</th>
-            <th scope="col" class="px-6 py-3">Phylum</th>
-            <th scope="col" class="px-6 py-3">Class</th>
-            <th scope="col" class="px-6 py-3">Order</th>
-            <th scope="col" class="px-6 py-3">Family</th>
-            <th scope="col" class="px-6 py-3">Genus</th>
-            <th scope="col" class="px-6 py-3">Species</th>
-            ${iucnCommonOpt ? '<th scope="col" class="px-6 py-3">Common Names</th>' : ''}
-            ${iucnCountryOpt ? '<th scope="col" class="px-6 py-3">Country Occurrence</th>' : ''}
-            ${iucnHabitatsOpt ? '<th scope="col" class="px-6 py-3">Habitats</th>' : ''}
-            <th scope="col" class="px-6 py-3">Species Citation</th>
-            <th scope="col" class="px-6 py-3">Status Conservation</th>
-            ${iucnSynonymsOpt ? '<th scope="col" class="px-6 py-3">Synonyms Names</th>' : ''}
-            ${iucnThreatsOpt ? '<th scope="col" class="px-6 py-3">Threats</th>' : ''}
-            <th scope="col" class="px-6 py-3">Link</th>
+            <th scope="col" class="py-3">Kingdom</th>
+            <th scope="col" class="py-3">Phylum</th>
+            <th scope="col" class="py-3">Class</th>
+            <th scope="col" class="py-3">Order</th>
+            <th scope="col" class="py-3">Family</th>
+            <th scope="col" class="py-3">Genus</th>
+            <th scope="col" class="py-3">Species</th>
+            ${iucnCommonOpt ? '<th scope="col" class="py-3">Common Names</th>' : ''}
+            ${iucnCountryOpt ? '<th scope="col" class="py-3">Country Occurrence</th>' : ''}
+            ${iucnHabitatsOpt ? '<th scope="col" class="py-3">Habitats</th>' : ''}
+            <th scope="col" class="py-3">Species Citation</th>
+            <th scope="col" class="py-3">Status Conservation</th>
+            ${iucnSynonymsOpt ? '<th scope="col" class="py-3">Synonyms Names</th>' : ''}
+            ${iucnThreatsOpt ? '<th scope="col" class="py-3">Threats</th>' : ''}
+            <th scope="col" class="py-3">Link</th>
         </tr>
     </thead>
     `;
@@ -201,7 +202,7 @@ async function getIUCN() {
 
             for (const result of json.result) {
                 const row = _iucnTableBody.insertRow();
-                row.classList.add('bg-gray-50', 'hover:bg-gray-100', 'text-black', 'whitespace-nowrap', 'odd:bg-gray-200', 'even:bg-white');
+                row.classList.add('bg-gray-50', 'hover:bg-gray-400', 'text-black', 'whitespace-nowrap', 'odd:bg-gray-200', 'even:bg-white');
                 row.innerHTML = `
                         <td>${result.kingdom.charAt(0).toUpperCase() + result.kingdom.slice(1).toLowerCase()}</td>
                         <td>${result.phylum.charAt(0).toUpperCase() + result.phylum.slice(1).toLowerCase()}</td>
@@ -873,7 +874,7 @@ function createCard(cardTitle, options) {
 
     options.forEach(option => {
         const toggleContainer = document.createElement('div');
-        toggleContainer.className = 'flex items-center space-x-2 my-1 col-span-1'; // Garantia de que cada item ocupa 1 coluna
+        toggleContainer.className = 'flex items-center space-x-2 my-5 col-span-1 space-x-2'; // Garantia de que cada item ocupa 1 coluna
         const label = document.createElement('label');
         label.className = 'relative inline-flex items-center cursor-pointer w-12 h-8 rounded-full transition duration-300';
 
@@ -923,7 +924,7 @@ function createCard(cardTitle, options) {
     });
 
     const infoText = document.createElement('div');
-    infoText.className = 'bg-gray-200 text-lg px-4 pt-4 pb-4 rounded text-center col-span-full w-full mx-auto my-4';
+    infoText.className = 'bg-gray-200 text-lg px-4 pt-4 pb-4 rounded text-center col-span-full w-full mx-auto my-5';
     infoText.innerHTML = `
     <p class="font-bold">* Mandatory Fields</p>
     <p><i class="fas fa-info-circle"></i> Click and select the options to search for ${NamesCards[cardTitle]} <b>(${cardTitle.toUpperCase()})</p>
@@ -931,4 +932,27 @@ function createCard(cardTitle, options) {
     cardBody.appendChild(infoText);
 
     return cardContainer;
+}
+
+// BOLD System - Search Options
+async function get_BOLD_Systems() {
+    //const progressModal = document.getElementById('progressModal');
+    //const progressBar = document.getElementById('progressBar');
+    //progressModal.classList.remove('hidden');
+
+    const speciesNames = document.getElementById('speciesNames').value.split('\n');
+
+    const promises = speciesNames.map(async (speciesName, index) => {
+        const _speciesName = encodeURIComponent(speciesName);
+        const url = `https://v3.boldsystems.org/index.php/API_Tax/TaxonSearch?taxName=${_speciesName}`;
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`HTTP-Error: ${response.status}`);
+            const json = await response.json();
+            console.log(json);
+        } catch (error) {
+            console.error(error);
+        }
+    });
+    await Promise.all(promises);
 }
