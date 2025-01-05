@@ -127,30 +127,44 @@
 
   <header class="bg-gray-800 text-white py-3 px-3">
     
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center h-16">
-        <div class="flex items-center">
-          <img src="assets/dataFishing.png" class="mr-3 h-12 w-12" alt="dataFishing">
-          <h1 class="text-lg font-bold select-none">dataFishing<sup class="text-sm">v1.1.0</sup></h1>
-        </div>
-        <div class="hidden sm:flex space-x-4">
-          <a href="https://github.com/luanrabelo/dataFishing" target="_blank" class="px-3 py-2 rounded-md text-base font-bold text-white hover:bg-gray-600 transition-colors duration-300 select-none"><i class="fa-brands fa-github mr-2"></i>GitHub</a>
-          <a href="https://www.buymeacoffee.com/lprabelo" target="_blank" class="px-3 py-2 rounded-md text-base font-bold text-white hover:bg-gray-600 transition-colors duration-300 select-none"><i class="fa-solid fa-mug-hot mr-2"></i>Donate</a>
-        </div>
-        <div class="sm:hidden">
-          <button id="menuBtn" class="p-3 rounded-md text-white hover:bg-gray-700 transition-colors duration-300">
-            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
-            </svg>
-          </button>
-        </div>
-      </div>
+   <!-- Navegação -->
+<div class="container mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="flex justify-between items-center h-16">
+    <div class="flex items-center">
+      <img src="assets/dataFishing.png" class="mr-3 h-12 w-12" alt="dataFishing">
+      <h1 class="text-lg font-bold select-none">dataFishing<sup class="text-sm">v1.1.5</sup></h1>
     </div>
+    <!-- Menu Desktop -->
+    <div class="hidden md:flex space-x-4">
+      <a href="https://github.com/luanrabelo/dataFishing" target="_blank" 
+         class="px-3 py-2 rounded-md text-base font-bold text-white hover:bg-gray-600 transition-colors duration-300 select-none">
+         <i class="fa-brands fa-github mr-2"></i>GitHub
+      </a>
+      <a href="https://www.buymeacoffee.com/lprabelo" target="_blank" 
+         class="px-3 py-2 rounded-md text-base font-bold text-white hover:bg-gray-600 transition-colors duration-300 select-none">
+         <i class="fa-solid fa-mug-hot mr-2"></i>Donate
+      </a>
+    </div>
+    <!-- Botão Mobile -->
+    <div class="md:hidden">
+      <button id="menuBtn" class="p-3 rounded-md text-white hover:bg-gray-700 transition-colors duration-300">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
 
-    <div id="menu" class="sm:hidden hidden">
-      <a href="https://github.com/luanrabelo/dataFishing" class="block px-3 py-3 rounded-md text-base font-medium hover:bg-gray-700"><i class="fa-brands fa-2x fa-github"></i> GitHub</a>
-      <a href="https://www.buymeacoffee.com/lprabelo" class="block px-3 py-3 rounded-md text-base font-medium hover:bg-gray-700"><i class="fa-solid fa-2x fa-mug-hot"></i> Donate</a>
-    </div>
+<!-- Menu Mobile -->
+<div id="menu" class="hidden md:hidden">
+  <a href="https://github.com/luanrabelo/dataFishing" class="block px-3 py-3 rounded-md text-base font-medium hover:bg-gray-700">
+    <i class="fa-brands fa-2x fa-github"></i> GitHub
+  </a>
+  <a href="https://www.buymeacoffee.com/lprabelo" class="block px-3 py-3 rounded-md text-base font-medium hover:bg-gray-700">
+    <i class="fa-solid fa-2x fa-mug-hot"></i> Donate
+  </a>
+</div>
 
     <script>
       document.getElementById('menuBtn').addEventListener('click', function () {
@@ -176,10 +190,10 @@
 
     <div class="flex items-center py-1 px-1">
       <div class="flex items-center justify-center h-12 w-12 rounded-full bg-gray-800 text-white mr-3 font-bold text-xl">1</div>
-      <div class="text-2xl font-semibold">Select the data source to search for <span class="font-bold">biodiversity</span> information:</div>
+      <div class="text-2xl font-semibold">Select the data source to search for <span class="font-bold">biodiversity</span> information:<b>*</b></div>
     </div>
-
     <div id="checkbox-container"></div>
+    <small class="py-5 px-5 text-base text-justify">* Please select one data source at a time to search for biodiversity information. When you select an option, the other options will be disabled. To choose a different data source, you must first uncheck the currently selected option.</small>
     
     <div id="CardsOpt">
       
@@ -316,7 +330,7 @@
           <h4 class="font-bold text-lg mb-1">About:</h4>
           <div class="flex items-center">
             <img src="assets/dataFishing.png" class="mr-3" alt="dataFishing" width="25%">
-            <p class="text-justify">dataFishing: An efficient Python tool and user-friendly web-form for mining mitochondrial and chloroplast sequences, taxonomic, and biodiversity data</p>
+            <p class="text-justify">dataFishing: An efficient Python tool and user-friendly web-form for mining mitochondrial and chloroplast sequences, taxonomic, and biodiversity data.</p>
           </div>
         </div>
 
@@ -360,7 +374,7 @@
         <hr class="sm:hidden border-t my-2 border-white">
         <div class="lg:col-span-1">
           <h4 class="font-bold text-lg mb-1">Institutions:</h4>
-          <div class="grid grid-cols-1 2xl:grid-cols-2 gap-1">
+          <div class="grid gap-1 grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2">
             <div class="text-center">
               <img src="assets/LEVO.png" class="mx-auto" alt="Laboratório de Evolução" width="70%">
               <p class="font-bold">Laboratório de Evolução</p>
@@ -372,6 +386,7 @@
             </div>
           </div>
         </div>
+
         <hr class="sm:hidden border-t my-2 border-white">
         <div class="lg:col-span-1">
           <h4 class="font-bold text-lg mb-1">Cite dataFishing:</h4>
@@ -381,7 +396,7 @@
           <hr class="border-gray-600 mt-4 mb-4">
           <h4 class="font-bold text-lg mb-1">GitHub:</h4>
           <div class="flex items-center">
-            <p class="text-justify hover:text-blue-300"><a class="" target="_blank"
+            <p class="text-left hover:text-blue-300"><a class="" target="_blank"
                 href="https://github.com/luanrabelo/dataFishing"><i class="fa-brands fa-github"></i>
                 https://github.com/luanrabelo/dataFishing</a></p>
           </div>
@@ -401,6 +416,7 @@
     const iucnCheckbox = $('#iucn-checkbox');
     const gbifCheckbox = $('#gbif-checkbox');
     const wormsCheckbox = $('#WoRMS-checkbox');
+    const boldCheckbox = $('#BoldSystems-checkbox');
     const startSearch   = $('#startSearch');
 
     const spForm = $('#spForm');
@@ -409,11 +425,11 @@
     btnExcel.hide();
 
     function disableOtherCheckboxes(checkbox) {
-        $('#iucn-checkbox, #gbif-checkbox, #WoRMS-checkbox').not(checkbox).prop('disabled', true);
+        $('#iucn-checkbox, #gbif-checkbox, #WoRMS-checkbox, #BoldSystems-checkbox').not(checkbox).prop('disabled', true);
     }
 
     function enableOtherCheckboxes() {
-        $('#iucn-checkbox, #gbif-checkbox, #WoRMS-checkbox').prop('disabled', false);
+        $('#iucn-checkbox, #gbif-checkbox, #WoRMS-checkbox, #BoldSystems-checkbox').prop('disabled', false);
     }
 
     function showElements() {
@@ -440,6 +456,8 @@
         if (this.checked) {
             disableOtherCheckboxes(this);
             showElements();
+            const textarea = $('#speciesNames');
+            textarea.val('');
         } else {
             enableOtherCheckboxes();
             hideElements();
@@ -450,6 +468,8 @@
         if (this.checked) {
             disableOtherCheckboxes(this);
             showElements();
+            const textarea = $('#speciesNames');
+            textarea.val('');
         } else {
             enableOtherCheckboxes();
             hideElements();
@@ -460,16 +480,26 @@
         if (this.checked) {
             disableOtherCheckboxes(this);
             showElements();
+            const textarea = $('#speciesNames');
+            textarea.val('');
+        } else {
+            enableOtherCheckboxes();
+            hideElements();
+        }
+    });
+
+    boldCheckbox.change(function () {
+        if (this.checked) {
+            disableOtherCheckboxes(this);
+            showElements();
+            const textarea = $('#speciesNames');
+            textarea.val('');
         } else {
             enableOtherCheckboxes();
             hideElements();
         }
     });
   });
-
-
-  
-
 
 createCheckboxesForCards(Cards);
   </script>
