@@ -48,9 +48,9 @@ For more details, please see the MIT License.
 # The Hitchhiker's Guide to ***dataFishing***
 ## Change Log
 ##### [:rocket: Go to Contents Overview](#contents-overview)
-- **Version 1.0.0** (2024-10-01)
+- **Python Version 1.0.0** (2024-10-01)
   - Initial release of ***dataFishing***.
-- **Version 1.0.1** (2024-10-15)
+- **Python Version 1.0.1** (2024-10-15)
   - Added the ability to download sequence data from BOLD System and/or GenBank.
   - Added the ability to obtain data of Threats from the IUCN database.
 
@@ -281,7 +281,10 @@ dataFishing.py --input Examples/SpeciesNames.txt --all True --email your@email.c
 ### Citing ***dataFishing***
 ##### [:rocket: Go to Contents Overview](#contents-overview)
 When referencing the ***dataFishing*** tool, please cite it appropriately in your academic or professional work.
-[dataFishing](https://doi.org/10.1016/j.ecoinf.2024.102970)
+
+
+* [:page_facing_up: dataFishing Papper](https://doi.org/10.1016/j.ecoinf.2024.102970)
+
 ```
 Rabelo, L., Sodré, D., Balcázar, O. D. A., do Rosário, M. F., Guimarães-Costa, A. J., Gomes, G., Sampaio, I., & Vallinoto, M. (2025). dataFishing: An efficient Python tool and user-friendly web-form for mining mitochondrial and chloroplast sequences, taxonomic, and biodiversity data. Ecological Informatics, 85, 102970. https://doi.org/10.1016/j.ecoinf.2024.102970
 ```
