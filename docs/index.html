@@ -413,8 +413,8 @@
   <script>
     $(document).ready(function () {
       
-    const IUCNCheckbox = $('#IUCN-checkbox');
-    const GBIFCheckbox = $('#GBIF-checkbox');
+    const iucnCheckbox = $('#iucn-checkbox');
+    const gbifCheckbox = $('#gbif-checkbox');
     const wormsCheckbox = $('#WoRMS-checkbox');
     const boldCheckbox = $('#BoldSystems-checkbox');
     const startSearch   = $('#startSearch');
@@ -425,11 +425,11 @@
     btnExcel.hide();
 
     function disableOtherCheckboxes(checkbox) {
-        $('#IUCN-checkbox, #GBIF-checkbox, #WoRMS-checkbox, #BoldSystems-checkbox').not(checkbox).prop('disabled', true);
+        $('#iucn-checkbox, #gbif-checkbox, #WoRMS-checkbox, #BoldSystems-checkbox').not(checkbox).prop('disabled', true);
     }
 
     function enableOtherCheckboxes() {
-        $('#IUCN-checkbox, #GBIF-checkbox, #WoRMS-checkbox, #BoldSystems-checkbox').prop('disabled', false);
+        $('#iucn-checkbox, #gbif-checkbox, #WoRMS-checkbox, #BoldSystems-checkbox').prop('disabled', false);
     }
 
     function showElements() {
@@ -452,7 +452,7 @@
         startSearch.addClass('hover:bg-blue-900');
     }
 
-    IUCNCheckbox.change(function () {
+    iucnCheckbox.change(function () {
         if (this.checked) {
             disableOtherCheckboxes(this);
             showElements();
@@ -464,7 +464,7 @@
         }
     });
 
-    GBIFCheckbox.change(function () {
+    gbifCheckbox.change(function () {
         if (this.checked) {
             disableOtherCheckboxes(this);
             showElements();
