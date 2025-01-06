@@ -3,14 +3,14 @@ var Cards = {
         'BOLD_All_data*',
         'BOLD_Taxonomy*',
     ],
-    'gbif': [
+    'GBIF': [
         'GBIF_All_data*',
         'GBIF_Taxonomy*',
         "GBIF_Basionym*",
         "GBIF_Vernacular_Name*",
         "GBIF_Taxonomic_Status*"
     ],
-    'iucn': [
+    'IUCN': [
         'IUCN_All_data',
         'IUCN_Common_Names',
         'IUCN_Country_Occurrence',
@@ -33,8 +33,8 @@ var Cards = {
 
 var NamesCards = {
     'BoldSystems': 'Barcode of Life Data Systems <sup>beta</sup>',
-    'gbif': 'Global Biodiversity Information Facility',
-    'iucn': 'Red List of Threatened Species',
+    'GBIF': 'Global Biodiversity Information Facility',
+    'IUCN': 'Red List of Threatened Species',
     //'ncbi': 'National Center for Biotechnology Information',
     'WoRMS': 'World Register of Marine Species'
 };
@@ -102,13 +102,13 @@ function getRandomTip() {
 
 const startSearch = document.getElementById('startSearch');
 startSearch.addEventListener('click', function () {
-    const iucn = document.getElementById('iucn-checkbox').checked;
-    const gbif = document.getElementById('gbif-checkbox').checked;
+    const IUCN = document.getElementById('IUCN-checkbox').checked;
+    const GBIF = document.getElementById('GBIF-checkbox').checked;
     const WoRMS = document.getElementById('WoRMS-checkbox').checked;
     const boldSystems = document.getElementById('BoldSystems-checkbox').checked;
-    if (iucn) {
+    if (IUCN) {
         getIUCN();
-    } else if (gbif) {
+    } else if (GBIF) {
         getGBIF();
     } else if (WoRMS) {
         getWoRMS();
@@ -140,26 +140,26 @@ async function getIUCN() {
     const progressBar = document.getElementById('progressBar');
     progressModal.classList.remove('hidden');
 
-    const iucnSynonymsOpt = document.getElementById('synonyms_namesopt').checked;
-    const iucnCommonOpt = document.getElementById('common_namesopt').checked;
-    const iucnCountryOpt = document.getElementById('country_occurrenceopt').checked;
-    const iucnHabitatsOpt = document.getElementById('habitatsopt').checked;
-    const iucnThreatsOpt = document.getElementById('threatsopt').checked;
+    const IUCNSynonymsOpt = document.getElementById('synonyms_namesopt').checked;
+    const IUCNCommonOpt = document.getElementById('common_namesopt').checked;
+    const IUCNCountryOpt = document.getElementById('country_occurrenceopt').checked;
+    const IUCNHabitatsOpt = document.getElementById('habitatsopt').checked;
+    const IUCNThreatsOpt = document.getElementById('threatsopt').checked;
 
     let progress = 0;
     const speciesNames = document.getElementById('speciesNames').value.split('\n');
     const _token = '9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee';
 
-    const _iucnTable = document.createElement('table');
-    _iucnTable.id = 'TableResults';
-    _iucnTable.classList.add(
+    const _IUCNTable = document.createElement('table');
+    _IUCNTable.id = 'TableResults';
+    _IUCNTable.classList.add(
         "text-base",
         "text-blue-800", 
         "table-auto",
         "border-collapse",
         "w-full" // Tabela ocupa toda a largura disponível
     );
-    _iucnTable.innerHTML = `
+    _IUCNTable.innerHTML = `
     <thead class="text-base text-white bg-gray-800 text-left whitespace-nowrap">
         <tr>
             <th scope="col" class="py-5 px-5">Kingdom</th>
@@ -169,48 +169,48 @@ async function getIUCN() {
             <th scope="col" class="py-5 px-5">Family</th>
             <th scope="col" class="py-5 px-5">Genus</th>
             <th scope="col" class="py-5 px-5">Species</th>
-            ${iucnCommonOpt ? '<th scope="col" class="py-5 px-5">Common Names</th>' : ''}
-            ${iucnCountryOpt ? '<th scope="col" class="py-5 px-5">Country Occurrence</th>' : ''}
-            ${iucnHabitatsOpt ? '<th scope="col" class="py-5 px-5">Habitats</th>' : ''}
+            ${IUCNCommonOpt ? '<th scope="col" class="py-5 px-5">Common Names</th>' : ''}
+            ${IUCNCountryOpt ? '<th scope="col" class="py-5 px-5">Country Occurrence</th>' : ''}
+            ${IUCNHabitatsOpt ? '<th scope="col" class="py-5 px-5">Habitats</th>' : ''}
             <th scope="col" class="py-5 px-5">Species Citation</th>
             <th scope="col" class="py-5 px-5">Status Conservation</th>
-            ${iucnSynonymsOpt ? '<th scope="col" class="py-5 px-5">Synonyms Names</th>' : ''}
-            ${iucnThreatsOpt ? '<th scope="col" class="py-5 px-5">Threats</th>' : ''}
+            ${IUCNSynonymsOpt ? '<th scope="col" class="py-5 px-5">Synonyms Names</th>' : ''}
+            ${IUCNThreatsOpt ? '<th scope="col" class="py-5 px-5">Threats</th>' : ''}
             <th scope="col" class="py-5 px-5">Link</th>
         </tr>
     </thead>
     `;
-    const _iucnTableBody = _iucnTable.createTBody();
-    _iucnTableBody.classList.add("text-left", 'divide-y-1', 'divide-blue-800', 'divide-dashed');
+    const _IUCNTableBody = _IUCNTable.createTBody();
+    _IUCNTableBody.classList.add("text-left", 'divide-y-1', 'divide-blue-800', 'divide-dashed');
 
-    const _iucnTableWrapper = document.createElement('div');
-    _iucnTableWrapper.classList.add(
+    const _IUCNTableWrapper = document.createElement('div');
+    _IUCNTableWrapper.classList.add(
         "w-full",               // O wrapper ocupa toda a largura disponível
         "overflow-x-auto",      // Rolagem horizontal para conteúdo grande
         "overflow-y-auto",      // Rolagem vertical
         "mx-auto"               // Centraliza o wrapper
     );
-    _iucnTableWrapper.appendChild(_iucnTable);
+    _IUCNTableWrapper.appendChild(_IUCNTable);
 
-    const iucnResults = document.getElementById('Results');
-    iucnResults.innerHTML = '';
-    iucnResults.appendChild(_iucnTableWrapper);
+    const IUCNResults = document.getElementById('Results');
+    IUCNResults.innerHTML = '';
+    IUCNResults.appendChild(_IUCNTableWrapper);
 
     const promises = speciesNames.map(async (speciesName, index) => {
         const _speciesName = encodeURIComponent(speciesName);
-        const url = `https://apiv3.iucnredlist.org/api/v3/species/${_speciesName}?token=${_token}`;
+        const url = `https://apiv3.IUCNredlist.org/api/v3/species/${_speciesName}?token=${_token}`;
         try {
             const response = await fetch(url);
             if (!response.ok) throw new Error(`HTTP-Error: ${response.status}`);
             const json = await response.json();
-            const _synonyms = iucnSynonymsOpt ? await getSynonymsNames(speciesName) : '-';
-            const _commonNames = iucnCommonOpt ? await getCommonNames(speciesName) : '-';
-            const _country = iucnCountryOpt ? await getCountryOccurrence(speciesName) : '-';
-            const _habitats = iucnHabitatsOpt ? await getHabitat(speciesName) : '-';
-            const _threats = iucnThreatsOpt ? await getThreats(speciesName) : '-';
+            const _synonyms = IUCNSynonymsOpt ? await getSynonymsNames(speciesName) : '-';
+            const _commonNames = IUCNCommonOpt ? await getCommonNames(speciesName) : '-';
+            const _country = IUCNCountryOpt ? await getCountryOccurrence(speciesName) : '-';
+            const _habitats = IUCNHabitatsOpt ? await getHabitat(speciesName) : '-';
+            const _threats = IUCNThreatsOpt ? await getThreats(speciesName) : '-';
 
             for (const result of json.result) {
-                const row = _iucnTableBody.insertRow();
+                const row = _IUCNTableBody.insertRow();
                 row.classList.add('bg-gray-50', 'hover:bg-gray-400', 'text-black', 'whitespace-nowrap', 'odd:bg-gray-200', 'even:bg-white');
                 row.innerHTML = `
                         <td class="py-5 px-5">${result.kingdom.charAt(0).toUpperCase() + result.kingdom.slice(1).toLowerCase()}</td>
@@ -220,14 +220,14 @@ async function getIUCN() {
                         <td class="py-5 px-5">${result.family.charAt(0).toUpperCase() + result.family.slice(1).toLowerCase()}</td>
                         <td class="py-5 px-5"><i>${speciesName.split(' ')[0]}</i></td>
                         <td class="py-5 px-5"><i>${speciesName}</i></td>
-                        ${iucnCommonOpt ? `<td class="py-5 px-5">${_commonNames}</td>` : ''}
-                        ${iucnCountryOpt ? `<td class="py-5 px-5">${_country}</td>` : ''}
-                        ${iucnHabitatsOpt ? `<td class="py-5 px-5">${_habitats}</td>` : ''}
+                        ${IUCNCommonOpt ? `<td class="py-5 px-5">${_commonNames}</td>` : ''}
+                        ${IUCNCountryOpt ? `<td class="py-5 px-5">${_country}</td>` : ''}
+                        ${IUCNHabitatsOpt ? `<td class="py-5 px-5">${_habitats}</td>` : ''}
                         <td class="py-5 px-5">${result.authority}</td>
                         <td class="text-center py-5 px-5" style="background-color: ${StatusIUCN[result.category][1]};">${StatusIUCN[result.category][0]} (${result.category})</td>
-                        ${iucnSynonymsOpt ? `<td class="py-5 px-5">${_synonyms}</td>` : ''}
-                        ${iucnThreatsOpt ? `<td class="py-5 px-5">${_threats}</td>` : ''}
-                        <td class="py-5 px-5"><a class="btn btn-outline-dark" href="https://www.iucnredlist.org/search?query=${_speciesName}&searchType=species" role="button" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+                        ${IUCNSynonymsOpt ? `<td class="py-5 px-5">${_synonyms}</td>` : ''}
+                        ${IUCNThreatsOpt ? `<td class="py-5 px-5">${_threats}</td>` : ''}
+                        <td class="py-5 px-5"><a class="btn btn-outline-dark" href="https://www.IUCNredlist.org/search?query=${_speciesName}&searchType=species" role="button" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
             `;
             }
         } catch (error) {
@@ -249,7 +249,7 @@ async function getIUCN() {
 async function getSynonymsNames(speciesName) {
     const _speciesName = speciesName.replace(' ', '%20');
     const _token = '9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee';
-    const url = `https://apiv3.iucnredlist.org/api/v3/species/synonym/${_speciesName}?token=${_token}`;
+    const url = `https://apiv3.IUCNredlist.org/api/v3/species/synonym/${_speciesName}?token=${_token}`;
     const listSpecies = [];
     let response = await fetch(url);
     if (response.ok) {
@@ -296,7 +296,7 @@ async function getThreats(speciesName) {
     };
     const _speciesName = speciesName.replace(' ', '%20');
     const _token = '9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee';
-    const url = `https://apiv3.iucnredlist.org/api/v3/threats/species/name/${_speciesName}?token=${_token}`;
+    const url = `https://apiv3.IUCNredlist.org/api/v3/threats/species/name/${_speciesName}?token=${_token}`;
     let response = await fetch(url);
     if (response.ok) {
         let json = await response.json();
@@ -332,7 +332,7 @@ async function getThreats(speciesName) {
 async function getCommonNames(speciesName) {
     const _speciesName = speciesName.replace(' ', '%20');
     const _token = '9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee';
-    const url = `https://apiv3.iucnredlist.org/api/v3/species/common_names/${_speciesName}?token=${_token}`;
+    const url = `https://apiv3.IUCNredlist.org/api/v3/species/common_names/${_speciesName}?token=${_token}`;
     let response = await fetch(url);
     if (response.ok) {
         let json = await response.json();
@@ -354,7 +354,7 @@ async function getCommonNames(speciesName) {
 async function getCountryOccurrence(speciesName) {
     const _speciesName = speciesName.replace(' ', '%20');
     const _token = '9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee';
-    const url = `https://apiv3.iucnredlist.org/api/v3/species/countries/name/${_speciesName}?token=${_token}`;
+    const url = `https://apiv3.IUCNredlist.org/api/v3/species/countries/name/${_speciesName}?token=${_token}`;
     let response = await fetch(url);
     if (response.ok) {
         let json = await response.json();
@@ -377,7 +377,7 @@ async function getCountryOccurrence(speciesName) {
 async function getHabitat(speciesName) {
     const _speciesName = speciesName.replace(' ', '%20');
     const _token = '9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee';
-    const url = `https://apiv3.iucnredlist.org/api/v3/habitats/species/name/${_speciesName}?token=${_token}`;
+    const url = `https://apiv3.IUCNredlist.org/api/v3/habitats/species/name/${_speciesName}?token=${_token}`;
     let response = await fetch(url);
     if (response.ok) {
         let json = await response.json();
@@ -524,16 +524,16 @@ async function getGBIF() {
     let progress = 0;
     const speciesNames = document.getElementById('speciesNames').value.split('\n');
 
-    const _gbifTable = document.createElement('table');
-    _gbifTable.id = 'TableResults';
-    _gbifTable.classList.add(
+    const _GBIFTable = document.createElement('table');
+    _GBIFTable.id = 'TableResults';
+    _GBIFTable.classList.add(
         "text-base",
         "text-blue-800", 
         "table-auto",
         "border-collapse",
         "w-full" // Tabela ocupa toda a largura disponível
     );
-    _gbifTable.innerHTML = `
+    _GBIFTable.innerHTML = `
     <thead class="text-base text-white bg-gray-800 text-left whitespace-nowrap">
         <tr>
             <th scope="col" class="py-5 px-5">Kingdom</th>
@@ -550,30 +550,30 @@ async function getGBIF() {
         </tr>
     </thead>
     `;
-    const _gbifTableBody = _gbifTable.createTBody();
-    _gbifTableBody.classList.add("text-left", 'divide-y-1', 'divide-blue-800', 'divide-dashed');
+    const _GBIFTableBody = _GBIFTable.createTBody();
+    _GBIFTableBody.classList.add("text-left", 'divide-y-1', 'divide-blue-800', 'divide-dashed');
 
-    const _gbifTableWrapper = document.createElement('div');
-    _gbifTableWrapper.classList.add(
+    const _GBIFTableWrapper = document.createElement('div');
+    _GBIFTableWrapper.classList.add(
         "w-full",               // O wrapper ocupa toda a largura disponível
         "overflow-x-auto",      // Rolagem horizontal para conteúdo grande
         "overflow-y-auto",      // Rolagem vertical
         "mx-auto"               // Centraliza o wrapper
     );
-    _gbifTableWrapper.appendChild(_gbifTable);
+    _GBIFTableWrapper.appendChild(_GBIFTable);
 
-    const gbifResults = document.getElementById('Results');
-    gbifResults.innerHTML = '';
-    gbifResults.appendChild(_gbifTableWrapper);
+    const GBIFResults = document.getElementById('Results');
+    GBIFResults.innerHTML = '';
+    GBIFResults.appendChild(_GBIFTableWrapper);
     const promises = speciesNames.map(async (speciesName) => {
         const _speciesName = encodeURIComponent(speciesName);
-        const url = `https://api.gbif.org/v1/species?name=${_speciesName}`;
+        const url = `https://api.GBIF.org/v1/species?name=${_speciesName}`;
         try {
             const response = await fetch(url);
             if (!response.ok) throw new Error(`HTTP-Error: ${response.status}`);
             const json = await response.json();
-            //const occurrence = gbifOccurrence ? await getOccurrence(speciesName) : '-';
-            const row = _gbifTableBody.insertRow();
+            //const occurrence = GBIFOccurrence ? await getOccurrence(speciesName) : '-';
+            const row = _GBIFTableBody.insertRow();
             row.classList.add(
                 'bg-gray-50',
                 'hover:bg-gray-400',
@@ -583,7 +583,7 @@ async function getGBIF() {
                 'whitespace-nowrap'
             );
             for (const results of json.results) {
-                if (results.taxonomicStatus === 'ACCEPTED' && results.taxonID.includes('gbif:')) {
+                if (results.taxonomicStatus === 'ACCEPTED' && results.taxonID.includes('GBIF:')) {
                     row.innerHTML = `
                 <td class="py-5 px-5">${results.kingdom ? results.kingdom.charAt(0).toUpperCase() + results.kingdom.slice(1).toLowerCase() : '-'}</td>
                 <td class="py-5 px-5">${results.phylum ? results.phylum.charAt(0).toUpperCase() + results.phylum.slice(1).toLowerCase() : '-'}</td>
@@ -595,7 +595,7 @@ async function getGBIF() {
                 <td class="py-5 px-5"><i>${results.basionym ? results.basionym : '-'}<i></td>
                 <td class="py-5 px-5">${results.vernacularName ? results.vernacularName : '-'}</td>
                 <td class="py-5 px-5" style="background-color: ${statusColor[results.taxonomicStatus] || '#FA7070'};">${results.taxonomicStatus ? results.taxonomicStatus.charAt(0).toUpperCase() + results.taxonomicStatus.slice(1).toLowerCase() : '-'}</td>
-                <td class="py-5 px-5"><a class="btn btn-outline-dark" href="https://www.gbif.org/species/${results.taxonID.split(':')[1]}" role="button" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+                <td class="py-5 px-5"><a class="btn btn-outline-dark" href="https://www.GBIF.org/species/${results.taxonID.split(':')[1]}" role="button" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
                 `;
                 }
             }
@@ -1011,6 +1011,7 @@ async function get_BOLD_Systems() {
             <th scope="col" class="py-5 px-5">Class</th>
             <th scope="col" class="py-5 px-5">Order</th>
             <th scope="col" class="py-5 px-5">Family</th>
+            <th scope="col" class="py-5 px-5">Sub Family</th>
             <th scope="col" class="py-5 px-5">Genus</th>
             <th scope="col" class="py-5 px-5">Species</th>
         </tr>
@@ -1047,7 +1048,6 @@ async function get_BOLD_Systems() {
                         const taxid = taxData.taxid;
                         const dataTaxonomy = await get_BOLD_Systems_data(taxid);
                         if (dataTaxonomy) {
-                            console.log(dataTaxonomy);
                             const row = _boldTableBody.insertRow();
                             row.classList.add('bg-gray-50', 'hover:bg-gray-400', 'text-black', 'whitespace-nowrap', 'odd:bg-gray-200', 'even:bg-white');
                             row.innerHTML = `
@@ -1055,6 +1055,7 @@ async function get_BOLD_Systems() {
                                 <td class="py-5 px-5">${dataTaxonomy.class}</td>
                                 <td class="py-5 px-5">${dataTaxonomy.order}</td>
                                 <td class="py-5 px-5">${dataTaxonomy.family}</td>
+                                <td class="py-5 px-5">${dataTaxonomy.subfamily || '-'}</td>
                                 <td class="py-5 px-5"><i>${dataTaxonomy.genus}</i></td>
                                 <td class="py-5 px-5"><i>${speciesName}</i></td>
                             `;
@@ -1063,6 +1064,7 @@ async function get_BOLD_Systems() {
                             const row = _boldTableBody.insertRow();
                             row.classList.add('bg-gray-50', 'hover:bg-gray-400', 'text-black', 'whitespace-nowrap', 'odd:bg-gray-200', 'even:bg-white');
                             row.innerHTML = `
+                                <td class="py-5 px-5">-</td>
                                 <td class="py-5 px-5">-</td>
                                 <td class="py-5 px-5">-</td>
                                 <td class="py-5 px-5">-</td>
