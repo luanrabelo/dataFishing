@@ -157,7 +157,7 @@ async function getIUCN() {
         "text-blue-800", 
         "table-auto",
         "border-collapse",
-        "w-full" // Tabela ocupa toda a largura disponível
+        "w-full" 
     );
     _iucnTable.innerHTML = `
     <thead class="text-base text-white bg-gray-800 text-left whitespace-nowrap">
@@ -415,7 +415,7 @@ async function getWoRMS() {
         "text-blue-800", 
         "table-auto",
         "border-collapse",
-        "w-full" // Tabela ocupa toda a largura disponível
+        "w-full" 
     );
     _wormsTable.innerHTML = `
     <thead class="text-base text-white bg-gray-800 text-left whitespace-nowrap">
@@ -531,7 +531,7 @@ async function getGBIF() {
         "text-blue-800", 
         "table-auto",
         "border-collapse",
-        "w-full" // Tabela ocupa toda a largura disponível
+        "w-full" 
     );
     _gbifTable.innerHTML = `
     <thead class="text-base text-white bg-gray-800 text-left whitespace-nowrap">
@@ -1002,7 +1002,7 @@ async function get_BOLD_Systems() {
         "text-blue-800", 
         "table-auto",
         "border-collapse",
-        "w-full" // Tabela ocupa toda a largura disponível
+        "w-full" 
     );
     _boldTable.innerHTML = `
     <thead class="text-base text-white bg-gray-800 text-left whitespace-nowrap">
