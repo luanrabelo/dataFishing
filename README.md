@@ -8,10 +8,11 @@
   </a>
 </p>
 
-[![Published in%20](https://img.shields.io/badge/Published_in-Ecological%20Informatics-blue)](https://doi.org/10.1016/j.ecoinf.2024.102970)
+[![Published in%20](https://img.shields.io/badge/Published_in-Ecological%20Informatics-black?style=for-the-badge)](https://doi.org/10.1016/j.ecoinf.2024.102970)
 
 # Contents Overview
 - [System Overview](#system-overview)
+- [How to cite dataFishing](#how-to-cite-datafishing)
 - [License](#license)
   - The Hitchhiker's Guide to ***dataFishing***
     - [Change Log](#change-log)
@@ -30,7 +31,6 @@
 - [dataFishing Development Team](#datafishing-development-team)
 - [Contact](#contact)
 
-- [Citing dataFishing](#citing-datafishing)
 ***
 # System Overview
 ##### [:rocket: Go to Contents Overview](#contents-overview)
@@ -39,6 +39,13 @@
 </p>
 
 ***dataFishing*** is an efficient Python tool and user-friendly web-form for mining Mitochondrial/Chloroplast Sequences and biodiversity data. It is designed to facilitate and automate access to information from various databases, including **NCBI GenBank**, **Bold Systems**, **GBIF**, **WoRMS**, and **IUCN**. ***dataFishing*** is faster and more efficient than other tools for obtaining taxonomic information from the databases consulted. It also allows the retrieval of **DNA sequences**, **Common Names**, **Synonyms**, **Conservation Status**, and **Occurrence Points** of species. The ***dataFishing*** repository, hosted on **GitHub** and **licensed under MIT**, is a **freely accessible** resource for the **scientific community**.
+***  
+### How to cite ***dataFishing***
+##### [:rocket: Go to Contents Overview](#contents-overview)
+When referencing the ***[dataFishing](https://doi.org/10.1016/j.ecoinf.2024.102970)*** tool, please cite it appropriately in your academic or professional work. Here is an example of how to cite the ***dataFishing*** tool in your work:
+```
+Rabelo, L., Sodré, D., Balcázar, O. D. A., do Rosário, M. F., Guimarães-Costa, A. J., Gomes, G., Sampaio, I., & Vallinoto, M. (2025). dataFishing: An efficient Python tool and user-friendly web-form for mining mitochondrial and chloroplast sequences, taxonomic, and biodiversity data. Ecological Informatics, 85, 102970. https://doi.org/10.1016/j.ecoinf.2024.102970
+```
 ***  
 # Licence
 ***dataFishing*** is released under the **MIT License**. This license permits reuse within proprietary software provided that all copies of the licensed software include a copy of the MIT License terms and the copyright notice.
@@ -230,7 +237,7 @@ dataFishing.py --input Examples/SpeciesNames.txt --all True --email your@email.c
 `--{databases} True`: Select the database(s) you wish to query. For instance, use `--worms True` to search only in the WoRMS database, or `--all True` to search across all databases (see Table below). You can also use combinations of databases, such as `--bold True` `--gbif True`, to conduct queries in both the BOLD and GBIF databases simultaneously. Default is `--all True`.
 | dataBase | data | Parameters |
 | --- | --- | --- | 
-| `IUCN` | Common Names; Habitats; Status Conservation; Synonyms Names; Taxonomy; Threats | `--iucn True` |
+| `IUCN` | Status Conservation; Synonyms Names; Taxonomy; Common Names; Country Occurrence; Habitats; Threats | `--iucn True` |
 | `NCBI GenBank` | Sequences; Taxonomy | `--ncbi True` |
 | `Bold Systems` | BINs; Collection Site; Depository; Sample IDs; Sequences; Taxonomy | `--bold True` |
 | `GBIF` | Occurrence; Synonyms; Vernacular Names; Verbatim Name; Taxonomy | `--gbif True` |
@@ -277,17 +284,6 @@ dataFishing.py --input Examples/SpeciesNames.txt --all True --email your@email.c
 - Aurycéia Guimarães-Costa
 - **Iracilda Sampaio**
 - **Marcelo Vallinoto**
-***  
-### Citing ***dataFishing***
-##### [:rocket: Go to Contents Overview](#contents-overview)
-When referencing the ***dataFishing*** tool, please cite it appropriately in your academic or professional work.
-
-
-* [:page_facing_up: dataFishing Papper](https://doi.org/10.1016/j.ecoinf.2024.102970)
-
-```
-Rabelo, L., Sodré, D., Balcázar, O. D. A., do Rosário, M. F., Guimarães-Costa, A. J., Gomes, G., Sampaio, I., & Vallinoto, M. (2025). dataFishing: An efficient Python tool and user-friendly web-form for mining mitochondrial and chloroplast sequences, taxonomic, and biodiversity data. Ecological Informatics, 85, 102970. https://doi.org/10.1016/j.ecoinf.2024.102970
-```
 ***  
 ### Contact
 ##### [:rocket: Go to Contents Overview](#contents-overview)

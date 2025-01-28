@@ -378,6 +378,7 @@ async def getIUCNStatusConservation(**kwargs):
     _token      = kwargs.get('token', '9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee')  # IUCN API token
     _verbose    = kwargs.get('verbose', True)  # Verbose flag for logging messages
     _log        = kwargs.get('log', True)  # Logging flag for writing status to a file
+    _semaphore  = kwargs.get('semaphore', None)  #
     # Dictionary for handling common HTTP error codes and messages
     errorMessages = {
         404: f"Status Conservation '{_specieName}' not found in IUCN Red List!",
@@ -390,68 +391,69 @@ async def getIUCNStatusConservation(**kwargs):
         405: "Method Not Allowed!",
         502: "Bad Gateway!"
     }
-    # Initialize the status list with the species name
-    _specieName = re.sub(r'[^A-Za-z ]+', '', _specieName)
-    _status     = [_specieName]
-    # If a time delay is specified, pause execution
-    if _time > 0:
-        await asyncio.sleep(_time)
-    # If verbose logging is enabled, print a message indicating the start of the status check
-    if _verbose:
-        print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Warning}Getting Status Conservation of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Warning} from IUCN Red List...{TerminalColors.End}")
-    # Construct the API request URL for the species using the IUCN API
-    url = f'https://apiv3.iucnredlist.org/api/v3/species/{_specieName}?token={_token}'
-    timeout = aiohttp.ClientTimeout(total=120) # Set the timeout for the request
-    # Use aiohttp to asynchronously send the request to the IUCN Red List API
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url, timeout=timeout) as response:
-            # If the response status is 200 (OK), process the data
-            if response.status == 200:
-                Taxdata = await response.json()  # Parse the JSON response
-                # Check if the result field exists and contains data
-                if Taxdata and 'result' in Taxdata and Taxdata['result']:
-                    # If verbose logging is enabled, print a success message
-                    if _verbose:
-                        print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Green}Found Status Conservation of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Green} in IUCN Red List!{TerminalColors.End}")
-                    # Iterate through the data in the result array
-                    for data in Taxdata['result']:
-                        # If the species' conservation status category is recognized
-                        if data['category'] in StatusIUCN.keys():
-                            _status.extend(StatusIUCN[data['category']])  # Add the category to the status list
-                            # If logging is enabled, write the status to the log file
-                            if _log == True:
-                                with open('StatusConservationLog.txt', 'a+', encoding='utf-8') as f:
-                                    f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Status Conservation of '{_specieName}' is {_status[1]}\n")
-                            # Print the status to the console if verbose mode is on
-                            if _verbose:
-                                print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Green}Status Conservation of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Green} is {_status[1]}!{TerminalColors.End}")
+    async with _semaphore:
+        # Initialize the status list with the species name
+        _specieName = re.sub(r'[^A-Za-z ]+', '', _specieName)
+        _status     = [_specieName]
+        # If a time delay is specified, pause execution
+        if _time > 0:
+            await asyncio.sleep(_time)
+        # If verbose logging is enabled, print a message indicating the start of the status check
+        if _verbose:
+            print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Warning}Getting Status Conservation of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Warning} from IUCN Red List...{TerminalColors.End}")
+        # Construct the API request URL for the species using the IUCN API
+        url = f'https://apiv3.iucnredlist.org/api/v3/species/{_specieName}?token={_token}'
+        timeout = aiohttp.ClientTimeout(total=120) # Set the timeout for the request
+        # Use aiohttp to asynchronously send the request to the IUCN Red List API
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, timeout=timeout) as response:
+                # If the response status is 200 (OK), process the data
+                if response.status == 200:
+                    Taxdata = await response.json()  # Parse the JSON response
+                    # Check if the result field exists and contains data
+                    if Taxdata and 'result' in Taxdata and Taxdata['result']:
+                        # If verbose logging is enabled, print a success message
+                        if _verbose:
+                            print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Green}Found Status Conservation of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Green} in IUCN Red List!{TerminalColors.End}")
+                        # Iterate through the data in the result array
+                        for data in Taxdata['result']:
+                            # If the species' conservation status category is recognized
+                            if data['category'] in StatusIUCN.keys():
+                                _status.extend(StatusIUCN[data['category']])  # Add the category to the status list
+                                # If logging is enabled, write the status to the log file
+                                if _log == True:
+                                    with open('StatusConservationLog.txt', 'a+', encoding='utf-8') as f:
+                                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Status Conservation of '{_specieName}' is {_status[1]}\n")
+                                # Print the status to the console if verbose mode is on
+                                if _verbose:
+                                    print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Green}Status Conservation of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Green} is {_status[1]}!{TerminalColors.End}")
+                    else:
+                        # If no result is found, print a not-found message and log it if verbose/logging is enabled
+                        if _verbose:
+                            print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Status Conservation of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Fail} not found in IUCN Red List!{TerminalColors.End}")
+                        if _log == True:
+                            with open('StatusConservationLog.txt', 'a+', encoding='utf-8') as f:
+                                f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Status Conservation of '{_specieName}' not found in IUCN Red List!\n")
+                        # Append placeholders to the status list if the species is not found
+                        _status.extend(['-', '-'])
                 else:
-                    # If no result is found, print a not-found message and log it if verbose/logging is enabled
+                    # If the response status indicates an error, print and log the error message
                     if _verbose:
-                        print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Status Conservation of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Fail} not found in IUCN Red List!{TerminalColors.End}")
+                        print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Error {response.status} - {errorMessages[response.status]}{TerminalColors.End}")
                     if _log == True:
                         with open('StatusConservationLog.txt', 'a+', encoding='utf-8') as f:
-                            f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Status Conservation of '{_specieName}' not found in IUCN Red List!\n")
-                    # Append placeholders to the status list if the species is not found
+                            f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Error {response.status} - {errorMessages[response.status]}\n")
+                    # Append placeholders to the status list in case of error
                     _status.extend(['-', '-'])
-            else:
-                # If the response status indicates an error, print and log the error message
-                if _verbose:
-                    print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Error {response.status} - {errorMessages[response.status]}{TerminalColors.End}")
-                if _log == True:
-                    with open('StatusConservationLog.txt', 'a+', encoding='utf-8') as f:
-                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Error {response.status} - {errorMessages[response.status]}\n")
-                # Append placeholders to the status list in case of error
-                _status.extend(['-', '-'])
-    # Return the final status list (species name and conservation status)
-    return _status
+        # Return the final status list (species name and conservation status)
+        return _status
 
 async def IUCNStatusConservation(**kwargs):
     _spList     = kwargs.get('speciesList', [])
     _verbose    = kwargs.get('verbose', True)
     _log        = kwargs.get('log', True)
     _time       = kwargs.get('time', 0.25)
-
+    _semaphore   = asyncio.Semaphore(5)
     if _verbose:
         print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Warning}Getting Status Conservation of {len(_spList)} species from IUCN Red List...{TerminalColors.End}")
     _tskStatus  = [
@@ -460,6 +462,7 @@ async def IUCNStatusConservation(**kwargs):
             time=_time, 
             verbose=_verbose, 
             log=_log,
+            semaphore=_semaphore
             ) for sp in _spList]
     dataStatus  = await asyncio.gather(*_tskStatus)
     dictStatus = {status[0]: status[1] for status in dataStatus}
@@ -475,6 +478,7 @@ async def getIUCNSynonymsNames(**kwargs):
     _token      = kwargs.get('token', '9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee')  # IUCN API token
     _verbose    = kwargs.get('verbose', True)  # Verbose flag for logging messages
     _log        = kwargs.get('log', True)  # Logging flag for writing synonyms to a file
+    _semaphore  = kwargs.get('semaphore', None)  #
     _listSyn    = []  # List to store the synonyms
     # Dictionary to map HTTP error codes to custom error messages
     errorMessages = {
@@ -488,71 +492,73 @@ async def getIUCNSynonymsNames(**kwargs):
         405: "Method Not Allowed!",
         502: "Bad Gateway!"
     }
-    # Initialize the synonyms list with the species name
-    _specieName = re.sub(r'[^A-Za-z ]+', '', _specieName)
-    _synonyms   = [_specieName]
-    # If a time delay is specified, pause execution
-    if _time > 0:
-        await asyncio.sleep(_time)
-    # If verbose logging is enabled, print a message indicating the start of the synonym search
-    if _verbose:
-        print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Warning}Getting Synonyms of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Warning} from IUCN Red List...{TerminalColors.End}")
-    # Construct the API request URL for the synonyms using the IUCN API
-    url = f'https://apiv3.iucnredlist.org/api/v3/species/synonym/{_specieName}?token={_token}'
-    timeout = aiohttp.ClientTimeout(total=120) # Set the timeout for the request
-    # Use aiohttp to asynchronously send the request to the IUCN Red List API
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url, timeout=timeout) as response:
-            # If the response status is 200 (OK), process the data
-            if response.status == 200:
-                Taxdata = await response.json()  # Parse the JSON response
-                # Check if the result field exists and contains data
-                if Taxdata and 'result' in Taxdata and Taxdata['result']:
-                    # If verbose logging is enabled, print a success message
-                    if _verbose:
-                        print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Green}Found Synonyms of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Green} in IUCN Red List!{TerminalColors.End}")
-                    # Iterate through the data in the result array to extract synonyms
-                    for data in Taxdata['result']:
-                        # If a synonym exists, format and add it to the list
-                        if data['synonym']:
-                            _listSyn.append(f"{data['synonym']} {str(data['authority']).replace('&amp;', '&')}")
-                            # If logging is enabled, write the synonyms to the log file
-                            if _log == True:
-                                with open('SynonymsLog.txt', 'a+') as f:
-                                    f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Synonyms of '{_specieName}' is {'; '.join(_listSyn)}\n")
-                    # If verbose logging is enabled, print the found synonyms to the console
-                    if _verbose:
-                        print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Green}Synonyms of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Green} is {TerminalColors.Italic}{'; '.join(_listSyn)}!{TerminalColors.End}")
-                # If no synonyms were found, handle the not-found case
+    async with _semaphore:
+        # Initialize the synonyms list with the species name
+        _specieName = re.sub(r'[^A-Za-z ]+', '', _specieName)
+        _synonyms   = [_specieName]
+        # If a time delay is specified, pause execution
+        if _time > 0:
+            await asyncio.sleep(_time)
+        # If verbose logging is enabled, print a message indicating the start of the synonym search
+        if _verbose:
+            print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Warning}Getting Synonyms of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Warning} from IUCN Red List...{TerminalColors.End}")
+        # Construct the API request URL for the synonyms using the IUCN API
+        url = f'https://apiv3.iucnredlist.org/api/v3/species/synonym/{_specieName}?token={_token}'
+        timeout = aiohttp.ClientTimeout(total=120) # Set the timeout for the request
+        # Use aiohttp to asynchronously send the request to the IUCN Red List API
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, timeout=timeout) as response:
+                # If the response status is 200 (OK), process the data
+                if response.status == 200:
+                    Taxdata = await response.json()  # Parse the JSON response
+                    # Check if the result field exists and contains data
+                    if Taxdata and 'result' in Taxdata and Taxdata['result']:
+                        # If verbose logging is enabled, print a success message
+                        if _verbose:
+                            print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Green}Found Synonyms of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Green} in IUCN Red List!{TerminalColors.End}")
+                        # Iterate through the data in the result array to extract synonyms
+                        for data in Taxdata['result']:
+                            # If a synonym exists, format and add it to the list
+                            if data['synonym']:
+                                _listSyn.append(f"{data['synonym']} {str(data['authority']).replace('&amp;', '&')}")
+                                # If logging is enabled, write the synonyms to the log file
+                                if _log == True:
+                                    with open('SynonymsLog.txt', 'a+') as f:
+                                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Synonyms of '{_specieName}' is {'; '.join(_listSyn)}\n")
+                        # If verbose logging is enabled, print the found synonyms to the console
+                        if _verbose:
+                            print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Green}Synonyms of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Green} is {TerminalColors.Italic}{'; '.join(_listSyn)}!{TerminalColors.End}")
+                    # If no synonyms were found, handle the not-found case
+                    else:
+                        if _verbose:
+                            print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Synonyms of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Fail} not found in IUCN Red List!{TerminalColors.End}")                    
+                        # If logging is enabled, write the not-found message to the log file
+                        if _log == True:
+                            with open('SynonymsLog.txt', 'a+') as f:
+                                f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Synonyms of '{_specieName}' not found in IUCN Red List!\n")
+                        # Append a placeholder to indicate no synonyms were found
+                        _listSyn.append('-')
+                # If the response status indicates an error, handle the error accordingly
                 else:
+                    # Print and log the error if verbose and logging are enabled
                     if _verbose:
-                        print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Synonyms of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Fail} not found in IUCN Red List!{TerminalColors.End}")                    
-                    # If logging is enabled, write the not-found message to the log file
+                        print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Error {response.status} - {errorMessages[response.status]}{TerminalColors.End}")
+                    # If logging is enabled, write the error to the log file
                     if _log == True:
                         with open('SynonymsLog.txt', 'a+') as f:
-                            f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Synonyms of '{_specieName}' not found in IUCN Red List!\n")
-                    # Append a placeholder to indicate no synonyms were found
+                            f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Error {response.status} - {errorMessages[response.status]}\n")
+                    # Append a placeholder to indicate an error occurred
                     _listSyn.append('-')
-            # If the response status indicates an error, handle the error accordingly
-            else:
-                # Print and log the error if verbose and logging are enabled
-                if _verbose:
-                    print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Error {response.status} - {errorMessages[response.status]}{TerminalColors.End}")
-                # If logging is enabled, write the error to the log file
-                if _log == True:
-                    with open('SynonymsLog.txt', 'a+') as f:
-                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Error {response.status} - {errorMessages[response.status]}\n")
-                # Append a placeholder to indicate an error occurred
-                _listSyn.append('-')
-    # Append the collected synonyms to the result list and return it
-    _synonyms.append('\n'.join(_listSyn))
-    return _synonyms
+        # Append the collected synonyms to the result list and return it
+        _synonyms.append('\n'.join(_listSyn))
+        return _synonyms
 
 async def IUCNSynonymsNames(**kwargs):
     _spList     = kwargs.get('speciesList', [])
     _verbose    = kwargs.get('verbose', True)
     _log        = kwargs.get('log', True)
     _time       = kwargs.get('time', 0.25)
+    _semaphore   = asyncio.Semaphore(5)
     if _verbose:
         print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Warning}Getting Synonyms of {len(_spList)} species from IUCN Red List...{TerminalColors.End}")
     _tskSynonyms    = [
@@ -560,7 +566,8 @@ async def IUCNSynonymsNames(**kwargs):
             spName=sp, 
             time=_time, 
             verbose=_verbose, 
-            log=_log
+            log=_log,
+            semaphore=_semaphore
             ) for sp in _spList]
     dataSynonyms    = await asyncio.gather(*_tskSynonyms)
     dictSynonyms    = {synonyms[0]: synonyms[1] for synonyms in dataSynonyms}
@@ -576,6 +583,7 @@ async def getIUCNTaxonomy(**kwargs):
     _token      = kwargs.get('token', '9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee')  # IUCN API token
     _verbose    = kwargs.get('verbose', True)  # Verbose flag for logging messages
     _log        = kwargs.get('log', True)  # Logging flag for writing taxonomy details to a file
+    _semaphore  = kwargs.get('semaphore', None)  #
     # Initialize a dictionary to store taxonomy data with default placeholder values
     dataList = {
         'Kingdom':     '-',
@@ -598,74 +606,75 @@ async def getIUCNTaxonomy(**kwargs):
         405: "Method Not Allowed!",
         502: "Bad Gateway!"
     }
-    # Initialize the taxonomy list with the species name
-    _specieName = re.sub(r'[^A-Za-z ]+', '', _specieName)
-    _taxonomy   = [_specieName]
-    # If a time delay is specified, pause execution
-    if _time > 0:
-        await asyncio.sleep(_time)
-    # If verbose logging is enabled, print a message indicating the start of the taxonomy retrieval
-    if _verbose:
-        print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Warning}Getting Taxonomy of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Warning} from IUCN Red List...{TerminalColors.End}")
-    # Construct the API request URL for the taxonomy data using the IUCN API
-    url = f'https://apiv3.iucnredlist.org/api/v3/species/{_specieName}?token={_token}'
-    timeout = aiohttp.ClientTimeout(total=120) # Set the timeout for the request
-    # Use aiohttp to asynchronously send the request to the IUCN Red List API
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url, timeout=timeout) as response:
-            # If the response status is 200 (OK), process the data
-            if response.status == 200:
-                Taxdata = await response.json()  # Parse the JSON response
-                # Check if the result field exists and contains data
-                if Taxdata and 'result' in Taxdata and Taxdata['result']:
-                    # If verbose logging is enabled, print a success message
-                    if _verbose:
-                        print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Green}Found Taxonomy of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Green} in IUCN Red List!{TerminalColors.End}")
-                    # Iterate through the data in the result array to extract taxonomy details
-                    for data in Taxdata['result']:
-                        if data['kingdom'] or data['phylum'] or data['class'] or data['order'] or data['family']:
-                            # Populate the dataList with available taxonomy information
-                            dataList['Kingdom'] = str(data.get('kingdom', '-')).capitalize()
-                            dataList['Phylum']  = str(data.get('phylum', '-')).capitalize()
-                            dataList['Class']   = str(data.get('class', '-')).capitalize()
-                            dataList['Order']   = str(data.get('order', '-')).capitalize()
-                            dataList['Family']  = str(data.get('family', '-')).capitalize()
-                            dataList['Genus']   = data.get('genus', f'{str(_specieName).split(" ")[0]}')
-                            dataList['Specie']  = data.get('scientific_name', f'{_specieName}')
-                    # If logging is enabled, write the taxonomy details to the log file
-                    if _log == True:
-                        with open('TaxonomyLog.txt', 'a+') as f:
-                            f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Taxonomy of '{_specieName}' is {dataList}\n")
-                    # If verbose logging is enabled, print the taxonomy details to the console
-                    if _verbose:
-                        print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Green}Taxonomy of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Green} is {dataList}!{TerminalColors.End}")
-                # If no taxonomy data was found, handle the not-found case
+    async with _semaphore:
+        # Initialize the taxonomy list with the species name
+        _specieName = re.sub(r'[^A-Za-z ]+', '', _specieName)
+        _taxonomy   = [_specieName]
+        # If a time delay is specified, pause execution
+        if _time > 0:
+            await asyncio.sleep(_time)
+        # If verbose logging is enabled, print a message indicating the start of the taxonomy retrieval
+        if _verbose:
+            print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Warning}Getting Taxonomy of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Warning} from IUCN Red List...{TerminalColors.End}")
+        # Construct the API request URL for the taxonomy data using the IUCN API
+        url = f'https://apiv3.iucnredlist.org/api/v3/species/{_specieName}?token={_token}'
+        timeout = aiohttp.ClientTimeout(total=120) # Set the timeout for the request
+        # Use aiohttp to asynchronously send the request to the IUCN Red List API
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, timeout=timeout) as response:
+                # If the response status is 200 (OK), process the data
+                if response.status == 200:
+                    Taxdata = await response.json()  # Parse the JSON response
+                    # Check if the result field exists and contains data
+                    if Taxdata and 'result' in Taxdata and Taxdata['result']:
+                        # If verbose logging is enabled, print a success message
+                        if _verbose:
+                            print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Green}Found Taxonomy of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Green} in IUCN Red List!{TerminalColors.End}")
+                        # Iterate through the data in the result array to extract taxonomy details
+                        for data in Taxdata['result']:
+                            if data['kingdom'] or data['phylum'] or data['class'] or data['order'] or data['family']:
+                                # Populate the dataList with available taxonomy information
+                                dataList['Kingdom'] = str(data.get('kingdom', '-')).capitalize()
+                                dataList['Phylum']  = str(data.get('phylum', '-')).capitalize()
+                                dataList['Class']   = str(data.get('class', '-')).capitalize()
+                                dataList['Order']   = str(data.get('order', '-')).capitalize()
+                                dataList['Family']  = str(data.get('family', '-')).capitalize()
+                                dataList['Genus']   = data.get('genus', f'{str(_specieName).split(" ")[0]}')
+                                dataList['Specie']  = data.get('scientific_name', f'{_specieName}')
+                        # If logging is enabled, write the taxonomy details to the log file
+                        if _log == True:
+                            with open('TaxonomyLog.txt', 'a+') as f:
+                                f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Taxonomy of '{_specieName}' is {dataList}\n")
+                        # If verbose logging is enabled, print the taxonomy details to the console
+                        if _verbose:
+                            print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Green}Taxonomy of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Green} is {dataList}!{TerminalColors.End}")
+                    # If no taxonomy data was found, handle the not-found case
+                    else:
+                        if _verbose:
+                            print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Taxonomy of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Fail} not found in IUCN Red List!{TerminalColors.End}")
+                        # If logging is enabled, write the not-found message to the log file
+                        if _log == True:
+                            with open('TaxonomyLog.txt', 'a+') as f:
+                                f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Taxonomy of '{_specieName}' not found in IUCN Red List!\n")
+                # If the response status indicates an error, handle the error accordingly
                 else:
+                    # Print and log the error if verbose and logging are enabled
                     if _verbose:
-                        print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Taxonomy of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Fail} not found in IUCN Red List!{TerminalColors.End}")
-                    # If logging is enabled, write the not-found message to the log file
+                        print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Error {response.status} - {errorMessages[response.status]}{TerminalColors.End}")
+                    # If logging is enabled, write the error to the log file
                     if _log == True:
                         with open('TaxonomyLog.txt', 'a+') as f:
-                            f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Taxonomy of '{_specieName}' not found in IUCN Red List!\n")
-            # If the response status indicates an error, handle the error accordingly
-            else:
-                # Print and log the error if verbose and logging are enabled
-                if _verbose:
-                    print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Error {response.status} - {errorMessages[response.status]}{TerminalColors.End}")
-                # If logging is enabled, write the error to the log file
-                if _log == True:
-                    with open('TaxonomyLog.txt', 'a+') as f:
-                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Error {response.status} - {errorMessages[response.status]}\n")
-    # Append the collected taxonomy details to the result list and return it
-    _taxonomy.append('; '.join(dataList.values()))
-    return _taxonomy
+                            f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Error {response.status} - {errorMessages[response.status]}\n")
+        # Append the collected taxonomy details to the result list and return it
+        _taxonomy.append('; '.join(dataList.values()))
+        return _taxonomy
 
 async def IUCNTaxonomy(**kwargs):
     _spList     = kwargs.get('speciesList', [])
     _verbose    = kwargs.get('verbose', True)
     _log        = kwargs.get('log', True)
     _time       = kwargs.get('time', 0.25)
-
+    _semaphore   = asyncio.Semaphore(5)
     if _verbose:
         print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Warning}Getting Taxonomy of {len(_spList)} species from IUCN Red List...{TerminalColors.End}")
     _tskTaxonomy = [
@@ -673,7 +682,8 @@ async def IUCNTaxonomy(**kwargs):
             spName=sp, 
             time=_time, 
             verbose=_verbose, 
-            log=_log
+            log=_log,
+            semaphore=_semaphore
             ) for sp in _spList]
     dataTaxonomy = await asyncio.gather(*_tskTaxonomy)
     dictTaxonomy = {taxonomy[0]: taxonomy[1] for taxonomy in dataTaxonomy}
@@ -689,6 +699,7 @@ async def getIUCNCommonNames(**kwargs):
     _token      = kwargs.get('token', '9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee')  # IUCN API token
     _verbose    = kwargs.get('verbose', True)  # Verbose flag for logging messages
     _log        = kwargs.get('log', True)  # Logging flag for writing common names to a file
+    _semaphore  = kwargs.get('semaphore', None)  #
     lstCommon   = []  # List to store common names
     # Dictionary for handling common HTTP error codes and messages
     errorMessages = {
@@ -702,81 +713,83 @@ async def getIUCNCommonNames(**kwargs):
         405: "Method Not Allowed!",
         502: "Bad Gateway!"
     }
-    # Initialize the common names list with the species name
-    _specieName     = re.sub(r'[^A-Za-z]+', '', _specieName)
-    _commonNames    = [_specieName]
-    # If a time delay is specified, pause execution
-    if _time > 0:
-        await asyncio.sleep(_time)
-    # If verbose logging is enabled, print a message indicating the start of common names retrieval
-    if _verbose:
-        print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Warning}Getting Common Names of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Warning} from IUCN Red List...{TerminalColors.End}")
-    # Construct the API request URL for common names using the IUCN API
-    url = f'https://apiv3.iucnredlist.org/api/v3/species/common_names/{_specieName}?token={_token}'
-    timeout = aiohttp.ClientTimeout(total=120) # Set the timeout for the request
-    # Use aiohttp to asynchronously send the request to the IUCN Red List API
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url, timeout=timeout) as response:
-            # If the response status is 200 (OK), process the data
-            if response.status == 200:
-                Taxdata = await response.json()  # Parse the JSON response
-                # Check if the result field exists and contains data
-                if Taxdata and 'result' in Taxdata and Taxdata['result']:
-                    # If verbose logging is enabled, print a success message
-                    if _verbose:
-                        print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Green}Found Common Names of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Green} in IUCN Red List!{TerminalColors.End}")
-                    # Iterate through the result array to extract common names
-                    for data in Taxdata['result']:
-                        if data['taxonname']:
-                            # Append the common name and its language to the list
-                            lstCommon.append(f"{str(data['taxonname'])} ({str(data['language'])})")
-                            # If logging is enabled, write the common names to the log file
-                            if _log == True:
-                                with open('CommonNamesLog.txt', 'a+') as f:
-                                    f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Common Names of '{_specieName}' is {lstCommon}\n")
-                            # If verbose logging is enabled, print the found common names to the console
-                            if _verbose:
-                                print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Green}Common Names of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Green} is {lstCommon}!{TerminalColors.End}")
-                        else:
-                            # Handle the case where no common names are found
-                            if _verbose:
-                                print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Common Names of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Fail} not found in IUCN Red List!{TerminalColors.End}")
-                            # If logging is enabled, write the not-found message to the log file
-                            if _log == True:
-                                with open('CommonNamesLog.txt', 'a+') as f:
-                                    f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {data['taxonname']} not found for {_specieName} in IUCN Red List!\n")
-                            # Append a placeholder to indicate no common names were found
-                            lstCommon.append(str('-'))
-                # If no common names were found, handle the not-found case
+    async with _semaphore:
+        # Initialize the common names list with the species name
+        _specieName = re.sub(r'[^A-Za-z ]+', '', _specieName)
+        _commonNames    = [_specieName]
+        # If a time delay is specified, pause execution
+        if _time > 0:
+            await asyncio.sleep(_time)
+        # If verbose logging is enabled, print a message indicating the start of common names retrieval
+        if _verbose:
+            print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Warning}Getting Common Names of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Warning} from IUCN Red List...{TerminalColors.End}")
+        # Construct the API request URL for common names using the IUCN API
+        url = f'https://apiv3.iucnredlist.org/api/v3/species/common_names/{_specieName}?token={_token}'
+        timeout = aiohttp.ClientTimeout(total=120) # Set the timeout for the request
+        # Use aiohttp to asynchronously send the request to the IUCN Red List API
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, timeout=timeout) as response:
+                # If the response status is 200 (OK), process the data
+                if response.status == 200:
+                    Taxdata = await response.json()  # Parse the JSON response
+                    # Check if the result field exists and contains data
+                    if Taxdata and 'result' in Taxdata and Taxdata['result']:
+                        # If verbose logging is enabled, print a success message
+                        if _verbose:
+                            print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Green}Found Common Names of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Green} in IUCN Red List!{TerminalColors.End}")
+                        # Iterate through the result array to extract common names
+                        for data in Taxdata['result']:
+                            if data['taxonname']:
+                                # Append the common name and its language to the list
+                                lstCommon.append(f"{str(data['taxonname'])} ({str(data['language'])})")
+                                # If logging is enabled, write the common names to the log file
+                                if _log == True:
+                                    with open('CommonNamesLog.txt', 'a+') as f:
+                                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Common Names of '{_specieName}' is {lstCommon}\n")
+                                # If verbose logging is enabled, print the found common names to the console
+                                if _verbose:
+                                    print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Green}Common Names of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Green} is {lstCommon}!{TerminalColors.End}")
+                            else:
+                                # Handle the case where no common names are found
+                                if _verbose:
+                                    print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Common Names of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Fail} not found in IUCN Red List!{TerminalColors.End}")
+                                # If logging is enabled, write the not-found message to the log file
+                                if _log == True:
+                                    with open('CommonNamesLog.txt', 'a+') as f:
+                                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {data['taxonname']} not found for {_specieName} in IUCN Red List!\n")
+                                # Append a placeholder to indicate no common names were found
+                                lstCommon.append(str('-'))
+                    # If no common names were found, handle the not-found case
+                    else:
+                        if _verbose:
+                            print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Common Names of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Fail} not found in IUCN Red List!{TerminalColors.End}")
+                        # If logging is enabled, write the not-found message to the log file
+                        if _log == True:
+                            with open('CommonNamesLog.txt', 'a+') as f:
+                                f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Common Names of '{_specieName}' not found in IUCN Red List!\n")
+                        # Append a placeholder to indicate no common names were found
+                        lstCommon.append(str('-'))
+                # If the response status indicates an error, handle the error accordingly
                 else:
+                    # Print and log the error if verbose and logging are enabled
                     if _verbose:
-                        print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Common Names of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Fail} not found in IUCN Red List!{TerminalColors.End}")
-                    # If logging is enabled, write the not-found message to the log file
+                        print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Error {response.status} - {errorMessages[response.status]}{TerminalColors.End}")
+                    # If logging is enabled, write the error to the log file
                     if _log == True:
                         with open('CommonNamesLog.txt', 'a+') as f:
-                            f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Common Names of '{_specieName}' not found in IUCN Red List!\n")
-                    # Append a placeholder to indicate no common names were found
-                    lstCommon.append(str('-'))
-            # If the response status indicates an error, handle the error accordingly
-            else:
-                # Print and log the error if verbose and logging are enabled
-                if _verbose:
-                    print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Error {response.status} - {errorMessages[response.status]}{TerminalColors.End}")
-                # If logging is enabled, write the error to the log file
-                if _log == True:
-                    with open('CommonNamesLog.txt', 'a+') as f:
-                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Error {response.status} - {errorMessages[response.status]}\n")
-                # Append a placeholder to indicate an error occurred
-                _commonNames.append(str('-'))
-    # Append the collected common names to the result list and return it
-    _commonNames.append('\n'.join(lstCommon))
-    return _commonNames
+                            f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Error {response.status} - {errorMessages[response.status]}\n")
+                    # Append a placeholder to indicate an error occurred
+                    _commonNames.append(str('-'))
+        # Append the collected common names to the result list and return it
+        _commonNames.append('\n'.join(lstCommon))
+        return _commonNames
 
 async def IUCNCommonNames(**kwargs):
     _spList     = kwargs.get('speciesList', [])
     _verbose    = kwargs.get('verbose', True)
     _log        = kwargs.get('log', True)
     _time       = kwargs.get('time', 0.25)
+    _semaphore   = asyncio.Semaphore(5)
     if _verbose:
         print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Warning}Getting Common Names of {len(_spList)} species from IUCN Red List...{TerminalColors.End}")
     _tskCommonNames = [
@@ -784,7 +797,8 @@ async def IUCNCommonNames(**kwargs):
             spName=sp, 
             time=_time, 
             verbose=_verbose, 
-            log=_log
+            log=_log,
+            semaphore=_semaphore
             ) for sp in _spList]
     dataCommonNames = await asyncio.gather(*_tskCommonNames)
     dictCommonNames = {commonNames[0]: commonNames[1] for commonNames in dataCommonNames}
@@ -800,6 +814,7 @@ async def getIUCNCountryOccurrence(**kwargs):
     _token      = kwargs.get('token', '9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee')  # IUCN API token
     _verbose    = kwargs.get('verbose', True)  # Verbose flag for logging messages
     _log        = kwargs.get('log', True)  # Logging flag for writing country occurrence data to a file
+    _semaphore  = kwargs.get('semaphore', None)  #
     lstCountry  = []  # List to store country occurrence data
     # Dictionary for handling common HTTP error codes and messages
     errorMessages = {
@@ -813,81 +828,83 @@ async def getIUCNCountryOccurrence(**kwargs):
         405: "Method Not Allowed!",
         502: "Bad Gateway!"
     }
-    # Initialize the country occurrence list with the species name
-    _specieName         = re.sub(r'[^A-Za-z ]+', '', _specieName)
-    _countryOccurrence  = [_specieName]
-    # If a time delay is specified, pause execution
-    if _time > 0:
-        await asyncio.sleep(_time)
-    # If verbose logging is enabled, print a message indicating the start of country occurrence retrieval
-    if _verbose:
-        print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Warning}Getting Country Occurrence of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Warning} from IUCN Red List...{TerminalColors.End}")
-    # Construct the API request URL for the country occurrence data using the IUCN API
-    url = f'https://apiv3.iucnredlist.org/api/v3/species/countries/name/{_specieName}?token={_token}'
-    timeout = aiohttp.ClientTimeout(total=120) # Set the timeout for the request
-    # Use aiohttp to asynchronously send the request to the IUCN Red List API
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url, timeout=timeout) as response:
-            # If the response status is 200 (OK), process the data
-            if response.status == 200:
-                Taxdata = await response.json()  # Parse the JSON response
-                # Check if the result field exists and contains data
-                if Taxdata and 'result' in Taxdata and Taxdata['result']:
-                    # If verbose logging is enabled, print a success message
-                    if _verbose:
-                        print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Green}Found Country Occurrence of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Green} in IUCN Red List!{TerminalColors.End}")
-                    # Iterate through the result array to extract country occurrence details
-                    for data in Taxdata['result']:
-                        if data['country']:
-                            # Append the country and presence status to the list
-                            lstCountry.append(f"{str(data['country'])} ({str(data['presence']).capitalize()})")
-                            # If logging is enabled, write the country occurrence data to the log file
-                            if _log == True:
-                                with open('CountryOccurrenceLog.txt', 'a+') as f:
-                                    f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Country Occurrence of '{_specieName}' is {lstCountry}\n")
-                            # If verbose logging is enabled, print the found country occurrence data to the console
-                            if _verbose:
-                                print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Green}Country Occurrence of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Green} is {lstCountry}!{TerminalColors.End}")
-                        else:
-                            # Handle the case where no country occurrence data is found
-                            if _verbose:
-                                print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Country Occurrence of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Fail} not found in IUCN Red List!{TerminalColors.End}")
-                            # If logging is enabled, write the not-found message to the log file
-                            if _log == True:
-                                with open('CountryOccurrenceLog.txt', 'a+') as f:
-                                    f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {data['country']} not found for {_specieName} in IUCN Red List!\n")                            
-                            # Append a placeholder to indicate no country occurrence data was found
-                            lstCountry.append(str('-'))
-                # If no country occurrence data was found, handle the not-found case
+    async with _semaphore:
+        # Initialize the country occurrence list with the species name
+        _specieName         = re.sub(r'[^A-Za-z ]+', '', _specieName)
+        _countryOccurrence  = [_specieName]
+        # If a time delay is specified, pause execution
+        if _time > 0:
+            await asyncio.sleep(_time)
+        # If verbose logging is enabled, print a message indicating the start of country occurrence retrieval
+        if _verbose:
+            print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Warning}Getting Country Occurrence of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Warning} from IUCN Red List...{TerminalColors.End}")
+        # Construct the API request URL for the country occurrence data using the IUCN API
+        url = f'https://apiv3.iucnredlist.org/api/v3/species/countries/name/{_specieName}?token={_token}'
+        timeout = aiohttp.ClientTimeout(total=120) # Set the timeout for the request
+        # Use aiohttp to asynchronously send the request to the IUCN Red List API
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, timeout=timeout) as response:
+                # If the response status is 200 (OK), process the data
+                if response.status == 200:
+                    Taxdata = await response.json()  # Parse the JSON response
+                    # Check if the result field exists and contains data
+                    if Taxdata and 'result' in Taxdata and Taxdata['result']:
+                        # If verbose logging is enabled, print a success message
+                        if _verbose:
+                            print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Green}Found Country Occurrence of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Green} in IUCN Red List!{TerminalColors.End}")
+                        # Iterate through the result array to extract country occurrence details
+                        for data in Taxdata['result']:
+                            if data['country']:
+                                # Append the country and presence status to the list
+                                lstCountry.append(f"{str(data['country'])} ({str(data['presence']).capitalize()})")
+                                # If logging is enabled, write the country occurrence data to the log file
+                                if _log == True:
+                                    with open('CountryOccurrenceLog.txt', 'a+') as f:
+                                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Country Occurrence of '{_specieName}' is {lstCountry}\n")
+                                # If verbose logging is enabled, print the found country occurrence data to the console
+                                if _verbose:
+                                    print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Green}Country Occurrence of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Green} is {lstCountry}!{TerminalColors.End}")
+                            else:
+                                # Handle the case where no country occurrence data is found
+                                if _verbose:
+                                    print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Country Occurrence of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Fail} not found in IUCN Red List!{TerminalColors.End}")
+                                # If logging is enabled, write the not-found message to the log file
+                                if _log == True:
+                                    with open('CountryOccurrenceLog.txt', 'a+') as f:
+                                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {data['country']} not found for {_specieName} in IUCN Red List!\n")                            
+                                # Append a placeholder to indicate no country occurrence data was found
+                                lstCountry.append(str('-'))
+                    # If no country occurrence data was found, handle the not-found case
+                    else:
+                        if _verbose:
+                            print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Country Occurrence of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Fail} not found in IUCN Red List!{TerminalColors.End}")
+                        # If logging is enabled, write the not-found message to the log file
+                        if _log == True:
+                            with open('CountryOccurrenceLog.txt', 'a+') as f:
+                                f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Country Occurrence of '{_specieName}' not found in IUCN Red List!\n")
+                        # Append a placeholder to indicate no country occurrence data was found
+                        lstCountry.append(str('-'))
+                # If the response status indicates an error, handle the error accordingly
                 else:
+                    # Print and log the error if verbose and logging are enabled
                     if _verbose:
-                        print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Country Occurrence of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Fail} not found in IUCN Red List!{TerminalColors.End}")
-                    # If logging is enabled, write the not-found message to the log file
+                        print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Error {response.status} - {errorMessages[response.status]}{TerminalColors.End}")
+                    # If logging is enabled, write the error to the log file
                     if _log == True:
                         with open('CountryOccurrenceLog.txt', 'a+') as f:
-                            f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Country Occurrence of '{_specieName}' not found in IUCN Red List!\n")
-                    # Append a placeholder to indicate no country occurrence data was found
-                    lstCountry.append(str('-'))
-            # If the response status indicates an error, handle the error accordingly
-            else:
-                # Print and log the error if verbose and logging are enabled
-                if _verbose:
-                    print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Error {response.status} - {errorMessages[response.status]}{TerminalColors.End}")
-                # If logging is enabled, write the error to the log file
-                if _log == True:
-                    with open('CountryOccurrenceLog.txt', 'a+') as f:
-                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Error {response.status} - {errorMessages[response.status]}\n")
-                # Append a placeholder to indicate an error occurred
-                _countryOccurrence.append(str('-'))
-    # Append the collected country occurrence data to the result list and return it
-    _countryOccurrence.append('\n'.join(lstCountry))
-    return _countryOccurrence
+                            f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Error {response.status} - {errorMessages[response.status]}\n")
+                    # Append a placeholder to indicate an error occurred
+                    _countryOccurrence.append(str('-'))
+        # Append the collected country occurrence data to the result list and return it
+        _countryOccurrence.append('\n'.join(lstCountry))
+        return _countryOccurrence
 
 async def IUCNCountryOccurrence(**kwargs):
     _spList     = kwargs.get('speciesList', [])
     _verbose    = kwargs.get('verbose', True)
     _log        = kwargs.get('log', True)
     _time       = kwargs.get('time', 0.25)
+    _semaphore  = asyncio.Semaphore(5)
     if _verbose:
         print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Warning}Getting Country Occurrence of {len(_spList)} species from IUCN Red List...{TerminalColors.End}")
     _tskCountryOccurrence = [
@@ -895,7 +912,8 @@ async def IUCNCountryOccurrence(**kwargs):
             spName=sp, 
             time=_time, 
             verbose=_verbose, 
-            log=_log
+            log=_log,
+            semaphore=_semaphore
             ) for sp in _spList]
     dataCountryOccurrence = await asyncio.gather(*_tskCountryOccurrence)
     dictCountryOccurrence = {countryOccurrence[0]: countryOccurrence[1] for countryOccurrence in dataCountryOccurrence}
@@ -911,6 +929,7 @@ async def getIUCNHabitats(**kwargs):
     _token      = kwargs.get('token', '9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee')  # IUCN API token
     _verbose    = kwargs.get('verbose', True)  # Verbose flag for logging messages
     _log        = kwargs.get('log', True)  # Logging flag for writing habitat data to a file
+    _semaphore  = kwargs.get('semaphore', None)  #
     lstHabitat  = []  # List to store habitat data
     # Dictionary for handling common HTTP error codes and messages
     errorMessages = {
@@ -924,81 +943,83 @@ async def getIUCNHabitats(**kwargs):
         405: "Method Not Allowed!",
         502: "Bad Gateway!"
     }
-    # Initialize the habitat list with the species name
-    _specieName = re.sub(r'[^A-Za-z ]+', '', _specieName)
-    _habitats   = [_specieName]
-    # If a time delay is specified, pause execution
-    if _time > 0:
-        await asyncio.sleep(_time)
-    # If verbose logging is enabled, print a message indicating the start of habitat retrieval
-    if _verbose:
-        print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Warning}Getting Habitats of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Warning} from IUCN Red List...{TerminalColors.End}")
-    # Construct the API request URL for the habitat data using the IUCN API
-    url = f'https://apiv3.iucnredlist.org/api/v3/habitats/species/name/{_specieName}?token={_token}'
-    timeout = aiohttp.ClientTimeout(total=120) # Set the timeout for the request
-    # Use aiohttp to asynchronously send the request to the IUCN Red List API
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url, timeout=timeout) as response:
-            # If the response status is 200 (OK), process the data
-            if response.status == 200:
-                Taxdata = await response.json()  # Parse the JSON response
-                # Check if the result field exists and contains data
-                if Taxdata and 'result' in Taxdata and Taxdata['result']:
-                    # If verbose logging is enabled, print a success message
-                    if _verbose:
-                        print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Green}Found Habitats of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Green} in IUCN Red List!{TerminalColors.End}")
-                    # Iterate through the result array to extract habitat details
-                    for data in Taxdata['result']:
-                        if data['habitat']:
-                            # Append the habitat name to the list
-                            lstHabitat.append(f"{str(data['habitat']).capitalize()}")
-                            # If logging is enabled, write the habitat data to the log file
-                            if _log == True:
-                                with open('HabitatsLog.txt', 'a+') as f:
-                                    f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Habitats of '{_specieName}' is {lstHabitat}\n")
-                            # If verbose logging is enabled, print the found habitat data to the console
-                            if _verbose:
-                                print(f"{time.strftime('%Y/%m/%d - %H/%M/%S', time.localtime())}: {TerminalColors.Green}Habitats of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Green} is {lstHabitat}!{TerminalColors.End}")
-                        else:
-                            # Handle the case where no habitat data is found
-                            if _verbose:
-                                print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Habitats of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Fail} not found in IUCN Red List!{TerminalColors.End}")
-                            # If logging is enabled, write the not-found message to the log file
-                            if _log == True:
-                                with open('HabitatsLog.txt', 'a+') as f:
-                                    f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {data['habitat']} not found for {_specieName} in IUCN Red List!\n")
-                            # Append a placeholder to indicate no habitat data was found
-                            lstHabitat.append(str('-'))
-                # If no habitat data was found, handle the not-found case
+    async with _semaphore:
+        # Initialize the habitat list with the species name
+        _specieName = re.sub(r'[^A-Za-z ]+', '', _specieName)
+        _habitats   = [_specieName]
+        # If a time delay is specified, pause execution
+        if _time > 0:
+            await asyncio.sleep(_time)
+        # If verbose logging is enabled, print a message indicating the start of habitat retrieval
+        if _verbose:
+            print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Warning}Getting Habitats of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Warning} from IUCN Red List...{TerminalColors.End}")
+        # Construct the API request URL for the habitat data using the IUCN API
+        url = f'https://apiv3.iucnredlist.org/api/v3/habitats/species/name/{_specieName}?token={_token}'
+        timeout = aiohttp.ClientTimeout(total=120) # Set the timeout for the request
+        # Use aiohttp to asynchronously send the request to the IUCN Red List API
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, timeout=timeout) as response:
+                # If the response status is 200 (OK), process the data
+                if response.status == 200:
+                    Taxdata = await response.json()  # Parse the JSON response
+                    # Check if the result field exists and contains data
+                    if Taxdata and 'result' in Taxdata and Taxdata['result']:
+                        # If verbose logging is enabled, print a success message
+                        if _verbose:
+                            print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Green}Found Habitats of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Green} in IUCN Red List!{TerminalColors.End}")
+                        # Iterate through the result array to extract habitat details
+                        for data in Taxdata['result']:
+                            if data['habitat']:
+                                # Append the habitat name to the list
+                                lstHabitat.append(f"{str(data['habitat']).capitalize()}")
+                                # If logging is enabled, write the habitat data to the log file
+                                if _log == True:
+                                    with open('HabitatsLog.txt', 'a+') as f:
+                                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Habitats of '{_specieName}' is {lstHabitat}\n")
+                                # If verbose logging is enabled, print the found habitat data to the console
+                                if _verbose:
+                                    print(f"{time.strftime('%Y/%m/%d - %H/%M/%S', time.localtime())}: {TerminalColors.Green}Habitats of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Green} is {lstHabitat}!{TerminalColors.End}")
+                            else:
+                                # Handle the case where no habitat data is found
+                                if _verbose:
+                                    print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Habitats of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Fail} not found in IUCN Red List!{TerminalColors.End}")
+                                # If logging is enabled, write the not-found message to the log file
+                                if _log == True:
+                                    with open('HabitatsLog.txt', 'a+') as f:
+                                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {data['habitat']} not found for {_specieName} in IUCN Red List!\n")
+                                # Append a placeholder to indicate no habitat data was found
+                                lstHabitat.append(str('-'))
+                    # If no habitat data was found, handle the not-found case
+                    else:
+                        if _verbose:
+                            print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Habitats of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Fail} not found in IUCN Red List!{TerminalColors.End}")
+                        # If logging is enabled, write the not-found message to the log file
+                        if _log == True:
+                            with open('HabitatsLog.txt', 'a+') as f:
+                                f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Habitats of '{_specieName}' not found in IUCN Red List!\n")
+                        # Append a placeholder to indicate no habitat data was found
+                        lstHabitat.append(str('-'))
+                # If the response status indicates an error, handle the error accordingly
                 else:
+                    # Print and log the error if verbose and logging are enabled
                     if _verbose:
-                        print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Habitats of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Fail} not found in IUCN Red List!{TerminalColors.End}")
-                    # If logging is enabled, write the not-found message to the log file
+                        print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Error {response.status} - {errorMessages[response.status]}{TerminalColors.End}")
+                    # If logging is enabled, write the error to the log file
                     if _log == True:
                         with open('HabitatsLog.txt', 'a+') as f:
-                            f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Habitats of '{_specieName}' not found in IUCN Red List!\n")
-                    # Append a placeholder to indicate no habitat data was found
-                    lstHabitat.append(str('-'))
-            # If the response status indicates an error, handle the error accordingly
-            else:
-                # Print and log the error if verbose and logging are enabled
-                if _verbose:
-                    print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Error {response.status} - {errorMessages[response.status]}{TerminalColors.End}")
-                # If logging is enabled, write the error to the log file
-                if _log == True:
-                    with open('HabitatsLog.txt', 'a+') as f:
-                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Error {response.status} - {errorMessages[response.status]}\n")
-                # Append a placeholder to indicate an error occurred
-                _habitats.append(str('-'))
-    # Append the collected habitat data to the result list and return it
-    _habitats.append('\n'.join(lstHabitat))
-    return _habitats
+                            f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Error {response.status} - {errorMessages[response.status]}\n")
+                    # Append a placeholder to indicate an error occurred
+                    _habitats.append(str('-'))
+        # Append the collected habitat data to the result list and return it
+        _habitats.append('\n'.join(lstHabitat))
+        return _habitats
 
 async def IUCNHabitats(**kwargs):
     _spList     = kwargs.get('speciesList', [])
     _verbose    = kwargs.get('verbose', True)
     _log        = kwargs.get('log', True)
     _time       = kwargs.get('time', 0.25)
+    _semaphore  = asyncio.Semaphore(5)
     if _verbose:
         print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Warning}Getting Habitats of {len(_spList)} species from IUCN Red List...{TerminalColors.End}")
     _tskHabitats = [
@@ -1006,7 +1027,8 @@ async def IUCNHabitats(**kwargs):
             spName=sp, 
             time=_time, 
             verbose=_verbose, 
-            log=_log
+            log=_log,
+            semaphore=_semaphore
             ) for sp in _spList]
     dataHabitats = await asyncio.gather(*_tskHabitats)
     dictHabitats = {habitats[0]: habitats[1] for habitats in dataHabitats}
@@ -1014,6 +1036,123 @@ async def IUCNHabitats(**kwargs):
         print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Green}Habitats of {len(_spList)} species from IUCN Red List found successfully!{TerminalColors.End}")
     return dictHabitats
 
+# Function to get the Threats information of a species from the IUCN Red List
+async def getIUCNThreats(**kwargs):
+    # Retrieve keyword arguments with defaults
+    _specieName = kwargs.get('spName', "Rhinella marina")  # Default species name
+    _time       = kwargs.get('time', 1)  # Time delay before the request
+    _token      = kwargs.get('token', '9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee')  # IUCN API token
+    _verbose    = kwargs.get('verbose', True)  # Verbose flag for logging messages
+    _log        = kwargs.get('log', True)  # Logging flag for writing Threats data to a file
+    _semaphore  = kwargs.get('semaphore', None)  #
+    lstThreats  = []  # List to store habitat data
+    # Dictionary for handling common HTTP error codes and messages
+    errorMessages = {
+        404: f"Threats '{_specieName}' not found in IUCN Red List!",
+        500: "Internal Server Error!",
+        503: "Service Unavailable!",
+        504: "Gateway Timeout!",
+        400: "Bad Request!",
+        401: "Unauthorized!",
+        403: "Forbidden!",
+        405: "Method Not Allowed!",
+        502: "Bad Gateway!"
+    }
+    async with _semaphore:
+        # Initialize the habitat list with the species name
+        _specieName = re.sub(r'[^A-Za-z ]+', '', _specieName)
+        _threats   = [_specieName]
+        # If a time delay is specified, pause execution
+        if _time > 0:
+            await asyncio.sleep(_time)
+        # If verbose logging is enabled, print a message indicating the start of habitat retrieval
+        if _verbose:
+            print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Warning}Getting Threats of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Warning} from IUCN Red List...{TerminalColors.End}")
+        # Construct the API request URL for the habitat data using the IUCN API
+        url = f'https://apiv3.iucnredlist.org/api/v3/threats/species/name/{_specieName}?token={_token}'
+        timeout = aiohttp.ClientTimeout(total=120) # Set the timeout for the request
+        # Use aiohttp to asynchronously send the request to the IUCN Red List API
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, timeout=timeout) as response:
+                # If the response status is 200 (OK), process the data
+                if response.status == 200:
+                    Taxdata = await response.json()  # Parse the JSON response
+                    # Check if the result field exists and contains data
+                    if Taxdata and 'result' in Taxdata and Taxdata['result']:
+                        # If verbose logging is enabled, print a success message
+                        if _verbose:
+                            print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Green}Found Threats of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Green} in IUCN Red List!{TerminalColors.End}")
+                        # Iterate through the result array to extract habitat details
+                        for data in Taxdata['result']:
+                            if data['title']:
+                                # Append the habitat name to the list
+                                lstThreats.append(
+                                    f"Code: {str(data['title'])}\ntitle: {str(data['title']).capitalize()}\ntiming: {str(data['timing'])}\nscope: {str(data['scope'])}\nseverity: {str(data['severity'])}\nscore: {str(data['score'])}\ninvasive: {str(data['invasive'])}"
+                                    )
+                                # If logging is enabled, write the habitat data to the log file
+                                if _log == True:
+                                    with open('ThreatsLog.txt', 'a+') as f:
+                                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Threats of '{_specieName}' is {lstThreats}\n")
+                                # If verbose logging is enabled, print the found habitat data to the console
+                                if _verbose:
+                                    print(f"{time.strftime('%Y/%m/%d - %H/%M/%S', time.localtime())}: {TerminalColors.Green}Threats of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Green} is {lstThreats}!{TerminalColors.End}")
+                            else:
+                                # Handle the case where no habitat data is found
+                                if _verbose:
+                                    print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Threats of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Fail} not found in IUCN Red List!{TerminalColors.End}")
+                                # If logging is enabled, write the not-found message to the log file
+                                if _log == True:
+                                    with open('ThreatsLog.txt', 'a+') as f:
+                                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {data['title']} not found for {_specieName} in IUCN Red List!\n")
+                                # Append a placeholder to indicate no habitat data was found
+                                lstThreats.append(str('-'))
+                    # If no habitat data was found, handle the not-found case
+                    else:
+                        if _verbose:
+                            print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Threats of {TerminalColors.Italic}'{_specieName}'{TerminalColors.End}{TerminalColors.Fail} not found in IUCN Red List!{TerminalColors.End}")
+                        # If logging is enabled, write the not-found message to the log file
+                        if _log == True:
+                            with open('ThreatsLog.txt', 'a+') as f:
+                                f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Threats of '{_specieName}' not found in IUCN Red List!\n")
+                        # Append a placeholder to indicate no habitat data was found
+                        lstThreats.append(str('-'))
+                # If the response status indicates an error, handle the error accordingly
+                else:
+                    # Print and log the error if verbose and logging are enabled
+                    if _verbose:
+                        print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Fail}Error {response.status} - {errorMessages[response.status]}{TerminalColors.End}")
+                    # If logging is enabled, write the error to the log file
+                    if _log == True:
+                        with open('ThreatsLog.txt', 'a+') as f:
+                            f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: Error {response.status} - {errorMessages[response.status]}\n")
+                    # Append a placeholder to indicate an error occurred
+                    lstThreats.append(str('-'))
+        # Append the collected habitat data to the result list and return it
+        _threats.append('\n'.join(lstThreats))
+        return _threats
+    
+async def IUCNThreats(**kwargs):
+    _spList     = kwargs.get('speciesList', [])
+    _verbose    = kwargs.get('verbose', True)
+    _log        = kwargs.get('log', True)
+    _time       = kwargs.get('time', 0.25)
+    _semaphore  = asyncio.Semaphore(5)
+    if _verbose:
+        print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Warning}Getting Threats of {len(_spList)} species from IUCN Red List...{TerminalColors.End}")
+    _tskThreats = [
+        getIUCNThreats(
+            spName=sp, 
+            time=_time, 
+            verbose=_verbose, 
+            log=_log,
+            semaphore=_semaphore
+            ) for sp in _spList]
+    dataThreats = await asyncio.gather(*_tskThreats)
+    dictThreats = {threats[0]: threats[1] for threats in dataThreats}
+    if _verbose:
+        print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Green}Threats of {len(_spList)} species from IUCN Red List found successfully!{TerminalColors.End}")
+    return dictThreats
+    
 # Function to get the taxonomy details of a species from GBIF (Global Biodiversity Information Facility)
 async def GBIF(**kwargs):
     # Retrieve keyword arguments with defaults
@@ -1518,7 +1657,7 @@ def dataFishingExcel(**kwargs):
         if _verbose:
             print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Green}Data {_sheet} formatted successfully!{TerminalColors.End}")
         # Reorder columns and sort the DataFrame
-        _df = _df[['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species', 'Synonyms Names', 'Common Names', 'Habitats', 'Status Conservation']]
+        _df = _df[['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species', 'Synonyms Names', 'Common Names', 'Habitats', 'Status Conservation', 'Threats']]
         _df = _df.sort_values(by=['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'])
     # Write the formatted DataFrame to an Excel, TSV and CSV file
     if _verbose:
@@ -1956,7 +2095,7 @@ if __name__ == '__main__':
     _download       = args.download
     _inputVerbose   = args.verbose
     _inputLog       = args.log
-    _timeSleep      = 30
+    _timeSleep      = 1
 
     print("\n")
     print(f"{TerminalColors.Bold}############################## {__tool__} ##############################\n{TerminalColors.End}")
@@ -1987,6 +2126,8 @@ if __name__ == '__main__':
         dfIUCN['Country Occurrence']    = dfIUCN['Species'].map(resultsOccurrence)
         resultsHabitat                  = asyncio.run(IUCNHabitats(speciesList=_spList, verbose=_inputVerbose, log=_inputLog, time=_timeSleep))
         dfIUCN['Habitats']              = dfIUCN['Species'].map(resultsHabitat)
+        resultsThreats                  = asyncio.run(IUCNThreats(speciesList=_spList, verbose=_inputVerbose, log=_inputLog, time=_timeSleep))
+        dfIUCN['Threats']              = dfIUCN['Species'].map(resultsThreats)
         dataFishingExcel(df=dfIUCN, sheet='IUCN', folderName=_folderName, verbose=_inputVerbose)
         dfIUCN.to_csv(f"dataFishing/{_folderName}/dataFishing_IUCN_Results.csv", index=False)
         dfIUCN.to_csv(f"dataFishing/{_folderName}/dataFishing_IUCN_Results.csv", sep='\t', index=False)
