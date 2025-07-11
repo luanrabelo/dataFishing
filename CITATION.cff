@@ -1,0 +1,75 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it using the metadata below.
+title: 'dataFishing: An efficient Python tool and user-friendly web-form for mining mitochondrial and chloroplast sequences, taxonomic, and biodiversity data'
+authors:
+- given-names: Luan
+  family-names: Rabelo
+  orcid: https://orcid.org/0000-0002-1223-8943
+  affiliation: Universidade Federal do Pará (UFPA) / Instituto Tecnológico Vale (ITV)
+- given-names: Davidson
+  family-names: Sodré
+  affiliation: Universidade Federal Rural da Amazônia (UFRA)
+- given-names: Oscar David Albito
+  family-names: Balcázar
+  affiliation: Universidade Federal do Pará (UFPA)
+- given-names: Murilo Furtado do
+  family-names: Rosário
+  affiliation: Universidade Federal do Pará (UFPA)
+- given-names: Aurycéia Jaquelyne
+  family-names: Guimarães-Costa
+  affiliation: AFYA, Faculdade de Ciências Médicas
+- given-names: Grazielle
+  family-names: Gomes
+  affiliation: Universidade Federal do Pará (UFPA)
+- given-names: Iracilda
+  family-names: Sampaio
+  affiliation: Universidade Federal do Pará (UFPA)
+- given-names: Marcelo
+  family-names: Vallinoto
+  orcid: https://orcid.org/0000-0002-3465-3830
+  affiliation: Universidade Federal do Pará (UFPA)
+date-released: '2024-12-22'
+doi: 10.1016/j.ecoinf.2024.102970
+url: https://github.com/luanrabelo/dataFishing
+repository-code: https://github.com/luanrabelo/dataFishing
+license: MIT
+abstract: dataFishing is a Python-based tool and web form designed to facilitate the
+  mining, retrieval, and processing of organelle DNA sequences and biodiversity information
+  from public databases such as GenBank, BOLD Systems, GBIF, IUCN, and WoRMS. It supports
+  both command-line and web-based usage, enabling users with varying levels of technical
+  expertise to access taxonomic, conservation, and occurrence data efficiently. The
+  tool outputs results in Excel, CSV, and TSV formats and is optimized for performance
+  and usability.
+type: software
+keywords:
+- biodiversity
+- taxonomy
+- genetic data
+- bioinformatics
+- data mining
+- Python
+- conservation
+- DNA sequences
+- open science
+contact:
+- name: Luan Rabelo
+  email: luanrabelo@outlook.com
+- name: Marcelo Vallinoto
+  email: mvallino@ufpa.br
+preferred-citation:
+  type: article
+  title: 'dataFishing: An efficient Python tool and user-friendly web-form for mining mitochondrial and chloroplast sequences, taxonomic, and biodiversity data'
+  authors:
+  - Luan Rabelo
+  - Davidson Sodré
+  - Oscar David Albito Balcázar
+  - Murilo Furtado do Rosário
+  - Aurycéia Jaquelyne Guimarães-Costa
+  - Grazielle Gomes
+  - Iracilda Sampaio
+  - Marcelo Vallinoto
+  journal: Ecological Informatics
+  volume: '85'
+  pages: '102970'
+  year: '2025'
+  doi: 10.1016/j.ecoinf.2024.102970
