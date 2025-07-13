@@ -5,9 +5,13 @@ channels:
   - lprabelo
 dependencies:
   - python=3.12
-  - requests
-  - aiohttp
-  - pandas
-  - biopython
-  - syngenes
-  - xlsxwriter
+  - aiofiles=24.1.0
+  - aiohttp=3.12.14
+  - beautifulsoup4=4.13.4
+  - biopython=1.85
+  - pandas=2.3.1
+  - requests=2.32.4
+  - syngenes=1.0.6
+  - xlsxwriter=3.2.5
+  - python-dotenv=1.1.1
+  - openpyxl=3.1.2

@@ -20,13 +20,22 @@ var Cards = {
         'IUCN_Synonyms_Names',
         'IUCN_Taxonomy*',
         'IUCN_Threats'
-
     ],
     'WoRMS': [
         'WoRMS_All_data*',
         'WoRMS_Taxonomy*',
-        'WoRMS_Species Status*',
-        'WoRMS_Species_Author*'
+        'WoRMS_Authority*',
+        'WoRMS_Valid_Species_Name*',
+        'WoRMS_Valid_Authority*',
+        'WoRMS_Species_Status*',
+        'WoRMS_Marine_Environment*',
+        'WoRMS_Brackish_Environment*',
+        'WoRMS_Freshwater_Environment*',
+        'WoRMS_Terrestrial_Environment*',
+        'WoRMS_Extinct_Status*',
+        'WoRMS_Match_Type*',
+        'WoRMS_Modified_Date*',
+        'WoRMS_Citation*'
     ]
 
 };
@@ -35,7 +44,6 @@ var NamesCards = {
     'BoldSystems': 'Barcode of Life Data Systems <sup>beta</sup>',
     'gbif': 'Global Biodiversity Information Facility',
     'iucn': 'Red List of Threatened Species',
-    //'ncbi': 'National Center for Biotechnology Information',
     'WoRMS': 'World Register of Marine Species'
 };
 
@@ -100,27 +108,57 @@ function getRandomTip() {
     return { key: randomKey, description: toolTips[randomKey][0], link: toolTips[randomKey][1] };
 }
 
-const startSearch = document.getElementById('startSearch');
-startSearch.addEventListener('click', function () {
-    const iucn = document.getElementById('iucn-checkbox').checked;
-    const gbif = document.getElementById('gbif-checkbox').checked;
-    const WoRMS = document.getElementById('WoRMS-checkbox').checked;
-    const boldSystems = document.getElementById('BoldSystems-checkbox').checked;
-    if (iucn) {
-        getIUCN();
-    } else if (gbif) {
-        getGBIF();
-    } else if (WoRMS) {
-        getWoRMS();
-    } else if (boldSystems) {
-        get_BOLD_Systems();
-    }
-    document.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape') {
-            event.preventDefault();
-        }
-    });
-});
+function updateDataResults() {
+    const dataResults = document.getElementById('dataResults');
+    dataResults.innerHTML = '';
+
+    const resultsCard = document.createElement('div');
+    resultsCard.className = 'bg-white rounded mb-4';
+
+    const cardHeader = document.createElement('div');
+    cardHeader.className = 'bg-gray-800 flex items-center text-white py-1 px-1 rounded';
+    cardHeader.innerHTML = `
+        <div class="flex items-center justify-center h-12 w-12 rounded-full bg-gray-200 text-black mr-3 font-bold text-xl">4</div>
+        <div class="text-2xl font-semibold">Visualize and export the results</div>
+    `;
+    resultsCard.appendChild(cardHeader);
+
+    const cardBody = document.createElement('div');
+    cardBody.className = 'px-4 py-4';
+    resultsCard.appendChild(cardBody);
+    dataResults.appendChild(resultsCard);
+
+    const columnTitle = document.createElement('h3');
+    columnTitle.className = 'text-xl font-bold text-gray-800 mb-5 mt-6';
+    columnTitle.textContent = 'Show/Hide Columns of the Results';
+    cardBody.appendChild(columnTitle);
+
+    const filterGrid = document.createElement('div');
+    filterGrid.id = 'columnFiltersGrid';
+    filterGrid.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 px-4';
+    cardBody.appendChild(filterGrid);
+
+    const infoNote = document.createElement('div');
+    infoNote.className = 'bg-gray-200 text-lg px-4 pt-4 pb-4 rounded text-center col-span-full w-full mx-auto my-5';
+    infoNote.innerHTML = `
+        <p class="font-bold"><i class="fas fa-info-circle"></i> Column Visibility Controls</p>
+        <p><i class="fas fa-info-circle"></i> Toggle columns on/off to customize your view. Hidden columns will not be included in the table search below.</p>
+        <p><i class="fas fa-info-circle"></i> Please note that changing column visibility will affect search results and Excel export.</p>
+    `;
+    cardBody.appendChild(infoNote);
+
+    createColumnFilters('TableResults', 'columnFiltersGrid');
+    createSearchInput('TableResults', cardBody);
+
+    const exportSection = document.createElement('div');
+    exportSection.className = 'flex justify-center mt-6 mb-6';
+    exportSection.innerHTML = `
+        <button id="btnExcel" onclick="exportTableToExcel('TableResults')" class="bg-gray-800 text-2xl w-96 sm:w-96 hover:bg-blue-900 text-white font-bold py-3 px-3 rounded-lg focus:outline-none focus:shadow-outline">
+            <i class="fa-solid fa-file-excel mr-2"></i> Export Result data to Excel
+        </button>
+    `;
+    cardBody.appendChild(exportSection);
+}
 
 // This function fetches IUCN data and updates the progress bar
 async function getIUCN() {
@@ -138,6 +176,7 @@ async function getIUCN() {
 
     const progressModal = document.getElementById('progressModal');
     const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
     progressModal.classList.remove('hidden');
 
     const iucnSynonymsOpt = document.getElementById('synonyms_namesopt').checked;
@@ -154,10 +193,10 @@ async function getIUCN() {
     _iucnTable.id = 'TableResults';
     _iucnTable.classList.add(
         "text-base",
-        "text-blue-800", 
+        "text-blue-800",
         "table-auto",
         "border-collapse",
-        "w-full" 
+        "w-full"
     );
     _iucnTable.innerHTML = `
     <thead class="text-base text-white bg-gray-800 text-left whitespace-nowrap">
@@ -234,7 +273,9 @@ async function getIUCN() {
             console.error(error);
         }
         progress += (100 / speciesNames.length);
-        progressBar.style.width = progress + '%';
+        const progressPercentage = Math.round(progress);
+        progressBar.style.width = progressPercentage + '%';
+        progressText.textContent = progressPercentage + '%';
         if (progress >= 100) {
             setTimeout(() => {
                 progressModal.classList.add('hidden');
@@ -401,48 +442,104 @@ async function getWoRMS() {
     const statusColor = {
         'accepted': '#BACD92',
         'unaccepted': '#FA7070',
+        'synonym': '#FFE066',
+        'uncertain': '#D1D1C7'
     };
+
+    const environmentColors = {
+        'Yes': '#5FC65A',
+        'No': '#FA7070',
+        '-': '#D1D1C7'
+    };
+
     const progressModal = document.getElementById('progressModal');
     const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
     progressModal.classList.remove('hidden');
+
     let progress = 0;
     const speciesNames = document.getElementById('speciesNames').value.split('\n');
+
+    // Verificar quais campos opcionais estão selecionados - corrigindo os IDs
+    const wormsAuthorityOpt = document.getElementById('authorityopt')?.checked ?? true;
+    const wormsValidSpeciesOpt = document.getElementById('valid_species_nameopt')?.checked ?? true;
+    const wormsValidAuthorityOpt = document.getElementById('valid_authorityopt')?.checked ?? true;
+    const wormsMarineOpt = document.getElementById('marine_environmentopt')?.checked ?? true;
+    const wormsBrackishOpt = document.getElementById('brackish_environmentopt')?.checked ?? true;
+    const wormsFreshwaterOpt = document.getElementById('freshwater_environmentopt')?.checked ?? true;
+    const wormsTerrestrialOpt = document.getElementById('terrestrial_environmentopt')?.checked ?? true;
+    const wormsExtinctOpt = document.getElementById('extinct_statusopt')?.checked ?? true;
+    const wormsMatchTypeOpt = document.getElementById('match_typeopt')?.checked ?? true;
+    const wormsModifiedOpt = document.getElementById('modified_dateopt')?.checked ?? true;
+    const wormsCitationOpt = document.getElementById('citationopt')?.checked ?? true;
 
     const _wormsTable = document.createElement('table');
     _wormsTable.id = 'TableResults';
     _wormsTable.classList.add(
         "text-base",
-        "text-blue-800", 
+        "text-blue-800",
         "table-auto",
         "border-collapse",
-        "w-full" 
+        "w-full"
     );
-    _wormsTable.innerHTML = `
+
+    let headerHTML = `
     <thead class="text-base text-white bg-gray-800 text-left whitespace-nowrap">
         <tr>
-            <th scope="col" class="py-5 px-5">AphiaID</th>
-            <th scope="col" class="py-5 px-5">Kingdom</th>
-            <th scope="col" class="py-5 px-5">Phylum</th>
-            <th scope="col" class="py-5 px-5">Class</th>
-            <th scope="col" class="py-5 px-5">Order</th>
-            <th scope="col" class="py-5 px-5">Family</th>
-            <th scope="col" class="py-5 px-5">Genus</th>
-            <th scope="col" class="py-5 px-5">Species</th>
-            <th scope="col" class="py-5 px-5">Species Status</th>
-            <th scope="col" class="py-5 px-5">Authority</th>
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 0)">
+                AphiaID <i class="fas fa-sort ml-2"></i>
+            </th>
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 1)">
+                Kingdom <i class="fas fa-sort ml-2"></i>
+            </th>
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 2)">
+                Phylum <i class="fas fa-sort ml-2"></i>
+            </th>
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 3)">
+                Class <i class="fas fa-sort ml-2"></i>
+            </th>
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 4)">
+                Order <i class="fas fa-sort ml-2"></i>
+            </th>
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 5)">
+                Family <i class="fas fa-sort ml-2"></i>
+            </th>
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 6)">
+                Genus <i class="fas fa-sort ml-2"></i>
+            </th>
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 7)">
+                Species <i class="fas fa-sort ml-2"></i>
+            </th>
+            ${wormsAuthorityOpt ? `<th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', ${8})">Authority <i class="fas fa-sort ml-2"></i></th>` : ''}
+            ${wormsValidSpeciesOpt ? `<th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', ${8 + (wormsAuthorityOpt ? 1 : 0)})">Valid Species Name <i class="fas fa-sort ml-2"></i></th>` : ''}
+            ${wormsValidAuthorityOpt ? `<th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', ${8 + (wormsAuthorityOpt ? 1 : 0) + (wormsValidSpeciesOpt ? 1 : 0)})">Valid Authority <i class="fas fa-sort ml-2"></i></th>` : ''}
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', ${8 + (wormsAuthorityOpt ? 1 : 0) + (wormsValidSpeciesOpt ? 1 : 0) + (wormsValidAuthorityOpt ? 1 : 0)})">
+                Species Status <i class="fas fa-sort ml-2"></i>
+            </th>
+            ${wormsMarineOpt ? `<th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', ${9 + (wormsAuthorityOpt ? 1 : 0) + (wormsValidSpeciesOpt ? 1 : 0) + (wormsValidAuthorityOpt ? 1 : 0)})">Marine <i class="fas fa-sort ml-2"></i></th>` : ''}
+            ${wormsBrackishOpt ? `<th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', ${9 + (wormsAuthorityOpt ? 1 : 0) + (wormsValidSpeciesOpt ? 1 : 0) + (wormsValidAuthorityOpt ? 1 : 0) + (wormsMarineOpt ? 1 : 0)})">Brackish <i class="fas fa-sort ml-2"></i></th>` : ''}
+            ${wormsFreshwaterOpt ? `<th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', ${9 + (wormsAuthorityOpt ? 1 : 0) + (wormsValidSpeciesOpt ? 1 : 0) + (wormsValidAuthorityOpt ? 1 : 0) + (wormsMarineOpt ? 1 : 0) + (wormsBrackishOpt ? 1 : 0)})">Freshwater <i class="fas fa-sort ml-2"></i></th>` : ''}
+            ${wormsTerrestrialOpt ? `<th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', ${9 + (wormsAuthorityOpt ? 1 : 0) + (wormsValidSpeciesOpt ? 1 : 0) + (wormsValidAuthorityOpt ? 1 : 0) + (wormsMarineOpt ? 1 : 0) + (wormsBrackishOpt ? 1 : 0) + (wormsFreshwaterOpt ? 1 : 0)})">Terrestrial <i class="fas fa-sort ml-2"></i></th>` : ''}
+            ${wormsExtinctOpt ? `<th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', ${9 + (wormsAuthorityOpt ? 1 : 0) + (wormsValidSpeciesOpt ? 1 : 0) + (wormsValidAuthorityOpt ? 1 : 0) + (wormsMarineOpt ? 1 : 0) + (wormsBrackishOpt ? 1 : 0) + (wormsFreshwaterOpt ? 1 : 0) + (wormsTerrestrialOpt ? 1 : 0)})">Extinct <i class="fas fa-sort ml-2"></i></th>` : ''}
+            ${wormsMatchTypeOpt ? `<th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', ${9 + (wormsAuthorityOpt ? 1 : 0) + (wormsValidSpeciesOpt ? 1 : 0) + (wormsValidAuthorityOpt ? 1 : 0) + (wormsMarineOpt ? 1 : 0) + (wormsBrackishOpt ? 1 : 0) + (wormsFreshwaterOpt ? 1 : 0) + (wormsTerrestrialOpt ? 1 : 0) + (wormsExtinctOpt ? 1 : 0)})">Match Type <i class="fas fa-sort ml-2"></i></th>` : ''}
+            ${wormsModifiedOpt ? `<th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', ${9 + (wormsAuthorityOpt ? 1 : 0) + (wormsValidSpeciesOpt ? 1 : 0) + (wormsValidAuthorityOpt ? 1 : 0) + (wormsMarineOpt ? 1 : 0) + (wormsBrackishOpt ? 1 : 0) + (wormsFreshwaterOpt ? 1 : 0) + (wormsTerrestrialOpt ? 1 : 0) + (wormsExtinctOpt ? 1 : 0) + (wormsMatchTypeOpt ? 1 : 0)})">Modified Date <i class="fas fa-sort ml-2"></i></th>` : ''}
+            ${wormsCitationOpt ? `<th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', ${9 + (wormsAuthorityOpt ? 1 : 0) + (wormsValidSpeciesOpt ? 1 : 0) + (wormsValidAuthorityOpt ? 1 : 0) + (wormsMarineOpt ? 1 : 0) + (wormsBrackishOpt ? 1 : 0) + (wormsFreshwaterOpt ? 1 : 0) + (wormsTerrestrialOpt ? 1 : 0) + (wormsExtinctOpt ? 1 : 0) + (wormsMatchTypeOpt ? 1 : 0) + (wormsModifiedOpt ? 1 : 0)})">Citation <i class="fas fa-sort ml-2"></i></th>` : ''}
             <th scope="col" class="py-5 px-5">Link</th>
         </tr>
     </thead>
     `;
+
+    _wormsTable.innerHTML = headerHTML;
+
     const _wormTableBody = _wormsTable.createTBody();
     _wormTableBody.classList.add("text-left", 'divide-y-1', 'divide-blue-800', 'divide-dashed');
 
     const _wormsTableWrapper = document.createElement('div');
     _wormsTableWrapper.classList.add(
-        "w-full",               // O wrapper ocupa toda a largura disponível
-        "overflow-x-auto",      // Rolagem horizontal para conteúdo grande
-        "overflow-y-auto",      // Rolagem vertical
-        "mx-auto"               // Centraliza o wrapper
+        "w-full",
+        "overflow-x-auto",
+        "overflow-y-auto",
+        "mx-auto"
     );
     _wormsTableWrapper.appendChild(_wormsTable);
 
@@ -450,9 +547,11 @@ async function getWoRMS() {
     wormsResults.innerHTML = '';
     wormsResults.appendChild(_wormsTableWrapper);
 
+    // Continue com o resto da função...
     const promises = speciesNames.map(async (speciesName) => {
         const _speciesName = encodeURIComponent(speciesName);
-        const url = `https://www.marinespecies.org/rest/AphiaRecordsByName/${_speciesName}`;
+        const url = `https://www.marinespecies.org/rest/AphiaRecordsByName/${_speciesName}?like=false&marine_only=false&offset=1`;
+
         try {
             const response = await fetch(url);
             const row = _wormTableBody.insertRow();
@@ -464,146 +563,339 @@ async function getWoRMS() {
                 'even:bg-white',
                 'whitespace-nowrap'
             );
+
             if (response.status === 200) {
                 const json = await response.json();
                 if (json.length > 0) {
-                    row.innerHTML = `
-                        <td class="py-5 px-5">${json[0].AphiaID || '-'}</td>
-                        <td class="py-5 px-5">${json[0].kingdom || '-'}</td>
-                        <td class="py-5 px-5">${json[0].phylum || '-'}</td>
-                        <td class="py-5 px-5">${json[0].class || '-'}</td>
-                        <td class="py-5 px-5">${json[0].order || '-'}</td>
-                        <td class="py-5 px-5">${json[0].family || '-'}</td>
-                        <td class="py-5 px-5"><i>${json[0].genus || '-'}</i></td>
-                        <td class="py-5 px-5"><i>${speciesName}</i></td>
-                        <td class="py-5 px-5" style="background-color: ${statusColor[json[0].status] || '#FFFFFF'};">${json[0].status || '-'}</td>
-                        <td class="py-5 px-5">${json[0].authority}</td>
-                        <td class="py-5 px-5"><a class="btn btn-outline-dark" href="https://www.marinespecies.org/aphia.php?p=taxdetails&id=${json[0].AphiaID}" role="button" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
-                    `;
+                    const data = json[0];
+
+                    // Função para formatar ambiente com cor na célula inteira
+                    const formatEnvironment = (value) => {
+                        const envValue = value === 1 ? 'Yes' : (value === 0 ? 'No' : '-');
+                        const color = environmentColors[envValue] || '#D1D1C7';
+                        return { text: envValue, color: color };
+                    };
+
+                    // Formatar data modificada
+                    const formatModifiedDate = (dateString) => {
+                        if (!dateString || dateString === '-') return '-';
+                        try {
+                            const date = new Date(dateString);
+                            return date.toLocaleDateString('pt-BR');
+                        } catch (e) {
+                            return dateString;
+                        }
+                    };
+
+                    // Formatar citação (truncar se muito longa)
+                    const formatCitation = (citation) => {
+                        if (!citation || citation === '-') return '-';
+                        return citation.length > 100 ? citation.substring(0, 100) + '...' : citation;
+                    };
+
+                    let cellIndex = 0;
+
+                    // Células básicas
+                    row.insertCell(cellIndex++).innerHTML = `${data.AphiaID || '-'}`;
+                    row.insertCell(cellIndex++).innerHTML = `${data.kingdom || '-'}`;
+                    row.insertCell(cellIndex++).innerHTML = `${data.phylum || '-'}`;
+                    row.insertCell(cellIndex++).innerHTML = `${data.class || '-'}`;
+                    row.insertCell(cellIndex++).innerHTML = `${data.order || '-'}`;
+                    row.insertCell(cellIndex++).innerHTML = `${data.family || '-'}`;
+                    row.insertCell(cellIndex++).innerHTML = `<i>${data.genus || '-'}</i>`;
+                    row.insertCell(cellIndex++).innerHTML = `<i>${speciesName}</i>`;
+
+                    // Células opcionais
+                    if (wormsAuthorityOpt) {
+                        row.insertCell(cellIndex++).innerHTML = `${data.authority || '-'}`;
+                    }
+                    if (wormsValidSpeciesOpt) {
+                        row.insertCell(cellIndex++).innerHTML = `<i>${data.valid_name || '-'}</i>`;
+                    }
+                    if (wormsValidAuthorityOpt) {
+                        row.insertCell(cellIndex++).innerHTML = `${data.valid_authority || '-'}`;
+                    }
+
+                    // Status da espécie com cor de fundo
+                    const statusCell = row.insertCell(cellIndex++);
+                    statusCell.innerHTML = `${data.status || '-'}`;
+                    statusCell.style.backgroundColor = statusColor[data.status] || '#FFFFFF';
+
+                    // Ambientes com cores de fundo
+                    if (wormsMarineOpt) {
+                        const marineData = formatEnvironment(data.isMarine);
+                        const marineCell = row.insertCell(cellIndex++);
+                        marineCell.innerHTML = marineData.text;
+                        marineCell.style.backgroundColor = marineData.color;
+                        marineCell.style.color = 'white';
+                        marineCell.style.fontWeight = 'bold';
+                        marineCell.style.textAlign = 'center';
+                    }
+                    if (wormsBrackishOpt) {
+                        const brackishData = formatEnvironment(data.isBrackish);
+                        const brackishCell = row.insertCell(cellIndex++);
+                        brackishCell.innerHTML = brackishData.text;
+                        brackishCell.style.backgroundColor = brackishData.color;
+                        brackishCell.style.color = 'white';
+                        brackishCell.style.fontWeight = 'bold';
+                        brackishCell.style.textAlign = 'center';
+                    }
+                    if (wormsFreshwaterOpt) {
+                        const freshwaterData = formatEnvironment(data.isFreshwater);
+                        const freshwaterCell = row.insertCell(cellIndex++);
+                        freshwaterCell.innerHTML = freshwaterData.text;
+                        freshwaterCell.style.backgroundColor = freshwaterData.color;
+                        freshwaterCell.style.color = 'white';
+                        freshwaterCell.style.fontWeight = 'bold';
+                        freshwaterCell.style.textAlign = 'center';
+                    }
+                    if (wormsTerrestrialOpt) {
+                        const terrestrialData = formatEnvironment(data.isTerrestrial);
+                        const terrestrialCell = row.insertCell(cellIndex++);
+                        terrestrialCell.innerHTML = terrestrialData.text;
+                        terrestrialCell.style.backgroundColor = terrestrialData.color;
+                        terrestrialCell.style.color = 'white';
+                        terrestrialCell.style.fontWeight = 'bold';
+                        terrestrialCell.style.textAlign = 'center';
+                    }
+                    if (wormsExtinctOpt) {
+                        const extinctData = formatEnvironment(data.isExtinct);
+                        const extinctCell = row.insertCell(cellIndex++);
+                        extinctCell.innerHTML = extinctData.text;
+                        extinctCell.style.backgroundColor = extinctData.color;
+                        extinctCell.style.color = 'white';
+                        extinctCell.style.fontWeight = 'bold';
+                        extinctCell.style.textAlign = 'center';
+                    }
+
+                    // Outras células opcionais
+                    if (wormsMatchTypeOpt) {
+                        row.insertCell(cellIndex++).innerHTML = `${data.match_type || '-'}`;
+                    }
+                    if (wormsModifiedOpt) {
+                        row.insertCell(cellIndex++).innerHTML = `${formatModifiedDate(data.modified)}`;
+                    }
+                    if (wormsCitationOpt) {
+                        const citationCell = row.insertCell(cellIndex++);
+                        citationCell.innerHTML = `${formatCitation(data.citation)}`;
+                        citationCell.title = data.citation || '-';
+                    }
+
+                    // Link
+                    row.insertCell(cellIndex++).innerHTML = `<a class="btn btn-outline-dark" href="https://www.marinespecies.org/aphia.php?p=taxdetails&id=${data.AphiaID}" role="button" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>`;
+
+                    // Aplicar classes CSS às células
+                    Array.from(row.cells).forEach(cell => {
+                        cell.classList.add("py-5", "px-5");
+                    });
                 }
             } else {
-                row.innerHTML = `
-                    <td class="py-5 px-5">-</td>
-                    <td class="py-5 px-5">-</td>
-                    <td class="py-5 px-5">-</td>
-                    <td class="py-5 px-5">-</td>
-                    <td class="py-5 px-5">-</td>
-                    <td class="py-5 px-5">-</td>
-                    <td class="py-5 px-5"><i>${speciesName.split(' ')[0]}</i></td>
-                    <td class="py-5 px-5"><i>${speciesName}</i></td>
-                    <td class="py-5 px-5">-</td>
-                    <td class="py-5 px-5">-</td>
-                    <td class="py-5 px-5">-</td>
-                `;
+                // Linha para espécie não encontrada
+                let cellIndex = 0;
+
+                for (let i = 0; i < 8; i++) {
+                    if (i === 6) {
+                        row.insertCell(cellIndex++).innerHTML = `<i>${speciesName.split(' ')[0]}</i>`;
+                    } else if (i === 7) {
+                        row.insertCell(cellIndex++).innerHTML = `<i>${speciesName}</i>`;
+                    } else {
+                        row.insertCell(cellIndex++).innerHTML = '-';
+                    }
+                }
+
+                if (wormsAuthorityOpt) row.insertCell(cellIndex++).innerHTML = '-';
+                if (wormsValidSpeciesOpt) row.insertCell(cellIndex++).innerHTML = '-';
+                if (wormsValidAuthorityOpt) row.insertCell(cellIndex++).innerHTML = '-';
+
+                row.insertCell(cellIndex++).innerHTML = '-';
+
+                if (wormsMarineOpt) {
+                    const cell = row.insertCell(cellIndex++);
+                    cell.innerHTML = '-';
+                    cell.style.backgroundColor = '#D1D1C7';
+                    cell.style.color = 'white';
+                    cell.style.fontWeight = 'bold';
+                    cell.style.textAlign = 'center';
+                }
+                if (wormsBrackishOpt) {
+                    const cell = row.insertCell(cellIndex++);
+                    cell.innerHTML = '-';
+                    cell.style.backgroundColor = '#D1D1C7';
+                    cell.style.color = 'white';
+                    cell.style.fontWeight = 'bold';
+                    cell.style.textAlign = 'center';
+                }
+                if (wormsFreshwaterOpt) {
+                    const cell = row.insertCell(cellIndex++);
+                    cell.innerHTML = '-';
+                    cell.style.backgroundColor = '#D1D1C7';
+                    cell.style.color = 'white';
+                    cell.style.fontWeight = 'bold';
+                    cell.style.textAlign = 'center';
+                }
+                if (wormsTerrestrialOpt) {
+                    const cell = row.insertCell(cellIndex++);
+                    cell.innerHTML = '-';
+                    cell.style.backgroundColor = '#D1D1C7';
+                    cell.style.color = 'white';
+                    cell.style.fontWeight = 'bold';
+                    cell.style.textAlign = 'center';
+                }
+                if (wormsExtinctOpt) {
+                    const cell = row.insertCell(cellIndex++);
+                    cell.innerHTML = '-';
+                    cell.style.backgroundColor = '#D1D1C7';
+                    cell.style.color = 'white';
+                    cell.style.fontWeight = 'bold';
+                    cell.style.textAlign = 'center';
+                }
+
+                if (wormsMatchTypeOpt) row.insertCell(cellIndex++).innerHTML = '-';
+                if (wormsModifiedOpt) row.insertCell(cellIndex++).innerHTML = '-';
+                if (wormsCitationOpt) row.insertCell(cellIndex++).innerHTML = '-';
+
+                row.insertCell(cellIndex++).innerHTML = '-';
+
+                Array.from(row.cells).forEach(cell => {
+                    cell.classList.add("py-5", "px-5");
+                });
             }
         } catch (error) {
-            console.error(error);
+            console.error(`Error fetching data for ${speciesName}:`, error);
+            const row = _wormTableBody.insertRow();
+            row.classList.add('bg-red-100', 'text-red-800');
+            const totalCols = 9 +
+                (wormsAuthorityOpt ? 1 : 0) +
+                (wormsValidSpeciesOpt ? 1 : 0) +
+                (wormsValidAuthorityOpt ? 1 : 0) +
+                (wormsMarineOpt ? 1 : 0) +
+                (wormsBrackishOpt ? 1 : 0) +
+                (wormsFreshwaterOpt ? 1 : 0) +
+                (wormsTerrestrialOpt ? 1 : 0) +
+                (wormsExtinctOpt ? 1 : 0) +
+                (wormsMatchTypeOpt ? 1 : 0) +
+                (wormsModifiedOpt ? 1 : 0) +
+                (wormsCitationOpt ? 1 : 0) + 1;
+
+            const errorCell = row.insertCell(0);
+            errorCell.colSpan = totalCols;
+            errorCell.innerHTML = `Error fetching data for <i>${speciesName}</i>: ${error.message}`;
+            errorCell.classList.add("py-5", "px-5", "text-center");
         }
+
         progress += (100 / speciesNames.length);
-        progressBar.style.width = progress + '%';
+        const progressPercentage = Math.round(progress);
+        progressBar.style.width = progressPercentage + '%';
+        progressText.textContent = progressPercentage + '%';
         if (progress >= 100) {
             setTimeout(() => {
                 progressModal.classList.add('hidden');
             }, 1000);
         }
     });
+
     await Promise.all(promises);
     updateDataResults();
 }
 
-
-// This function fetches data from GBIF for the given species
-async function getGBIF() {
-    const statusColor = {
-        'ACCEPTED': '#BACD92',
-        'unaccepted': '#FA7070',
-    };
+// BOLD System - Search Options
+async function get_BOLD_Systems() {
     const progressModal = document.getElementById('progressModal');
     const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
     progressModal.classList.remove('hidden');
+
     let progress = 0;
     const speciesNames = document.getElementById('speciesNames').value.split('\n');
 
-    const _gbifTable = document.createElement('table');
-    _gbifTable.id = 'TableResults';
-    _gbifTable.classList.add(
+    const _boldTable = document.createElement('table');
+    _boldTable.id = 'TableResults';
+    _boldTable.classList.add(
         "text-base",
-        "text-blue-800", 
+        "text-blue-800",
         "table-auto",
         "border-collapse",
-        "w-full" 
+        "w-full"
     );
-    _gbifTable.innerHTML = `
+    _boldTable.innerHTML = `
     <thead class="text-base text-white bg-gray-800 text-left whitespace-nowrap">
         <tr>
-            <th scope="col" class="py-5 px-5">Kingdom</th>
             <th scope="col" class="py-5 px-5">Phylum</th>
             <th scope="col" class="py-5 px-5">Class</th>
             <th scope="col" class="py-5 px-5">Order</th>
             <th scope="col" class="py-5 px-5">Family</th>
+            <th scope="col" class="py-5 px-5">Sub Family</th>
             <th scope="col" class="py-5 px-5">Genus</th>
             <th scope="col" class="py-5 px-5">Species</th>
-            <th scope="col" class="py-5 px-5">Basionym</th>
-            <th scope="col" class="py-5 px-5">Vernacular Name</th>
-            <th scope="col" class="py-5 px-5">Taxonomic Status</th>
-            <th scope="col" class="py-5 px-5">Link</th>
         </tr>
     </thead>
     `;
-    const _gbifTableBody = _gbifTable.createTBody();
-    _gbifTableBody.classList.add("text-left", 'divide-y-1', 'divide-blue-800', 'divide-dashed');
+    const _boldTableBody = _boldTable.createTBody();
+    _boldTableBody.classList.add("text-left", 'divide-y-1', 'divide-blue-800', 'divide-dashed');
 
-    const _gbifTableWrapper = document.createElement('div');
-    _gbifTableWrapper.classList.add(
+    const _boldTableWrapper = document.createElement('div');
+    _boldTableWrapper.classList.add(
         "w-full",               // O wrapper ocupa toda a largura disponível
         "overflow-x-auto",      // Rolagem horizontal para conteúdo grande
         "overflow-y-auto",      // Rolagem vertical
         "mx-auto"               // Centraliza o wrapper
     );
-    _gbifTableWrapper.appendChild(_gbifTable);
+    _boldTableWrapper.appendChild(_boldTable);
 
-    const gbifResults = document.getElementById('Results');
-    gbifResults.innerHTML = '';
-    gbifResults.appendChild(_gbifTableWrapper);
-    const promises = speciesNames.map(async (speciesName) => {
+    const boldResults = document.getElementById('Results');
+    boldResults.innerHTML = '';
+    boldResults.appendChild(_boldTableWrapper);
+
+    const promises = speciesNames.map(async (speciesName, index) => {
         const _speciesName = encodeURIComponent(speciesName);
-        const url = `https://api.gbif.org/v1/species?name=${_speciesName}`;
+        const apiUrl = `http://v3.boldsystems.org/index.php/API_Tax/TaxonSearch?taxName=${_speciesName}`;
+        const proxyUrl = `https://corsproxy.io/?${apiUrl}`;
         try {
-            const response = await fetch(url);
+            const response = await fetch(proxyUrl);
             if (!response.ok) throw new Error(`HTTP-Error: ${response.status}`);
             const json = await response.json();
-            //const occurrence = gbifOccurrence ? await getOccurrence(speciesName) : '-';
-            const row = _gbifTableBody.insertRow();
-            row.classList.add(
-                'bg-gray-50',
-                'hover:bg-gray-400',
-                'text-black',
-                'odd:bg-gray-200',
-                'even:bg-white',
-                'whitespace-nowrap'
-            );
-            for (const results of json.results) {
-                if (results.taxonomicStatus === 'ACCEPTED' && results.taxonID.includes('gbif:')) {
-                    row.innerHTML = `
-                <td class="py-5 px-5">${results.kingdom ? results.kingdom.charAt(0).toUpperCase() + results.kingdom.slice(1).toLowerCase() : '-'}</td>
-                <td class="py-5 px-5">${results.phylum ? results.phylum.charAt(0).toUpperCase() + results.phylum.slice(1).toLowerCase() : '-'}</td>
-                <td class="py-5 px-5">${results.class ? results.class.charAt(0).toUpperCase() + results.class.slice(1).toLowerCase() : '-'}</td>
-                <td class="py-5 px-5">${results.order ? results.order.charAt(0).toUpperCase() + results.order.slice(1).toLowerCase() : '-'}</td>
-                <td class="py-5 px-5">${results.family ? results.family.charAt(0).toUpperCase() + results.family.slice(1).toLowerCase() : '-'}</td>
-                <td class="py-5 px-5"><i>${speciesName.split(' ')[0]}</i></td>
-                <td class="py-5 px-5"><i>${speciesName}</i> ${results.authorship}</td>
-                <td class="py-5 px-5"><i>${results.basionym ? results.basionym : '-'}<i></td>
-                <td class="py-5 px-5">${results.vernacularName ? results.vernacularName : '-'}</td>
-                <td class="py-5 px-5" style="background-color: ${statusColor[results.taxonomicStatus] || '#FA7070'};">${results.taxonomicStatus ? results.taxonomicStatus.charAt(0).toUpperCase() + results.taxonomicStatus.slice(1).toLowerCase() : '-'}</td>
-                <td class="py-5 px-5"><a class="btn btn-outline-dark" href="https://www.gbif.org/species/${results.taxonID.split(':')[1]}" role="button" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
-                `;
-                }
+            if (json) {
+                await Promise.all(Object.keys(json).map(async key => {
+                    const taxData = json[key];
+                    if (taxData && taxData.taxid) {
+                        const taxid = taxData.taxid;
+                        const dataTaxonomy = await get_BOLD_Systems_data(taxid);
+                        if (dataTaxonomy) {
+                            const row = _boldTableBody.insertRow();
+                            row.classList.add('bg-gray-50', 'hover:bg-gray-400', 'text-black', 'whitespace-nowrap', 'odd:bg-gray-200', 'even:bg-white');
+                            row.innerHTML = `
+                                <td class="py-5 px-5">${dataTaxonomy.phylum}</td>
+                                <td class="py-5 px-5">${dataTaxonomy.class}</td>
+                                <td class="py-5 px-5">${dataTaxonomy.order}</td>
+                                <td class="py-5 px-5">${dataTaxonomy.family}</td>
+                                <td class="py-5 px-5">${dataTaxonomy.subfamily || '-'}</td>
+                                <td class="py-5 px-5"><i>${dataTaxonomy.genus}</i></td>
+                                <td class="py-5 px-5"><i>${speciesName}</i></td>
+                            `;
+                        } else {
+                            // add - to the table
+                            const row = _boldTableBody.insertRow();
+                            row.classList.add('bg-gray-50', 'hover:bg-gray-400', 'text-black', 'whitespace-nowrap', 'odd:bg-gray-200', 'even:bg-white');
+                            row.innerHTML = `
+                                <td class="py-5 px-5">-</td>
+                                <td class="py-5 px-5">-</td>
+                                <td class="py-5 px-5">-</td>
+                                <td class="py-5 px-5">-</td>
+                                <td class="py-5 px-5">-</td>
+                                <td class="py-5 px-5"><i>${speciesName.split(' ')[0]}</i></td>
+                                <td class="py-5 px-5"><i>${speciesName}</i></td>
+                            `;
+                        }
+                    }
+                }));
             }
         } catch (error) {
-            console.error(error);
+            console.error(`Error fetching data for ${speciesName}: ${error}`);
         }
-        progress += (100/speciesNames.length);
-        progressBar.style.width = progress + '%';
+        progress += (100 / speciesNames.length);
+        const progressPercentage = Math.round(progress);
+        progressBar.style.width = progressPercentage + '%';
+        progressText.textContent = progressPercentage + '%';
         if (progress >= 100) {
             setTimeout(() => {
                 progressModal.classList.add('hidden');
@@ -614,61 +906,200 @@ async function getGBIF() {
     updateDataResults();
 }
 
-// This function exports an HTML table to an Excel file
-async function exportTableToExcel(tableId) {
-    const table = document.getElementById(tableId);
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet(tableId);
-    const data = Array.from(table.rows).map(r => Array.from(r.cells).map(c => c.innerText.replace(/<p>/g, '\n').replace(/<sup>/g, ' ')));
-    data.forEach((row, rowIndex) => {
-        row.forEach((cell, cellIndex) => {
-            if (cellIndex !== 10) {
-                let excelCell = worksheet.getCell(rowIndex + 1, cellIndex < 3 ? cellIndex + 1 : cellIndex);
-                excelCell.value = cell;
-                excelCell.alignment = { vertical: 'middle', wrapText: true };
-            }
-        });
-    });
-    worksheet.getRow(1).font = { bold: true };
-    worksheet.columns.forEach(column => {
-        let maxColumnLength = 0;
-        column.eachCell({ includeEmpty: true }, cell => {
-            let columnLength = cell.text.length;
-            if (columnLength > maxColumnLength) {
-                maxColumnLength = columnLength;
-            }
-        });
-        column.width = maxColumnLength < 10 ? 10 : maxColumnLength > 50 ? 50 : maxColumnLength;
-    });
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'dataFishing_' + tableId + '.xlsx';
-    a.click();
+async function get_BOLD_Systems_data(taxid) {
+    const apiUrl = `http://v3.boldsystems.org/index.php/API_Tax/TaxonData?taxId=${taxid}&dataTypes=basic&includeTree=true`;
+    const proxyUrl = `https://corsproxy.io/?${apiUrl}`;
+    const tax_data = {};
+    try {
+        const response = await fetch(proxyUrl);
+        if (!response.ok) throw new Error(`HTTP-Error: ${response.status}`);
+        const json = await response.json();
+        if (json) {
+            Object.keys(json).forEach(key => {
+                const value = json[key];
+                tax_data[value.tax_rank] = value.taxon;
+            });
+            return tax_data;
+        }
+    } catch (error) {
+        return false;
+    }
 }
 
-// This function updates the data results and column filters
-function updateDataResults() {
-    const dataResults = document.getElementById('dataResults');
-    dataResults.innerHTML = '';
-    const newContent = `
-        <div class="flex items-center py-5 px-5 select-none hover:cursor-pointer">
-            <div class="flex items-center justify-center h-12 w-12 rounded-full bg-gray-800 text-white mr-2 font-bold text-xl">2</div>
-            <div class="text-3xl font-bold hover:underline">Visualize and export the results</div>
+// Função para criar input de busca (modificada para receber cardBody diretamente)
+function createSearchInput(tableId, cardBody) {
+    const searchContainer = document.createElement('div');
+    searchContainer.className = 'mt-6 mb-6'; // Mudei de mb-6 para mt-6 mb-6
+    searchContainer.innerHTML = `
+        <div class="w-full mx-auto">
+            <label for="table-search" class="text-lg font-semibold text-gray-800 mb-2 block">
+                <i class="fas fa-search mr-2"></i>Search in Table Results
+            </label>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <i class="fas fa-search text-gray-400"></i>
+                </div>
+                <input 
+                    type="text" 
+                    id="table-search" 
+                    class="block w-full pl-10 pr-12 py-3 text-base text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-200"
+                    placeholder="Type to search in visible columns..."
+                    autocomplete="off"
+                >
+                <div id="search-clear" class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer hidden">
+                    <i class="fas fa-times text-gray-400 hover:text-gray-600 text-lg"></i>
+                </div>
+            </div>
+            <small class="text-gray-600 mt-2 block">
+                <i class="fas fa-info-circle mr-1"></i>
+                This search will filter and highlight results in the visible columns selected above. First choose your columns, then search through the data.
+            </small>
         </div>
     `;
-    
-    dataResults.innerHTML = newContent;
-    createColumnFilters('TableResults', 'columnFilters');
-    dataResults.innerHTML = `
-    <div class="flex justify-center mt-2 mb-2">
-        <button id="btnExcel" onclick="exportTableToExcel('TableResults')" class="bg-gray-800 text-2xl w-96 sm:w-w-96 hover:bg-blue-900 text-white font-bold py-3 px-3 rounded-lg focus:outline-none focus:shadow-outline"><i class="fa-solid fa-file-excel mr-2"></i> Export Result data to Excel</button>
-    </div>`;
+
+    // Adicionar ao FINAL do cardBody (não mais no início)
+    cardBody.appendChild(searchContainer);
+
+    // Adicionar funcionalidade de busca
+    const searchInput = document.getElementById('table-search');
+    const clearButton = document.getElementById('search-clear');
+    let searchTimeout;
+
+    searchInput.addEventListener('input', function () {
+        const searchTerm = this.value.toLowerCase().trim();
+
+        // Mostrar/esconder botão de limpar
+        if (searchTerm) {
+            clearButton.classList.remove('hidden');
+        } else {
+            clearButton.classList.add('hidden');
+        }
+
+        // Debounce para melhor performance
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            filterAndHighlightTable(tableId, searchTerm);
+        }, 300);
+    });
+
+    // Funcionalidade do botão limpar
+    clearButton.addEventListener('click', function () {
+        searchInput.value = '';
+        clearButton.classList.add('hidden');
+        filterAndHighlightTable(tableId, '');
+        updateSearchResultsCounter('', 0);
+        searchInput.focus();
+    });
+
+    // Limpar busca com ESC
+    searchInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            this.value = '';
+            clearButton.classList.add('hidden');
+            filterAndHighlightTable(tableId, '');
+            updateSearchResultsCounter('', 0);
+        }
+    });
 }
 
-// This function creates filters to toggle table columns
+// Função para filtrar e destacar resultados na tabela
+function filterAndHighlightTable(tableId, searchTerm) {
+    const table = document.getElementById(tableId);
+    const tbody = table.querySelector('tbody');
+    const rows = tbody.querySelectorAll('tr');
+
+    // Remover highlights anteriores
+    removeHighlights(table);
+
+    if (!searchTerm) {
+        // Mostrar todas as linhas se não há termo de busca
+        rows.forEach(row => {
+            row.style.display = '';
+        });
+        updateSearchResultsCounter('', 0); // Esconder contador
+        return;
+    }
+
+    let visibleRowCount = 0;
+
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        let rowMatches = false;
+
+        cells.forEach((cell, cellIndex) => {
+            // Verificar se a coluna está visível
+            const isColumnVisible = cell.style.display !== 'none';
+
+            if (isColumnVisible) {
+                const cellText = cell.textContent.toLowerCase();
+
+                if (cellText.includes(searchTerm)) {
+                    rowMatches = true;
+                    // Destacar o termo encontrado
+                    highlightText(cell, searchTerm);
+                }
+            }
+        });
+
+        // Mostrar/esconder linha baseado na correspondência
+        if (rowMatches) {
+            row.style.display = '';
+            visibleRowCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+
+    // Mostrar contador de resultados
+    updateSearchResultsCounter(searchTerm, visibleRowCount);
+}
+
+function highlightText(element, searchTerm) {
+    const text = element.textContent;
+    const regex = new RegExp(`(${escapeRegExp(searchTerm)})`, 'gi');
+    const highlightedText = text.replace(regex, '<mark class="bg-yellow-300 px-1 rounded">$1</mark>');
+    element.innerHTML = highlightedText;
+}
+
+// Função para remover highlights
+function removeHighlights(table) {
+    const marks = table.querySelectorAll('mark');
+    marks.forEach(mark => {
+        const parent = mark.parentNode;
+        parent.replaceChild(document.createTextNode(mark.textContent), mark);
+        parent.normalize();
+    });
+}
+
+// Função para escapar caracteres especiais do regex
+function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// Função para mostrar contador de resultados
+function updateSearchResultsCounter(searchTerm, count) {
+    let counter = document.getElementById('search-results-counter');
+
+    if (!counter) {
+        counter = document.createElement('div');
+        counter.id = 'search-results-counter';
+        counter.className = 'text-center mt-2 text-sm text-gray-600';
+
+        const searchContainer = document.querySelector('#table-search').closest('.w-full');
+        searchContainer.appendChild(counter);
+    }
+
+    if (searchTerm && searchTerm.length > 0) {
+        counter.innerHTML = `
+            <i class="fas fa-filter mr-1"></i>
+            Showing <strong>${count}</strong> result${count !== 1 ? 's' : ''} for "<strong>${searchTerm}</strong>"
+        `;
+        counter.style.display = 'block';
+    } else {
+        counter.style.display = 'none';
+    }
+}
+
 function createColumnFilters(tableId, filterContainerId) {
     const table = document.getElementById(tableId);
     const filterContainer = document.getElementById(filterContainerId);
@@ -679,18 +1110,10 @@ function createColumnFilters(tableId, filterContainerId) {
     const headerRow = table.querySelector('thead tr');
     filterContainer.innerHTML = ''; // Limpar filtros existentes
 
-    const filterTitle = document.createElement('h3');
-    filterTitle.className = 'text-xl font-bold text-gray-800 mb-5';
-    filterTitle.textContent = 'Show/Hide Columns of the Results';
-    filterContainer.appendChild(filterTitle);
-
-    const filterGrid = document.createElement('div');
-    filterGrid.className = 'grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-10 xxl:grid-cols-10 gap-2';
-
     // Criar switches para cada coluna
     Array.from(headerRow.cells).forEach((cell, index) => {
         const filterItem = document.createElement('div');
-        filterItem.className = 'flex items-center space-x-2';
+        filterItem.className = 'flex items-start space-x-3 my-2 w-full';
 
         const label = document.createElement('label');
         label.className = 'relative inline-flex items-center cursor-pointer w-12 h-8 rounded-full transition duration-300';
@@ -719,6 +1142,12 @@ function createColumnFilters(tableId, filterContainerId) {
                 label.classList.add('bg-gray-400');
                 switchIcon.className = 'fas fa-eye-slash text-white text-xl absolute';
             }
+
+            // Reprocessar busca se houver termo ativo
+            const searchInput = document.getElementById('table-search');
+            if (searchInput && searchInput.value.trim()) {
+                filterAndHighlightTable(tableId, searchInput.value.toLowerCase().trim());
+            }
         });
 
         // Fundo do switch
@@ -735,15 +1164,14 @@ function createColumnFilters(tableId, filterContainerId) {
         label.appendChild(switchIcon);
 
         const columnLabel = document.createElement('span');
-        columnLabel.textContent = cell.textContent.trim();
-        columnLabel.className = 'text-xl text-gray-800 ml-4';
+        columnLabel.htmlFor = `filter-col-${index}`;
+        columnLabel.className = 'ml-3 text-base text-gray-800 leading-tight';
+        columnLabel.innerHTML = cell.textContent.trim();
 
         filterItem.appendChild(label);
         filterItem.appendChild(columnLabel);
-        filterGrid.appendChild(filterItem);
+        filterContainer.appendChild(filterItem);
     });
-
-    filterContainer.appendChild(filterGrid);
 }
 
 // This function toggles the visibility of a table column
@@ -756,9 +1184,6 @@ function toggleColumnVisibility(tableId, colIndex, isVisible) {
         }
     });
 }
-
-
-// 
 
 // This function displays the randomly selected tip on the screen
 function displayTip() {
@@ -871,242 +1296,34 @@ function createCheckboxesForCards(Cards) {
         wrapperDiv.appendChild(label);
         wrapperDiv.appendChild(textLabel);
         container.appendChild(wrapperDiv);
-    });
+    }
+    );
 }
 
+// Criar cards ao carregar
 Object.keys(Cards).forEach(key => {
     const cardElement = createCard(key, Cards[key]);
     document.getElementById('CardsOpt').appendChild(cardElement);
 });
 
-// This function creates a card element for the selected data source
-function createCard(cardTitle, options) {
-    const cardContainer = document.createElement('div');
-    cardContainer.id = cardTitle + 'Card';
-    cardContainer.className = 'bg-white rounded hidden';
-
-    const cardHeader = document.createElement('div');
-    cardHeader.className = 'bg-gray-800 flex items-center text-white py-1 px-1 rounded';
-    cardHeader.innerHTML = `
-        <div class="flex items-center justify-center h-12 w-12 rounded-full bg-gray-200 text-black mr-3 font-bold text-xl">2</div>
-        <div class="text-2xl font-semibold">Search Options of <span class="font-bold">${NamesCards[cardTitle]}</span></div>
-        `;
-    cardContainer.appendChild(cardHeader);
-
-    const cardBody = document.createElement('div');
-    cardBody.className = 'grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-10 xxl:grid-cols-10 gap-1 justify-items-start px-1 py-1';
-    cardContainer.appendChild(cardBody);
-
-    function handleAllDataChange(event) {
-        const allDataInput = event.target;
-        const allDataStatus = allDataInput.checked;
-        const allInputs = Array.from(cardBody.querySelectorAll('.toggle-checkbox')).filter(input => !input.id.endsWith('*opt'));
-
-        allInputs.forEach(input => {
-            input.checked = allDataStatus;
-            input.disabled = false;
-            updateInputStyle(input);
-        });
+const startSearch = document.getElementById('startSearch');
+startSearch.addEventListener('click', function () {
+    const iucn = document.getElementById('iucn-checkbox').checked;
+    const gbif = document.getElementById('gbif-checkbox').checked;
+    const WoRMS = document.getElementById('WoRMS-checkbox').checked;
+    const boldSystems = document.getElementById('BoldSystems-checkbox').checked;
+    if (iucn) {
+        getIUCN();
+    } else if (gbif) {
+        getGBIF();
+    } else if (WoRMS) {
+        getWoRMS();
+    } else if (boldSystems) {
+        get_BOLD_Systems();
     }
-
-    function updateInputStyle(input) {
-        const label = input.parentElement;
-        const icon = label.querySelector('i');
-
-        if (input.checked) {
-            label.classList.remove('bg-orange-500');
-            label.classList.add('bg-gray-800');
-            icon.className = 'fas fa-check text-white text-xl absolute';
-        } else {
-            label.classList.remove('bg-gray-800');
-            label.classList.add('bg-orange-500');
-            icon.className = 'fas fa-times text-black text-xl absolute';
-        }
-    }
-
-    options.forEach(option => {
-        const toggleContainer = document.createElement('div');
-        toggleContainer.className = 'flex items-center space-x-2 my-5 col-span-1 space-x-2'; // Garantia de que cada item ocupa 1 coluna
-        const label = document.createElement('label');
-        label.className = 'relative inline-flex items-center cursor-pointer w-12 h-8 rounded-full transition duration-300';
-
-        const toggleInput = document.createElement('input');
-        toggleInput.type = 'checkbox';
-        toggleInput.checked = option.endsWith('*'); // Ligado apenas para obrigatórios
-        toggleInput.id = option.toLowerCase().replace(cardTitle.toLowerCase() + '_', '') + 'opt';
-        toggleInput.className = 'toggle-checkbox sr-only peer';
-
-        // Desativa os inputs obrigatórios
-        if (option.endsWith('*')) {
-            toggleInput.disabled = true;
-        }
-
-        // Evento para "All Data"
-        if (option.includes('_All_data')) {
-            toggleInput.addEventListener('change', handleAllDataChange);
-        }
-
-        // Ícone inicial
-        const stateIcon = document.createElement('i');
-        stateIcon.className = toggleInput.checked
-            ? 'fas fa-check text-white text-xl absolute'
-            : 'fas fa-times text-black text-xl absolute';
-
-        toggleInput.addEventListener('change', function () {
-            updateInputStyle(toggleInput);
-        });
-
-        // Estilo inicial
-        label.classList.add(toggleInput.checked ? 'bg-gray-800' : 'bg-orange-500');
-
-        // Ícone centralizado no fundo
-        stateIcon.style.top = '50%';
-        stateIcon.style.left = '50%';
-        stateIcon.style.transform = 'translate(-50%, -50%)';
-        label.appendChild(toggleInput);
-        label.appendChild(stateIcon);
-
-        const columnLabel = document.createElement('span');
-        columnLabel.textContent = option.replace(new RegExp('^' + cardTitle + '_', 'i'), '').replace(/_/g, ' ');
-        columnLabel.className = 'text-xl text-gray-800 ml-3';
-
-        toggleContainer.appendChild(label);
-        toggleContainer.appendChild(columnLabel);
-        cardBody.appendChild(toggleContainer);
-    });
-
-    const infoText = document.createElement('div');
-    infoText.className = 'bg-gray-200 text-lg px-4 pt-4 pb-4 rounded text-center col-span-full w-full mx-auto my-5';
-    infoText.innerHTML = `
-    <p class="font-bold">* Mandatory Fields</p>
-    <p><i class="fas fa-info-circle"></i> Click and select the options to search for ${NamesCards[cardTitle]} <b>(${cardTitle})</p>
-    <p><i class="fas fa-info-circle"></i> Please note that a full data search may take considerable time. We appreciate your patience during processing.</p>`;
-    cardBody.appendChild(infoText);
-
-    return cardContainer;
-}
-
-// BOLD System - Search Options
-async function get_BOLD_Systems() {
-    const progressModal = document.getElementById('progressModal');
-    const progressBar = document.getElementById('progressBar');
-    progressModal.classList.remove('hidden');
-
-    let progress = 0;
-    const speciesNames = document.getElementById('speciesNames').value.split('\n');
-
-    const _boldTable = document.createElement('table');
-    _boldTable.id = 'TableResults';
-    _boldTable.classList.add(
-        "text-base",
-        "text-blue-800", 
-        "table-auto",
-        "border-collapse",
-        "w-full" 
-    );
-    _boldTable.innerHTML = `
-    <thead class="text-base text-white bg-gray-800 text-left whitespace-nowrap">
-        <tr>
-            <th scope="col" class="py-5 px-5">Phylum</th>
-            <th scope="col" class="py-5 px-5">Class</th>
-            <th scope="col" class="py-5 px-5">Order</th>
-            <th scope="col" class="py-5 px-5">Family</th>
-            <th scope="col" class="py-5 px-5">Sub Family</th>
-            <th scope="col" class="py-5 px-5">Genus</th>
-            <th scope="col" class="py-5 px-5">Species</th>
-        </tr>
-    </thead>
-    `;
-    const _boldTableBody = _boldTable.createTBody();
-    _boldTableBody.classList.add("text-left", 'divide-y-1', 'divide-blue-800', 'divide-dashed');
-
-    const _boldTableWrapper = document.createElement('div');
-    _boldTableWrapper.classList.add(
-        "w-full",               // O wrapper ocupa toda a largura disponível
-        "overflow-x-auto",      // Rolagem horizontal para conteúdo grande
-        "overflow-y-auto",      // Rolagem vertical
-        "mx-auto"               // Centraliza o wrapper
-    );
-    _boldTableWrapper.appendChild(_boldTable);
-
-    const boldResults = document.getElementById('Results');
-    boldResults.innerHTML = '';
-    boldResults.appendChild(_boldTableWrapper);
-    
-    const promises = speciesNames.map(async (speciesName, index) => {
-        const _speciesName = encodeURIComponent(speciesName);
-        const apiUrl = `http://v3.boldsystems.org/index.php/API_Tax/TaxonSearch?taxName=${_speciesName}`;
-        const proxyUrl = `https://corsproxy.io/?${apiUrl}`;
-        try {
-            const response = await fetch(proxyUrl);
-            if (!response.ok) throw new Error(`HTTP-Error: ${response.status}`);
-            const json = await response.json();
-            if (json) {
-                await Promise.all(Object.keys(json).map(async key => {
-                    const taxData = json[key];
-                    if (taxData && taxData.taxid) {
-                        const taxid = taxData.taxid;
-                        const dataTaxonomy = await get_BOLD_Systems_data(taxid);
-                        if (dataTaxonomy) {
-                            const row = _boldTableBody.insertRow();
-                            row.classList.add('bg-gray-50', 'hover:bg-gray-400', 'text-black', 'whitespace-nowrap', 'odd:bg-gray-200', 'even:bg-white');
-                            row.innerHTML = `
-                                <td class="py-5 px-5">${dataTaxonomy.phylum}</td>
-                                <td class="py-5 px-5">${dataTaxonomy.class}</td>
-                                <td class="py-5 px-5">${dataTaxonomy.order}</td>
-                                <td class="py-5 px-5">${dataTaxonomy.family}</td>
-                                <td class="py-5 px-5">${dataTaxonomy.subfamily || '-'}</td>
-                                <td class="py-5 px-5"><i>${dataTaxonomy.genus}</i></td>
-                                <td class="py-5 px-5"><i>${speciesName}</i></td>
-                            `;
-                        } else {
-                            // add - to the table
-                            const row = _boldTableBody.insertRow();
-                            row.classList.add('bg-gray-50', 'hover:bg-gray-400', 'text-black', 'whitespace-nowrap', 'odd:bg-gray-200', 'even:bg-white');
-                            row.innerHTML = `
-                                <td class="py-5 px-5">-</td>
-                                <td class="py-5 px-5">-</td>
-                                <td class="py-5 px-5">-</td>
-                                <td class="py-5 px-5">-</td>
-                                <td class="py-5 px-5">-</td>
-                                <td class="py-5 px-5"><i>${speciesName.split(' ')[0]}</i></td>
-                                <td class="py-5 px-5"><i>${speciesName}</i></td>
-                            `;
-                        }
-                    }
-                }));
-            }
-        } catch (error) {
-            console.error(`Error fetching data for ${speciesName}: ${error}`);
-        }
-        progress += (100 / speciesNames.length);
-        progressBar.style.width = progress + '%';
-        if (progress >= 100) {
-            setTimeout(() => {
-                progressModal.classList.add('hidden');
-            }, 1000);
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            event.preventDefault();
         }
     });
-    await Promise.all(promises);
-    updateDataResults();
-}
-
-async function get_BOLD_Systems_data(taxid) {
-    const apiUrl = `http://v3.boldsystems.org/index.php/API_Tax/TaxonData?taxId=${taxid}&dataTypes=basic&includeTree=true`;
-    const proxyUrl = `https://corsproxy.io/?${apiUrl}`;
-    const tax_data = {};
-    try {
-        const response = await fetch(proxyUrl);
-        if (!response.ok) throw new Error(`HTTP-Error: ${response.status}`);
-        const json = await response.json();
-        if (json) {
-            Object.keys(json).forEach(key => {
-                const value = json[key];
-                tax_data[value.tax_rank] = value.taxon;
-            });
-            return tax_data;
-        }
-    } catch (error) {
-        return false;
-    }
-}
+});

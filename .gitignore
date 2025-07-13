@@ -1,0 +1,8 @@
+# egg-info
+*egg-info
+dataFishing/__pycache__
+dataFishing/apis/__pycache__
+saida_teste
+*Log.txt
+.env
+apikeys.env

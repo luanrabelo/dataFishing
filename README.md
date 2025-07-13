@@ -100,14 +100,14 @@ pip install -r requirements.txt
 > This command will clone the repository, and then you should navigate to the cloned directory to install ***dataFishing*** and its dependencies using pip.  
 3. With **Conda Environment**
 ```shell
-conda create -n dataFishing python=3.12
-conda activate dataFishing
+conda create -n dataFishing_env python=3.12
+conda activate dataFishing_env
 pip install aiohttp requests pandas biopython openpyxl xlsxwriter SynGenes
 ```
 or
 ```shell
-conda env create -f environment.yml
-conda activate dataFishing
+conda env create --file environment.yml
+conda activate dataFishing_env
 ```
 > [!NOTE]
 > This command creates an **environment in conda** with **Python version 3.12**, then activates the created environment, and finally installs the necessary libraries for **dataFishing**.  
