@@ -83,21 +83,62 @@ async function getWoRMS() {
     <thead class="text-base text-white bg-gray-800 text-left whitespace-nowrap">
         <tr>
             <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 0)">
-                Species Name <i class="fas fa-sort ml-2"></i>
-            </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 1)">
                 AphiaID <i class="fas fa-sort ml-2"></i>
             </th>
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 1)">
+                Kingdom <i class="fas fa-sort ml-2"></i>
+            </th>
             <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 2)">
-                Status <i class="fas fa-sort ml-2"></i>
+                Phylum <i class="fas fa-sort ml-2"></i>
             </th>
             <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 3)">
+                Class <i class="fas fa-sort ml-2"></i>
+            </th>
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 4)">
+                Order <i class="fas fa-sort ml-2"></i>
+            </th>
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 5)">
                 Family <i class="fas fa-sort ml-2"></i>
             </th>
-            ${wormsAuthorityOpt ? `<th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 4)">Authority <i class="fas fa-sort ml-2"></i></th>` : ''}
-            ${wormsMarineOpt ? `<th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', ${4 + (wormsAuthorityOpt ? 1 : 0)})">Marine <i class="fas fa-sort ml-2"></i></th>` : ''}
-            ${wormsBrackishOpt ? `<th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', ${4 + (wormsAuthorityOpt ? 1 : 0) + (wormsMarineOpt ? 1 : 0)})">Brackish <i class="fas fa-sort ml-2"></i></th>` : ''}
-            ${wormsFreshwaterOpt ? `<th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', ${4 + (wormsAuthorityOpt ? 1 : 0) + (wormsMarineOpt ? 1 : 0) + (wormsBrackishOpt ? 1 : 0)})">Freshwater <i class="fas fa-sort ml-2"></i></th>` : ''}
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 6)">
+                Genus <i class="fas fa-sort ml-2"></i>
+            </th>
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 7)">
+                Species Name <i class="fas fa-sort ml-2"></i>
+            </th>
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 8)">
+                Authority <i class="fas fa-sort ml-2"></i>
+            </th>
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 9)">
+                Valid Species Name <i class="fas fa-sort ml-2"></i>
+            </th>
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 10)">
+                Valid Authority <i class="fas fa-sort ml-2"></i>
+            </th>
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 11)">
+                Status <i class="fas fa-sort ml-2"></i>
+            </th>
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 12)">
+                Marine <i class="fas fa-sort ml-2"></i>
+            </th>
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 13)">
+                Brackish <i class="fas fa-sort ml-2"></i>
+            </th>
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 14)">
+                Freshwater <i class="fas fa-sort ml-2"></i>
+            </th>
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 15)">
+                Terrestrial <i class="fas fa-sort ml-2"></i>
+            </th>
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 16)">
+                Extinct <i class="fas fa-sort ml-2"></i>
+            </th>
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 17)">
+                Match Type <i class="fas fa-sort ml-2"></i>
+            </th>
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 18)">
+                Modified <i class="fas fa-sort ml-2"></i>
+            </th>
             <th scope="col" class="py-5 px-5">Link</th>
         </tr>
     </thead>
@@ -155,75 +196,135 @@ async function getWoRMS() {
             
             let cellIndex = 0;
 
+            // AphiaID
+            const aphiaIdCell = row.insertCell(cellIndex++);
+            aphiaIdCell.innerHTML = result.aphiaID || '-';
+            aphiaIdCell.className = "py-5 px-5";
+
+            // Kingdom
+            const kingdomCell = row.insertCell(cellIndex++);
+            kingdomCell.innerHTML = result.kingdom || '-';
+            kingdomCell.className = "py-5 px-5";
+
+            // Phylum
+            const phylumCell = row.insertCell(cellIndex++);
+            phylumCell.innerHTML = result.phylum || '-';
+            phylumCell.className = "py-5 px-5";
+
+            // Class
+            const classCell = row.insertCell(cellIndex++);
+            classCell.innerHTML = result.class || '-';
+            classCell.className = "py-5 px-5";
+
+            // Order
+            const orderCell = row.insertCell(cellIndex++);
+            orderCell.innerHTML = result.order || '-';
+            orderCell.className = "py-5 px-5";
+
+            // Family
+            const familyCell = row.insertCell(cellIndex++);
+            familyCell.innerHTML = result.family || '-';
+            familyCell.className = "py-5 px-5";
+
+            // Genus
+            const genusCell = row.insertCell(cellIndex++);
+            genusCell.innerHTML = `<i>${result.genus || '-'}</i>`;
+            genusCell.className = "py-5 px-5";
+
             // Species Name
             const speciesCell = row.insertCell(cellIndex++);
             speciesCell.innerHTML = `<i>${result.speciesName}</i>`;
             speciesCell.className = "py-5 px-5";
 
-            // AphiaID
-            const aphiaCell = row.insertCell(cellIndex++);
-            aphiaCell.innerHTML = result.aphiaID;
-            aphiaCell.className = "py-5 px-5";
+            // Authority
+            const authorityCell = row.insertCell(cellIndex++);
+            authorityCell.innerHTML = result.authority || '-';
+            authorityCell.className = "py-5 px-5";
+
+            // Valid Species Name
+            const validSpeciesCell = row.insertCell(cellIndex++);
+            validSpeciesCell.innerHTML = `<i>${result.validName || '-'}</i>`;
+            validSpeciesCell.className = "py-5 px-5";
+
+            // Valid Authority
+            const validAuthorityCell = row.insertCell(cellIndex++);
+            validAuthorityCell.innerHTML = result.validAuthority || '-';
+            validAuthorityCell.className = "py-5 px-5";
 
             // Status
             const statusCell = row.insertCell(cellIndex++);
             const statusColor = result.status === 'accepted' ? '#BACD92' : 
                                result.status === 'synonym' ? '#FFE066' : 
                                result.status === 'unaccepted' ? '#FA7070' : 
-                               result.status === 'Error' ? '#FA7070' : '#D1D1C7';
-            statusCell.innerHTML = result.status;
+                               result.status === 'uncertain' ? '#D1D1C7' : '#D1D1C7';
+            statusCell.innerHTML = result.status || '-';
             statusCell.className = "py-5 px-5 font-bold";
             statusCell.style.backgroundColor = statusColor;
 
-            // Family
-            const familyCell = row.insertCell(cellIndex++);
-            familyCell.innerHTML = result.family;
-            familyCell.className = "py-5 px-5";
+            // Marine
+            const marineCell = row.insertCell(cellIndex++);
+            const marineValue = result.isMarine === '1' ? 'Yes' : result.isMarine === '0' ? 'No' : '-';
+            const marineColor = marineValue === 'Yes' ? '#5FC65A' : marineValue === 'No' ? '#FA7070' : '#D1D1C7';
+            marineCell.innerHTML = marineValue;
+            marineCell.className = "py-5 px-5 font-bold text-center";
+            marineCell.style.backgroundColor = marineColor;
 
-            // Authority (if enabled)
-            if (wormsAuthorityOpt) {
-                const authorityCell = row.insertCell(cellIndex++);
-                authorityCell.innerHTML = result.authority;
-                authorityCell.className = "py-5 px-5";
-            }
+            // Brackish
+            const brackishCell = row.insertCell(cellIndex++);
+            const brackishValue = result.isBrackish === '1' ? 'Yes' : result.isBrackish === '0' ? 'No' : '-';
+            const brackishColor = brackishValue === 'Yes' ? '#5FC65A' : brackishValue === 'No' ? '#FA7070' : '#D1D1C7';
+            brackishCell.innerHTML = brackishValue;
+            brackishCell.className = "py-5 px-5 font-bold text-center";
+            brackishCell.style.backgroundColor = brackishColor;
 
-            // Marine (if enabled)
-            if (wormsMarineOpt) {
-                const marineCell = row.insertCell(cellIndex++);
-                const marineColor = environmentColors[result.isMarine] || '#D1D1C7';
-                marineCell.innerHTML = result.isMarine;
-                marineCell.className = "py-5 px-5 font-bold";
-                marineCell.style.backgroundColor = marineColor;
-            }
+            // Freshwater
+            const freshwaterCell = row.insertCell(cellIndex++);
+            const freshwaterValue = result.isFreshwater === '1' ? 'Yes' : result.isFreshwater === '0' ? 'No' : '-';
+            const freshwaterColor = freshwaterValue === 'Yes' ? '#5FC65A' : freshwaterValue === 'No' ? '#FA7070' : '#D1D1C7';
+            freshwaterCell.innerHTML = freshwaterValue;
+            freshwaterCell.className = "py-5 px-5 font-bold text-center";
+            freshwaterCell.style.backgroundColor = freshwaterColor;
 
-            // Brackish (if enabled)
-            if (wormsBrackishOpt) {
-                const brackishCell = row.insertCell(cellIndex++);
-                const brackishColor = environmentColors[result.isBrackish] || '#D1D1C7';
-                brackishCell.innerHTML = result.isBrackish;
-                brackishCell.className = "py-5 px-5 font-bold";
-                brackishCell.style.backgroundColor = brackishColor;
-            }
+            // Terrestrial
+            const terrestrialCell = row.insertCell(cellIndex++);
+            const terrestrialValue = result.isTerrestrial === '1' ? 'Yes' : result.isTerrestrial === '0' ? 'No' : '-';
+            const terrestrialColor = terrestrialValue === 'Yes' ? '#5FC65A' : terrestrialValue === 'No' ? '#FA7070' : '#D1D1C7';
+            terrestrialCell.innerHTML = terrestrialValue;
+            terrestrialCell.className = "py-5 px-5 font-bold text-center";
+            terrestrialCell.style.backgroundColor = terrestrialColor;
 
-            // Freshwater (if enabled)
-            if (wormsFreshwaterOpt) {
-                const freshwaterCell = row.insertCell(cellIndex++);
-                const freshwaterColor = environmentColors[result.isFreshwater] || '#D1D1C7';
-                freshwaterCell.innerHTML = result.isFreshwater;
-                freshwaterCell.className = "py-5 px-5 font-bold";
-                freshwaterCell.style.backgroundColor = freshwaterColor;
-            }
+            // Extinct
+            const extinctCell = row.insertCell(cellIndex++);
+            const extinctValue = result.isExtinct === '1' ? 'Yes' : result.isExtinct === '0' ? 'No' : '-';
+            const extinctColor = extinctValue === 'Yes' ? '#FA7070' : extinctValue === 'No' ? '#5FC65A' : '#D1D1C7';
+            extinctCell.innerHTML = extinctValue;
+            extinctCell.className = "py-5 px-5 font-bold text-center";
+            extinctCell.style.backgroundColor = extinctColor;
+
+            // Match Type
+            const matchTypeCell = row.insertCell(cellIndex++);
+            matchTypeCell.innerHTML = result.matchType || '-';
+            matchTypeCell.className = "py-5 px-5";
+
+            // Modified
+            const modifiedCell = row.insertCell(cellIndex++);
+            modifiedCell.innerHTML = result.modified || '-';
+            modifiedCell.className = "py-5 px-5";
 
             // Link
             const linkCell = row.insertCell(cellIndex++);
-            linkCell.innerHTML = `
-                <a class="inline-flex items-center px-4 py-2 border border-gray-800 text-base font-medium rounded-lg text-gray-800 bg-white hover:bg-gray-50 transition-colors duration-200 shadow-sm hover:shadow-md" 
-                   href="https://www.marinespecies.org/aphia.php?p=taxdetails&id=${result.aphiaID}" 
-                   target="_blank">
-                    <i class="fa-solid fa-arrow-up-right-from-square mr-2 text-lg"></i>
-                    View
-                </a>
-            `;
+            if (result.aphiaID && result.aphiaID !== '-') {
+                linkCell.innerHTML = `
+                    <a class="inline-flex items-center px-4 py-2 border border-gray-800 text-base font-medium rounded-lg text-gray-800 bg-white hover:bg-gray-50 transition-colors duration-200 shadow-sm hover:shadow-md" 
+                       href="https://www.marinespecies.org/aphia.php?p=taxdetails&id=${result.aphiaID}" 
+                       target="_blank">
+                        <i class="fa-solid fa-arrow-up-right-from-square mr-2 text-lg"></i>
+                        View
+                    </a>
+                `;
+            } else {
+                linkCell.innerHTML = '-';
+            }
             linkCell.className = "py-5 px-5";
 
             // Contar status para estatísticas

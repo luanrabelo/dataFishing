@@ -124,7 +124,6 @@ class DataFishingApp {
     getSelectedApis() {
         const selected = [];
         
-        // Verificar usando os IDs corretos criados pela função createCheckboxesForCards
         if (document.getElementById('eschmeyer-checkbox')?.checked) {
             selected.push('eschmeyer');
         }
@@ -198,6 +197,15 @@ class DataFishingApp {
                     onProgress,
                     (result, current, total) => {
                         console.log(`🌊 WoRMS - Completed ${current}/${total}: ${result.speciesName} (${result.status})`);
+                    }
+                );
+            
+            case 'gbif':
+                return await gbifAPI.searchBatch(
+                    speciesList,
+                    onProgress,
+                    (result, current, total) => {
+                        console.log(`🌍 GBIF - Completed ${current}/${total}: ${result.speciesName} (${result.taxonomicStatus})`);
                     }
                 );
             
@@ -363,6 +371,15 @@ class DataFishingApp {
                     { key: `${apiName}_isMarine`, label: `${apiLabel} Marine`, description: 'Marine environment' },
                     { key: `${apiName}_isBrackish`, label: `${apiLabel} Brackish`, description: 'Brackish environment' },
                     { key: `${apiName}_isFreshwater`, label: `${apiLabel} Freshwater`, description: 'Freshwater environment' }
+                );
+            } else if (apiName === 'gbif') {
+                headers.push(
+                    { key: `${apiName}_key`, label: `${apiLabel} Key`, description: 'GBIF identifier' },
+                    { key: `${apiName}_taxonomicStatus`, label: `${apiLabel} Status`, description: 'Taxonomic status' },
+                    { key: `${apiName}_family`, label: `${apiLabel} Family`, description: 'Taxonomic family' },
+                    { key: `${apiName}_scientificName`, label: `${apiLabel} Scientific Name`, description: 'Full scientific name' },
+                    { key: `${apiName}_authorship`, label: `${apiLabel} Authorship`, description: 'Species authorship' },
+                    { key: `${apiName}_taxonRank`, label: `${apiLabel} Rank`, description: 'Taxonomic rank' }
                 );
             }
 
@@ -1228,7 +1245,6 @@ document.addEventListener('DOMContentLoaded', function () {
         startSearch.addEventListener('click', function () {
             console.log('Start search button clicked');
             
-            // Usar os IDs corretos dos checkboxes
             const eschmeyer = document.getElementById('eschmeyer-checkbox')?.checked;
             const iucn = document.getElementById('iucn-checkbox')?.checked;
             const gbif = document.getElementById('gbif-checkbox')?.checked;
@@ -1245,10 +1261,11 @@ document.addEventListener('DOMContentLoaded', function () {
             } else if (worms) {
                 console.log('Starting WoRMS search...');
                 getWoRMS();
+            } else if (gbif) {
+                console.log('Starting GBIF search...');
+                getGBIF();
             } else if (iucn) {
                 alert('IUCN API not yet implemented in web version');
-            } else if (gbif) {
-                alert('GBIF API not yet implemented in web version');
             } else if (bold) {
                 alert('BOLD Systems API not yet implemented in web version');
             } else {
