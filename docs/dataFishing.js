@@ -124,6 +124,7 @@ class DataFishingApp {
     getSelectedApis() {
         const selected = [];
         
+        // Verificar usando os IDs corretos criados pela função createCheckboxesForCards
         if (document.getElementById('eschmeyer-checkbox')?.checked) {
             selected.push('eschmeyer');
         }
@@ -528,7 +529,7 @@ var Cards = {
         'Eschmeyer_Family*',
         'Eschmeyer_Synonyms*'
     ],
-    'WoRMS': [
+    'worms': [
         'WoRMS_All_data*',
         'WoRMS_Taxonomy*',
         'WoRMS_Authority*',
@@ -551,7 +552,7 @@ var Cards = {
         "GBIF_Vernacular_Name*",
         "GBIF_Taxonomic_Status*"
     ],
-    'BoldSystems': [
+    'bold': [
         'BOLD_All_data*',
         'BOLD_Taxonomy*',
         'BOLD_Sequences*'
@@ -571,9 +572,9 @@ var Cards = {
 
 var NamesCards = {
     'eschmeyer': 'Eschmeyer\'s Catalog of Fishes',
-    'WoRMS': 'World Register of Marine Species',
+    'worms': 'World Register of Marine Species',
     'gbif': 'Global Biodiversity Information Facility',
-    'BoldSystems': 'Barcode of Life Data Systems <sup>beta</sup>',
+    'bold': 'Barcode of Life Data Systems <sup>beta</sup>',
     'iucn': 'Red List of Threatened Species'
 };
 
@@ -1227,26 +1228,28 @@ document.addEventListener('DOMContentLoaded', function () {
         startSearch.addEventListener('click', function () {
             console.log('Start search button clicked');
             
+            // Usar os IDs corretos dos checkboxes
             const eschmeyer = document.getElementById('eschmeyer-checkbox')?.checked;
             const iucn = document.getElementById('iucn-checkbox')?.checked;
             const gbif = document.getElementById('gbif-checkbox')?.checked;
-            const WoRMS = document.getElementById('WoRMS-checkbox')?.checked;
-            const boldSystems = document.getElementById('BoldSystems-checkbox')?.checked;
+            const worms = document.getElementById('worms-checkbox')?.checked;
+            const bold = document.getElementById('bold-checkbox')?.checked;
             
             console.log('Selected databases:', {
-                eschmeyer, iucn, gbif, WoRMS, boldSystems
+                eschmeyer, iucn, gbif, worms, bold
             });
             
             if (eschmeyer) {
                 console.log('Starting Eschmeyer search...');
                 getEschmeyer();
+            } else if (worms) {
+                console.log('Starting WoRMS search...');
+                getWoRMS();
             } else if (iucn) {
                 alert('IUCN API not yet implemented in web version');
             } else if (gbif) {
                 alert('GBIF API not yet implemented in web version');
-            } else if (WoRMS) {
-                alert('WoRMS API not yet implemented in web version');
-            } else if (boldSystems) {
+            } else if (bold) {
                 alert('BOLD Systems API not yet implemented in web version');
             } else {
                 alert('Please select a database to search.');
