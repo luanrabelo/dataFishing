@@ -388,7 +388,7 @@ function updateDataResults() {
     resultsCard.className = 'bg-white rounded mb-4 mx-1';
 
     const cardHeader = document.createElement('div');
-    cardHeader.className = 'bg-gray-800 flex items-center text-white py-1 px-1 rounded mx-1 my-2';
+    cardHeader.className = 'bg-gray-800 flex items-center text-white py-2 px-2 rounded my-1';
     cardHeader.innerHTML = `
         <div class="flex items-center justify-center h-12 w-12 rounded-full bg-gray-200 text-black mr-3 font-bold text-xl">4</div>
         <div class="text-2xl font-semibold">Visualize and export the results</div>

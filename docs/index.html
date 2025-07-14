@@ -181,7 +181,7 @@
   </header>
 
   <main class="flex-grow">
-    <div class="tip-container">
+    <div class="tip-container py-2">
       <script>
         $(document).ready(function () {
           displayTip();
@@ -189,7 +189,7 @@
       </script>
     </div>
 
-    <div class="bg-gray-800 flex items-center text-white py-2 px-2 rounded my-1">
+    <div class="bg-gray-800 flex items-center text-white py-2 px-2 rounded">
       <div class="flex items-center justify-center h-12 w-12 rounded-full bg-gray-200 text-black mr-3 font-bold text-xl">1</div>
       <div class="text-2xl font-semibold">Select the data source to search for <span class="font-bold">biodiversity</span> information:</div>
     </div>
@@ -216,17 +216,37 @@
       
     </div>
 
-    <div id="spForm" class="max-w-screen-2xl mx-auto py-2">
-      <div class="bg-gray-800 flex items-center text-white py-2 px-2 rounded my-1">
+    <div id="spForm" class="w-full py-2">
+      <!-- Barra do bloco 3 igual às demais, largura total -->
+      <div class="bg-gray-800 flex items-center text-white py-2 px-2 rounded w-full">
         <div class="flex items-center justify-center h-12 w-12 rounded-full bg-gray-200 text-black mr-3 font-bold text-xl">3</div>
         <div class="text-2xl font-semibold">Species Names:</div>
       </div>
       <textarea id="speciesNames" class="rounded-lg border-2 border-gray-800/50 w-full text-lg py-1 px-1" style="height: 30vh;" spellcheck="false"></textarea>
-      <div class="mt-1 text-justify">
-        <i class="fa-solid fa-circle-info"></i> Enter the <b>Species Names</b>, each on a <b>new line</b>, <b>without any special characters</b>. 
-        <button type="button" id="exampleSpecies" class="rounded-md py-2 px-4 cursor-pointer text-base text-center bg-gray-800 text-white font-bold hover:bg-blue-900"> Click here</button> to see an example.</div>
+      <div class="bg-gray-200 border-l-4 border-gray-800 p-4 my-2 mx-1 rounded-lg shadow-sm">
+        <div class="flex items-start">
+          <div class="flex-shrink-0">
+            <i class="fas fa-2x fa-exclamation-triangle text-black"></i>
+          </div>
+          <div class="ml-5">
+            <h3 class="text-lg font-semibold text-black mb-1">
+              <i class="fas fa-info-circle mr-2"></i>Important Information
+            </h3>
+            <p class="text-black text-base leading-relaxed">
+              <i class="fas fa-hand-pointer mr-2 text-gray-800"></i>
+              <strong>Enter the <span class="text-gray-800">species names</span> you want to search for.</strong><br>
+              <i class="fas fa-list-ol mr-2 text-gray-600"></i>
+              Each species must be on a <b>new line</b> and in the format <b>Genus species</b> (e.g., <b>Panthera tigris</b>).<br>
+              <i class="fas fa-ban mr-2 text-gray-600"></i>
+              Do <b>not</b> use special characters or numbers.<br>
+              <i class="fas fa-copy mr-2 text-gray-600"></i>
+              <button type="button" id="exampleSpecies" class="rounded-md py-2 px-4 cursor-pointer text-base text-center bg-gray-800 text-white font-bold hover:bg-blue-900 inline-block">Click here</button> to see an example.
+            </p>
+          </div>
+        </div>
+      </div>
       <div id="errorDiv" class="text-danger mt-1"></div>
-      <div class="flex justify-end">
+      <div class="flex justify-center">
         <button id="startSearch" class="bg-gray-800 text-2xl w-96 sm:w-w-96 hover:bg-blue-900 text-white font-bold py-5 px-5 rounded-lg focus:outline-none focus:shadow-outline mt-2" type="button"><i class="fa-solid fa-magnifying-glass"></i> Start dataFishing</button>
       </div>
       <script>
@@ -355,7 +375,7 @@
 
   <!-- Footer -->
   <footer
-    class="bg-gray-800 text-white p-5 inset-x-0 bottom-0 text-xl sm:text-2xl md:text-2xl lg:text-base xl:text-base">
+    class="bg-gray-800 text-white p-5 inset-x-0 bottom-0 text-xl sm:text-2xl md:text-2xl lg:text-base xl:text-base mt-5">
     <div class="max-w-screen-2xl mx-auto">
       <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
         
@@ -363,7 +383,7 @@
           <h4 class="font-bold text-lg mb-1">About:</h4>
           <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-1">
             <div class="text-center">
-              <img src="assets/dataFishing.png" alt="dataFishing">
+              <img src="assets/dataFishing.png" alt="dataFishing" class="mx-auto" width="45%">
             </div>
           </div>
         </div>

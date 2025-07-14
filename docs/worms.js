@@ -338,17 +338,17 @@ async function getWoRMS() {
         // Mostrar aviso de sucesso (WoRMS geralmente não tem problemas de CORS)
         if (successCount > 0) {
             const successNotice = document.createElement('div');
-            successNotice.className = 'bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4';
+            successNotice.className = 'bg-gray-200 border-l-4 border-gray-800 p-5 my-1 mx-1 rounded-lg shadow-sm';
             successNotice.innerHTML = `
-                <div class="flex">
+                <div class="flex items-start">
                     <div class="flex-shrink-0">
-                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-2x fa-check-circle text-black"></i>
                     </div>
-                    <div class="ml-3">
-                        <p class="text-sm">
-                            <strong>Success:</strong> Successfully accessed WoRMS database.
+                    <div class="ml-5">
+                        <p class="text-lg font-semibold text-black mb-1">
+                            <strong>Success:</strong> Successfully accessed World Register of Marine Species database.
                         </p>
-                        <p class="text-sm mt-2">
+                        <p class="text-black text-base leading-relaxed">
                             Results: ${successCount}/${results.length} species found
                         </p>
                     </div>
@@ -357,17 +357,17 @@ async function getWoRMS() {
             wormsResults.insertBefore(successNotice, _wormsTableWrapper);
         } else if (errorCount > 0) {
             const errorNotice = document.createElement('div');
-            errorNotice.className = 'bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4';
+            errorNotice.className = 'bg-red-200 border-l-4 border-gray-800 p-5 my-1 mx-1 rounded-lg shadow-sm';
             errorNotice.innerHTML = `
-                <div class="flex">
+                <div class="flex items-start">
                     <div class="flex-shrink-0">
-                        <i class="fas fa-exclamation-triangle"></i>
+                        <i class="fas fa-2x fa-exclamation-triangle text-black"></i>
                     </div>
-                    <div class="ml-3">
-                        <p class="text-sm">
+                    <div class="ml-5">
+                        <p class="text-lg font-semibold text-black mb-1">
                             <strong>Notice:</strong> ${errorCount} of ${results.length} requests had issues. 
                         </p>
-                        <p class="text-sm mt-2">
+                        <p class="text-black text-base leading-relaxed">
                             Successfully processed: ${successCount}/${results.length} species
                         </p>
                     </div>
@@ -383,8 +383,8 @@ async function getWoRMS() {
             <!-- Search Input -->
             <div class="mt-6 mb-6 px-4">
                 <div class="w-full mx-auto">
-                    <label for="worms-table-search" class="text-lg font-semibold text-gray-800 mb-2 block">
-                        <i class="fas fa-search mr-2"></i>Search in WoRMS Results
+                    <label for="worms-table-search" class="text-xl font-semibold text-gray-800 mb-2 block">
+                        <i class="fas fa-search mr-2"></i>Search in World Register of Marine Species Results
                     </label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">

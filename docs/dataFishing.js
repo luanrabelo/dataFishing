@@ -578,30 +578,30 @@ var Cards = {
         "GBIF_Vernacular_Name*",
         "GBIF_Taxonomic_Status*"
     ],
-    'bold': [
-        'BOLD_All_data*',
-        'BOLD_Taxonomy*',
-        'BOLD_Sequences*'
-    ],
-    'iucn': [
-        'IUCN_All_data',
-        'IUCN_Common_Names',
-        'IUCN_Country_Occurrence',
-        'IUCN_Habitats',
-        'IUCN_Species_Author*',
-        'IUCN_Status_Conservation*',
-        'IUCN_Synonyms_Names',
-        'IUCN_Taxonomy*',
-        'IUCN_Threats'
-    ]
+    //'bold': [
+    //    'BOLD_All_data*',
+    //    'BOLD_Taxonomy*',
+    //    'BOLD_Sequences*'
+    //],
+    //'iucn': [
+    //    'IUCN_All_data',
+    //    'IUCN_Common_Names',
+    //    'IUCN_Country_Occurrence',
+    //    'IUCN_Habitats',
+    //    'IUCN_Species_Author*',
+    //    'IUCN_Status_Conservation*',
+    //    'IUCN_Synonyms_Names',
+    //    'IUCN_Taxonomy*',
+    //    'IUCN_Threats'
+    //]
 };
 
 var NamesCards = {
     'eschmeyer': 'Eschmeyer\'s Catalog of Fishes',
     'worms': 'World Register of Marine Species',
     'gbif': 'Global Biodiversity Information Facility',
-    'bold': 'Barcode of Life Data Systems <sup>beta</sup>',
-    'iucn': 'Red List of Threatened Species'
+    //'bold': 'Barcode of Life Data Systems',
+    //'iucn': 'IUCN Red List of Threatened Species'
 };
 
 function createCheckboxesForCards(Cards) {
@@ -636,35 +636,69 @@ function createCheckboxesForCards(Cards) {
         stateIcon.style.left = '50%';
         stateIcon.style.transform = 'translate(-50%, -50%)';
 
-        allCheckboxes.push({ checkbox, label, stateIcon });
+        allCheckboxes.push({ checkbox, label, stateIcon, wrapperDiv });
 
         const updateStyles = () => {
-            const anyChecked = allCheckboxes.some(item => item.checkbox.checked);
+            const checkedBoxes = allCheckboxes.filter(item => item.checkbox.checked);
+            const anyChecked = checkedBoxes.length > 0;
 
             allCheckboxes.forEach(item => {
                 if (item.checkbox.checked) {
-                    item.label.classList.remove('bg-orange-500', 'bg-gray-400');
-                    item.label.classList.add('bg-gray-800');
+                    // Checkbox selecionado - estilo ativo
+                    item.label.classList.remove('bg-orange-500', 'bg-gray-400', 'cursor-not-allowed');
+                    item.label.classList.add('bg-gray-800', 'cursor-pointer');
                     item.stateIcon.className = 'fas fa-check text-white text-xl absolute';
+                    item.checkbox.disabled = false;
+                    item.wrapperDiv.style.pointerEvents = 'auto';
+                    item.wrapperDiv.style.opacity = '1';
                 } else if (anyChecked) {
-                    item.label.classList.remove('bg-gray-800', 'bg-orange-500');
+                    // Outros checkboxes quando um está selecionado - REALMENTE desabilitados
+                    item.label.classList.remove('bg-gray-800', 'bg-orange-500', 'cursor-pointer');
                     item.label.classList.add('bg-gray-400', 'cursor-not-allowed');
-                    item.stateIcon.className = 'fas fa-ban text-gray-500 text-xl absolute';
+                    item.stateIcon.className = 'fas fa-ban text-gray-600 text-xl absolute';
                     item.checkbox.disabled = true;
+                    item.wrapperDiv.style.pointerEvents = 'none'; // Bloquear TODOS os eventos do mouse
+                    item.wrapperDiv.style.opacity = '0.6';
+                    item.wrapperDiv.style.cursor = 'not-allowed';
                 } else {
+                    // Estado inicial - todos disponíveis
                     item.label.classList.remove('bg-gray-800', 'bg-gray-400', 'cursor-not-allowed');
-                    item.label.classList.add('bg-orange-500');
+                    item.label.classList.add('bg-orange-500', 'cursor-pointer');
                     item.stateIcon.className = 'fas fa-times text-black text-xl absolute';
                     item.checkbox.disabled = false;
+                    item.wrapperDiv.style.pointerEvents = 'auto';
+                    item.wrapperDiv.style.opacity = '1';
+                    item.wrapperDiv.style.cursor = 'pointer';
                 }
             });
         };
 
-        checkbox.addEventListener('change', function() {
+        // Função para alternar checkbox (só funciona se não estiver desabilitado)
+        const toggleCheckbox = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Verificar se o checkbox está desabilitado
+            if (checkbox.disabled) {
+                return false;
+            }
+            
             const card = document.getElementById(key + 'Card');
-            if (this.checked) {
+            
+            if (checkbox.checked) {
+                // Desmarcando
+                checkbox.checked = false;
+                if (card) {
+                    card.classList.add('fade-out');
+                    setTimeout(() => {
+                        card.classList.add('hidden');
+                        card.classList.remove('fade-out');
+                    }, 500);
+                }
+            } else {
+                // Marcando - desmarcar todos os outros primeiro
                 allCheckboxes.forEach(item => {
-                    if (item.checkbox !== this) {
+                    if (item.checkbox !== checkbox) {
                         item.checkbox.checked = false;
                         const otherCard = document.getElementById(item.checkbox.id.replace('-checkbox', 'Card'));
                         if (otherCard) {
@@ -674,42 +708,60 @@ function createCheckboxesForCards(Cards) {
                     }
                 });
 
+                // Marcar o atual
+                checkbox.checked = true;
                 if (card) {
                     card.classList.remove('hidden');
                     card.classList.add('fade-in');
                 }
-            } else {
-                if (card) {
-                    card.classList.add('fade-out');
-                    setTimeout(() => {
-                        card.classList.add('hidden');
-                        card.classList.remove('fade-out');
-                    }, 500);
-                }
+            }
+            
+            updateStyles();
+            return false;
+        };
+
+        // Adicionar event listeners para o wrapper inteiro
+        wrapperDiv.addEventListener('click', toggleCheckbox);
+        wrapperDiv.addEventListener('mousedown', (e) => {
+            if (checkbox.disabled) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        });
+
+        // Event listener direto no checkbox também
+        checkbox.addEventListener('change', function(e) {
+            if (this.disabled) {
+                e.preventDefault();
+                return false;
             }
             updateStyles();
         });
 
-        label.classList.add('bg-orange-500');
+        // Configuração inicial
+        label.classList.add('bg-orange-500', 'cursor-pointer');
 
         label.appendChild(checkbox);
         label.appendChild(stateIcon);
 
         const textLabel = document.createElement('span');
-        textLabel.className = 'ml-5 text-xl text-gray-800';
-        textLabel.innerHTML = `${NamesCards[key]}<br>(<strong>${key.toUpperCase()}</strong>)`;
+        textLabel.className = 'ml-5 text-xl text-gray-800 font-medium select-none';
+        textLabel.innerHTML = NamesCards[key]; // Apenas o nome completo, sem parênteses
 
         wrapperDiv.appendChild(label);
         wrapperDiv.appendChild(textLabel);
         container.appendChild(wrapperDiv);
     });
 
+    // Configuração inicial dos estilos
     allCheckboxes.forEach(item => {
-        item.label.classList.add('bg-orange-500');
+        item.label.classList.add('bg-orange-500', 'cursor-pointer');
         item.stateIcon.className = 'fas fa-times text-black text-xl absolute';
         item.stateIcon.style.top = '50%';
         item.stateIcon.style.left = '50%';
         item.stateIcon.style.transform = 'translate(-50%, -50%)';
+        item.wrapperDiv.style.cursor = 'pointer';
     });
 }
 
@@ -808,387 +860,6 @@ function createCard(cardTitle, options) {
 
 function updateDataResults() {
     console.log('Data results updated successfully');
-}
-
-async function getEschmeyer() {
-    console.log('getEschmeyer called');
-    
-    // Verificar se o eschmeyerAPI está disponível
-    if (typeof window.eschmeyerAPI === 'undefined' || !window.eschmeyerAPI) {
-        console.error('❌ eschmeyerAPI is not available. Attempting to initialize...');
-        
-        if (typeof EschmeyerAPI !== 'undefined') {
-            window.eschmeyerAPI = new EschmeyerAPI();
-            console.log('✅ eschmeyerAPI initialized successfully');
-        } else {
-            console.error('❌ EschmeyerAPI class not found. Please check if eschmeyer.js is loaded.');
-            alert('Erro: API do Eschmeyer não está carregada. Por favor, recarregue a página e tente novamente.');
-            return;
-        }
-    }
-
-    const statusColor = {
-        'Valid': '#BACD92',
-        'Synonym': '#FFE066',
-        'Error': '#FA7070',
-        'Not Found': '#D1D1C7'
-    };
-
-    const progressModal = document.getElementById('progressModal');
-    const progressBar = document.getElementById('progressBar');
-    const progressText = document.getElementById('progressText');
-    
-    if (!progressModal) {
-        console.error('Progress modal not found');
-        return;
-    }
-    
-    progressModal.classList.remove('hidden');
-
-    let progress = 0;
-    const speciesNames = document.getElementById('speciesNames').value.split('\n').filter(name => name.trim());
-    
-    if (speciesNames.length === 0) {
-        alert('Please enter at least one species name.');
-        progressModal.classList.add('hidden');
-        return;
-    }
-
-    console.log(`🐟 Starting Eschmeyer search for ${speciesNames.length} species...`);
-    console.log(`🐟 Note: Using CORS proxy servers to access Eschmeyer database from browser`);
-
-    // Verificar quais campos opcionais estão selecionados
-    const eschmeyerStatusOpt = document.getElementById('statusopt')?.checked ?? true;
-    const eschmeyerAcceptedNameOpt = document.getElementById('accepted_nameopt')?.checked ?? true;
-    const eschmeyerFamilyOpt = document.getElementById('familyopt')?.checked ?? true;
-    const eschmeyerSynonymsOpt = document.getElementById('synonymsopt')?.checked ?? true;
-
-    const _eschmeyerTable = document.createElement('table');
-    _eschmeyerTable.id = 'TableResults';
-    _eschmeyerTable.classList.add(
-        "text-base",
-        "text-blue-800",
-        "table-auto",
-        "border-collapse",
-        "w-full"
-    );
-
-    let headerHTML = `
-    <thead class="text-base text-white bg-gray-800 text-left whitespace-nowrap">
-        <tr>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 0)">
-                Species Name <i class="fas fa-sort ml-2"></i>
-            </th>
-            ${eschmeyerStatusOpt ? `<th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', ${1})">Status <i class="fas fa-sort ml-2"></i></th>` : ''}
-            ${eschmeyerAcceptedNameOpt ? `<th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', ${1 + (eschmeyerStatusOpt ? 1 : 0)})">Accepted Name <i class="fas fa-sort ml-2"></i></th>` : ''}
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', ${1 + (eschmeyerStatusOpt ? 1 : 0) + (eschmeyerAcceptedNameOpt ? 1 : 0)})">
-                Authority <i class="fas fa-sort ml-2"></i>
-            </th>
-            ${eschmeyerFamilyOpt ? `<th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', ${2 + (eschmeyerStatusOpt ? 1 : 0) + (eschmeyerAcceptedNameOpt ? 1 : 0)})">Family <i class="fas fa-sort ml-2"></i></th>` : ''}
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', ${2 + (eschmeyerStatusOpt ? 1 : 0) + (eschmeyerAcceptedNameOpt ? 1 : 0) + (eschmeyerFamilyOpt ? 1 : 0)})">
-                Habitat <i class="fas fa-sort ml-2"></i>
-            </th>
-            ${eschmeyerSynonymsOpt ? `<th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', ${3 + (eschmeyerStatusOpt ? 1 : 0) + (eschmeyerAcceptedNameOpt ? 1 : 0) + (eschmeyerFamilyOpt ? 1 : 0)})">Synonyms Count <i class="fas fa-sort ml-2"></i></th>` : ''}
-            <th scope="col" class="py-5 px-5">Link</th>
-        </tr>
-    </thead>
-    `;
-
-    _eschmeyerTable.innerHTML = headerHTML;
-
-    const _eschmeyerTableBody = _eschmeyerTable.createTBody();
-    _eschmeyerTableBody.classList.add("text-left", 'divide-y-1', 'divide-blue-800', 'divide-dashed');
-
-    const _eschmeyerTableWrapper = document.createElement('div');
-    _eschmeyerTableWrapper.classList.add(
-        "w-full",
-        "overflow-x-auto",
-        "overflow-y-auto",
-        "mx-auto"
-    );
-    _eschmeyerTableWrapper.appendChild(_eschmeyerTable);
-
-    const eschmeyerResults = document.getElementById('Results');
-    eschmeyerResults.innerHTML = '';
-    eschmeyerResults.appendChild(_eschmeyerTableWrapper);
-
-    try {
-        console.log('🐟 Using eschmeyerAPI.searchBatch...');
-        
-        const results = await window.eschmeyerAPI.searchBatch(
-            speciesNames,
-            (current, total) => {
-                progress = (current / total) * 100;
-                progressBar.style.width = progress + '%';
-                progressText.textContent = Math.round(progress) + '%';
-            },
-            (result, current, total) => {
-                console.log(`🐟 Eschmeyer - Completed ${current}/${total}: ${result.speciesName} (${result.status})`);
-            }
-        );
-
-        console.log(`🐟 Eschmeyer search completed. Processing ${results.length} results...`);
-
-        // Contar resultados com sucesso e erros
-        let successCount = 0;
-        let errorCount = 0;
-
-        for (const result of results) {
-            const row = _eschmeyerTableBody.insertRow();
-            row.classList.add(
-                'bg-gray-50',
-                'hover:bg-gray-400',
-                'text-black',
-                'odd:bg-gray-200',
-                'even:bg-white',
-                'whitespace-nowrap'
-            );
-            
-            let cellIndex = 0;
-
-            // Species Name
-            const speciesCell = row.insertCell(cellIndex++);
-            speciesCell.innerHTML = `<i>${result.speciesName}</i>`;
-            speciesCell.className = "py-5 px-5";
-
-            // Status (if enabled)
-            if (eschmeyerStatusOpt) {
-                const statusCell = row.insertCell(cellIndex++);
-                const statusColor = result.status === 'Valid' ? '#BACD92' : 
-                                   result.status === 'Synonym' ? '#FFE066' : 
-                                   result.status === 'Error' ? '#FA7070' : '#D1D1C7';
-                statusCell.innerHTML = result.status;
-                statusCell.className = "py-5 px-5 font-bold";
-                statusCell.style.backgroundColor = statusColor;
-            }
-
-            // Accepted Name (if enabled)
-            if (eschmeyerAcceptedNameOpt) {
-                const acceptedNameCell = row.insertCell(cellIndex++);
-                acceptedNameCell.innerHTML = `<i>${result.acceptedName}</i>`;
-                acceptedNameCell.className = "py-5 px-5";
-            }
-
-            // Authority
-            const authorityCell = row.insertCell(cellIndex++);
-            authorityCell.innerHTML = result.acceptedAuthorYear;
-            authorityCell.className = "py-5 px-5";
-
-            // Family (if enabled)
-            if (eschmeyerFamilyOpt) {
-                const familyCell = row.insertCell(cellIndex++);
-                familyCell.innerHTML = result.family;
-                familyCell.className = "py-5 px-5";
-            }
-
-            // Habitat
-            const habitatCell = row.insertCell(cellIndex++);
-            habitatCell.innerHTML = result.habitat;
-            habitatCell.className = "py-5 px-5";
-
-            // Synonyms Count (if enabled)
-            if (eschmeyerSynonymsOpt) {
-                const synonymsCell = row.insertCell(cellIndex++);
-                synonymsCell.innerHTML = result.synonymsCount;
-                synonymsCell.className = "py-5 px-5 text-center";
-            }
-
-            // Link
-            const linkCell = row.insertCell(cellIndex++);
-            linkCell.innerHTML = `
-                <a class="inline-flex items-center px-4 py-2 border border-gray-800 text-base font-medium rounded-lg text-gray-800 bg-white hover:bg-gray-50 transition-colors duration-200 shadow-sm hover:shadow-md" 
-                   href="https://researcharchive.calacademy.org/research/ichthyology/catalog/fishcatget.asp?tbl=species&genus=${encodeURIComponent(result.speciesName.split(' ')[0])}&species=${encodeURIComponent(result.speciesName.split(' ')[1])}" 
-                   target="_blank">
-                    <i class="fa-solid fa-arrow-up-right-from-square mr-2 text-lg"></i>
-                    View
-                </a>
-            `;
-            linkCell.className = "py-5 px-5";
-
-            // Contar status para estatísticas
-            if (result.status === 'Valid' || result.status === 'Synonym') {
-                successCount++;
-            } else if (result.status === 'Error') {
-                errorCount++;
-            }
-        }
-
-        // Mostrar aviso sobre o uso de proxy se houve erros
-        if (errorCount > 0) {
-            const corsNotice = document.createElement('div');
-            corsNotice.className = 'bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-4';
-            corsNotice.innerHTML = `
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <i class="fas fa-info-circle"></i>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm">
-                            <strong>Browser Notice:</strong> ${errorCount} of ${results.length} requests failed. 
-                            The Eschmeyer database requires special CORS proxy servers for browser access.
-                        </p>
-                        <p class="text-sm mt-2">
-                            Successfully processed: ${successCount}/${results.length} species
-                        </p>
-                        <p class="text-sm mt-2">
-                            <i class="fas fa-lightbulb"></i> 
-                            <strong>Tip:</strong> For better reliability with large datasets, consider using the Python version of dataFishing.
-                        </p>
-                    </div>
-                </div>
-            `;
-            eschmeyerResults.insertBefore(corsNotice, _eschmeyerTableWrapper);
-        } else if (successCount > 0) {
-            // Mostrar notice de sucesso
-            const successNotice = document.createElement('div');
-            successNotice.className = 'bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4';
-            successNotice.innerHTML = `
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm">
-                            <strong>Success:</strong> Successfully accessed Eschmeyer database using CORS proxy servers.
-                        </p>
-                        <p class="text-sm mt-2">
-                            Results: ${successCount}/${results.length} species found
-                        </p>
-                    </div>
-                </div>
-            `;
-            eschmeyerResults.insertBefore(successNotice, _eschmeyerTableWrapper);
-        }
-
-        // Adicionar controles de filtro, busca e exportação ANTES da tabela
-        const controlsContainer = document.createElement('div');
-        controlsContainer.className = 'bg-white rounded mb-4 mx-1';
-        controlsContainer.innerHTML = `
-            <!-- Search Input -->
-            <div class="mt-6 mb-6 px-4">
-                <div class="w-full mx-auto">
-                    <label for="eschmeyer-table-search" class="text-lg font-semibold text-gray-800 mb-2 block">
-                        <i class="fas fa-search mr-2"></i>Search in Eschmeyer Results
-                    </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <i class="fas fa-search text-gray-400"></i>
-                        </div>
-                        <input 
-                            type="text" 
-                            id="eschmeyer-table-search" 
-                            class="block w-full pl-10 pr-12 py-3 text-base text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-200"
-                            placeholder="Type to search in visible columns..."
-                            autocomplete="off"
-                        >
-                        <div id="eschmeyer-search-clear" class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer hidden">
-                            <i class="fas fa-times text-gray-400 hover:text-gray-600 text-lg"></i>
-                        </div>
-                    </div>
-                    <small class="text-gray-600 mt-2 block">
-                        <i class="fas fa-info-circle mr-1"></i>
-                        This search will filter and highlight results in the visible columns selected below.
-                    </small>
-                </div>
-            </div>
-
-            <!-- Column Filters -->
-            <div class="px-4 py-4">
-                <h4 class="text-lg font-semibold text-gray-800 mb-3">
-                    <i class="fas fa-columns mr-2"></i>Toggle Column Visibility
-                </h4>
-                <div id="eschmeyer-column-filters" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-items-start"></div>
-            </div>
-
-            <!-- Export Section -->
-            <div class="px-4 py-4 border-t">
-                <h4 class="text-lg font-semibold text-gray-800 mb-3">
-                    <i class="fas fa-download mr-2"></i>Export Results
-                </h4>
-                <div class="flex flex-wrap gap-3">
-                    <button id="eschmeyer-export-excel" class="inline-flex items-center px-6 py-3 border border-gray-800 text-base font-medium rounded-lg text-gray-800 bg-white hover:bg-gray-50 transition-colors duration-200 shadow-sm hover:shadow-md">
-                        <i class="fas fa-file-excel mr-3 text-green-600 text-lg"></i>
-                        Export to Excel
-                    </button>
-                    <button id="eschmeyer-export-tsv" class="inline-flex items-center px-6 py-3 border border-gray-800 text-base font-medium rounded-lg text-gray-800 bg-white hover:bg-gray-50 transition-colors duration-200 shadow-sm hover:shadow-md">
-                        <i class="fas fa-file-alt mr-3 text-blue-600 text-lg"></i>
-                        Export to TSV
-                    </button>
-                </div>
-                <p class="text-sm text-gray-600 mt-3">
-                    <i class="fas fa-info-circle mr-1"></i>
-                    Export will include only the currently visible columns and filtered results.
-                </p>
-            </div>
-        `;
-
-        // Inserir controles ANTES da tabela
-        eschmeyerResults.insertBefore(controlsContainer, _eschmeyerTableWrapper);
-
-        // Configurar funcionalidades dos controles
-
-        // 1. Criar filtros de coluna
-        createColumnFilters('TableResults', 'eschmeyer-column-filters');
-
-        // 2. Configurar busca na tabela
-        const searchInput = document.getElementById('eschmeyer-table-search');
-        const clearButton = document.getElementById('eschmeyer-search-clear');
-        let searchTimeout;
-
-        searchInput.addEventListener('input', function () {
-            const searchTerm = this.value.toLowerCase().trim();
-
-            if (searchTerm) {
-                clearButton.classList.remove('hidden');
-            } else {
-                clearButton.classList.add('hidden');
-            }
-
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                filterAndHighlightTable('TableResults', searchTerm);
-            }, 300);
-        });
-
-        clearButton.addEventListener('click', function () {
-            searchInput.value = '';
-            clearButton.classList.add('hidden');
-            filterAndHighlightTable('TableResults', '');
-            updateSearchResultsCounter('', 0);
-            searchInput.focus();
-        });
-
-        searchInput.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') {
-                this.value = '';
-                clearButton.classList.add('hidden');
-                filterAndHighlightTable('TableResults', '');
-                updateSearchResultsCounter('', 0);
-            }
-        });
-
-        // 3. Configurar botões de exportação
-        document.getElementById('eschmeyer-export-excel').addEventListener('click', function() {
-            exportTableToExcel('TableResults');
-        });
-
-        document.getElementById('eschmeyer-export-tsv').addEventListener('click', function() {
-            exportTableToTSV('TableResults');
-        });
-
-        setTimeout(() => {
-            progressModal.classList.add('hidden');
-        }, 1000);
-
-        updateDataResults();
-
-        console.log(`🐟 Eschmeyer search completed: ${successCount} successful, ${errorCount} errors`);
-
-    } catch (error) {
-        console.error('❌ Error during Eschmeyer search:', error);
-        progressModal.classList.add('hidden');
-        alert('An error occurred during the search: ' + error.message);
-    }
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -1297,3 +968,52 @@ window.addEventListener('error', function(e) {
 window.addEventListener('unhandledrejection', function(e) {
     console.error('Unhandled promise rejection:', e.reason);
 });
+
+function getRandomTip() {
+    const toolTips = {
+        SynGenes: [
+            'a Python class for standardizing nomenclatures of mitochondrial and chloroplast genes and a web form for enhancing searches for evolutionary analyses.',
+            'https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-024-05781-y'
+        ],
+        ForAlexa: [
+            "an online tool for the rapid development of artificial intelligence skills for the teaching of evolutionary biology using Amazon's Alexa.",
+            'https://link.springer.com/article/10.1186/s12052-022-00169-z'
+        ],
+        dataFishing: [
+            "An efficient Python tool and user-friendly web-form for mining mitochondrial and chloroplast sequences, taxonomic, and biodiversity data.",
+            'https://doi.org/10.1016/j.ecoinf.2024.102970'
+        ],
+    };
+    const keys = Object.keys(toolTips);
+    const randomKey = keys[Math.floor(Math.random() * keys.length)];
+    return { key: randomKey, description: toolTips[randomKey][0], link: toolTips[randomKey][1] };
+}
+
+function displayTip() {
+    const tip = getRandomTip(); // Get a random tip
+    const container = document.querySelector('.tip-container');
+    container.classList.remove('fade-out');
+    container.classList.add('fade-in');
+    container.style.display = 'block';
+    container.innerHTML = `
+    <div class="bg-gray-700 overflow-hidden px-5 py-5">
+        <div class="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
+            
+            <div class="flex-shrink-0 text-center sm:text-center md:text-left lg:text-left xl:text-left">
+                <span class="text-white font-semibold leading-6 rounded-full bg-gray-800 px-3 py-3 text-base">Explore other tools:</span>
+            </div>
+            
+            <div class="flex-grow sm:text-justify md:text-center lg:text-center xl:text-center">
+                <div class="text-white font-semibold leading-6 sm:text-base md:text-lg lg:text-2xl xl:text-2xl xxl:text-2xl">
+                    <strong>${tip.key}</strong> ${tip.description}
+                </div>
+            </div>
+
+            <div class="flex-shrink-0 text-center sm:text-center md:text-left lg:text-left xl:text-left">
+                <a href="${tip.link}" target="_blank" class="rounded-full bg-gray-800 px-3 py-3 text-base font-semibold text-white transition-all duration-300 hover:bg-gray-400 hover:ring-2 hover:ring-white hover:scale-105">Learn More <span aria-hidden="true">→</span></a>
+            </div>
+
+        </div>
+    </div>
+    `;
+}

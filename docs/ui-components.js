@@ -35,22 +35,22 @@ var Cards = {
         "GBIF_Vernacular_Name*",
         "GBIF_Taxonomic_Status*"
     ],
-    'bold': [
-        'BOLD_All_data*',
-        'BOLD_Taxonomy*',
-        'BOLD_Sequences*'
-    ],
-    'iucn': [
-        'IUCN_All_data',
-        'IUCN_Common_Names',
-        'IUCN_Country_Occurrence',
-        'IUCN_Habitats',
-        'IUCN_Species_Author*',
-        'IUCN_Status_Conservation*',
-        'IUCN_Synonyms_Names',
-        'IUCN_Taxonomy*',
-        'IUCN_Threats'
-    ]
+    //'bold': [
+    //    'BOLD_All_data*',
+    //    'BOLD_Taxonomy*',
+    //    'BOLD_Sequences*'
+    //],
+    //'iucn': [
+    //    'IUCN_All_data',
+    //    'IUCN_Common_Names',
+    //    'IUCN_Country_Occurrence',
+    //    'IUCN_Habitats',
+    //    'IUCN_Species_Author*',
+    //    'IUCN_Status_Conservation*',
+    //    'IUCN_Synonyms_Names',
+    //    'IUCN_Taxonomy*',
+    //    'IUCN_Threats'
+    //]
 };
 
 var NamesCards = {
@@ -71,7 +71,7 @@ function createCard(apiKey, cardData) {
 
     // Card header with step number and title
     const cardHeader = document.createElement('div');
-    cardHeader.className = 'bg-gray-800 flex items-center text-white py-1 px-1 rounded-t';
+    cardHeader.className = 'bg-gray-800 flex items-center text-white py-2 px-2 rounded-t';
     cardHeader.innerHTML = `
         <div class="flex items-center justify-center h-12 w-12 rounded-full bg-gray-200 text-black mr-3 font-bold text-xl">2</div>
         <div class="text-2xl font-semibold">Configure ${NamesCards[apiKey]} options</div>
@@ -88,54 +88,126 @@ function createCard(apiKey, cardData) {
     optionsGrid.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 px-4';
     cardBody.appendChild(optionsGrid);
 
+    // Dicionário de descrições para cada campo (adicione conforme necessário)
+    const optionDescriptions = {
+        'all_data': 'All available data for the species.',
+        'taxonomy': 'Taxonomic classification (kingdom, phylum, class, etc).',
+        'status': 'Taxonomic or conservation status.',
+        'accepted_name': 'Currently accepted scientific name.',
+        'family': 'Taxonomic family.',
+        'synonyms': 'Known synonyms for the species.',
+        'authority': 'Author and year of species description.',
+        'marine_environment': 'Presence in marine environments.',
+        'brackish_environment': 'Presence in brackish environments.',
+        'freshwater_environment': 'Presence in freshwater environments.',
+        'terrestrial_environment': 'Presence in terrestrial environments.',
+        'extinct_status': 'Extinction status.',
+        'match_type': 'Type of match in the database.',
+        'modified_date': 'Date of last modification.',
+        'citation': 'Recommended citation for the data.',
+        'basionym': 'Original name (basionym) for the species.',
+        'vernacular_name': 'Common names.',
+        'taxonomic_status': 'Taxonomic status in GBIF.',
+        'sequences': 'DNA barcode sequences.',
+        // ...adicione mais descrições conforme necessário...
+    };
+
     // Create options for each data type
     cardData.forEach(option => {
         const optionDiv = document.createElement('div');
         optionDiv.className = 'flex items-center space-x-2 my-2';
 
         const label = document.createElement('label');
-        label.className = 'relative inline-flex items-center cursor-pointer w-12 h-8 rounded-full transition duration-300 bg-gray-800';
+        label.className = 'relative inline-flex items-center w-12 h-8 rounded-full transition duration-300 flex-shrink-0';
 
         const optionId = option.toLowerCase().replace(/[^a-z0-9]/g, '');
         const switchInput = document.createElement('input');
         switchInput.type = 'checkbox';
-        switchInput.checked = option.includes('*'); // Default checked if marked with *
         switchInput.id = optionId + 'opt';
         switchInput.className = 'sr-only peer';
 
+        // Checar se é obrigatório (*)
+        const isRequired = option.endsWith('*');
+        switchInput.checked = isRequired;
+        switchInput.disabled = isRequired;
+
+        // Tooltip informativo
+        const cleanOption = option.replace('*', '').replace(/^.*?_/, '').replace(/_/g, ' ');
+        const descKey = option.replace('*', '').toLowerCase().replace(/^.*?_/, '').replace(/_/g, '');
+        const description = optionDescriptions[descKey] || cleanOption;
+
+        label.title = isRequired
+            ? `${description} (Mandatory)`
+            : description;
+
+        // Aparência do switch (igual ao início, mas com cadeado para obrigatórios)
+        if (isRequired) {
+            label.classList.add('bg-gray-800', 'cursor-not-allowed');
+        } else {
+            label.classList.add('bg-gray-400', 'cursor-pointer');
+        }
+
         const switchIcon = document.createElement('i');
-        switchIcon.className = 'fas fa-eye text-white text-xl absolute';
+        if (isRequired) {
+            switchIcon.className = 'fas fa-lock text-white text-xl absolute';
+        } else {
+            switchIcon.className = 'far fa-circle text-gray-600 text-xl absolute';
+        }
         switchIcon.style.top = '50%';
         switchIcon.style.left = '50%';
         switchIcon.style.transform = 'translate(-50%, -50%)';
 
-        // Update switch appearance based on state
-        const updateSwitch = () => {
-            if (switchInput.checked) {
-                label.classList.remove('bg-gray-400');
-                label.classList.add('bg-gray-800');
-                switchIcon.className = 'fas fa-eye text-white text-xl absolute';
-            } else {
-                label.classList.remove('bg-gray-800');
-                label.classList.add('bg-gray-400');
-                switchIcon.className = 'fas fa-eye-slash text-white text-xl absolute';
-            }
-        };
-
-        switchInput.addEventListener('change', updateSwitch);
-        updateSwitch(); // Set initial state
+        // Atualizar aparência ao mudar (apenas se não for obrigatório)
+        if (!isRequired) {
+            switchInput.addEventListener('change', () => {
+                if (switchInput.checked) {
+                    label.classList.remove('bg-gray-400');
+                    label.classList.add('bg-gray-800');
+                    switchIcon.className = 'fas fa-check text-white text-xl absolute';
+                } else {
+                    label.classList.remove('bg-gray-800');
+                    label.classList.add('bg-gray-400');
+                    switchIcon.className = 'far fa-circle text-gray-600 text-xl absolute';
+                }
+            });
+        }
 
         label.appendChild(switchInput);
         label.appendChild(switchIcon);
 
         const optionLabel = document.createElement('span');
-        optionLabel.className = 'ml-3 text-base text-gray-800 leading-tight';
-        optionLabel.innerHTML = option.replace('*', '').replace(/_/g, ' ');
+        optionLabel.className = 'ml-3 text-xl text-gray-800 leading-tight';
+        optionLabel.innerHTML = cleanOption + (isRequired ? ' <span class="font-bold text-black">*</span>' : '');
 
         optionDiv.appendChild(label);
         optionDiv.appendChild(optionLabel);
         optionsGrid.appendChild(optionDiv);
     });
+
+    // Mensagem informativa igual ao tópico 1 (agora DEPOIS dos inputs, texto maior)
+    const infoDiv = document.createElement('div');
+    infoDiv.className = 'bg-gray-200 border-l-4 border-gray-800 p-4 my-2 mx-1 rounded-lg shadow-sm';
+    infoDiv.innerHTML = `
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <i class="fas fa-2x fa-exclamation-triangle text-black"></i>
+            </div>
+            <div class="ml-5">
+                <h3 class="text-lg font-semibold text-black mb-1">
+                    <i class="fas fa-info-circle mr-2"></i>Important Information
+                </h3>
+                <p class="text-black text-base leading-relaxed">
+                    <i class="fas fa-hand-pointer mr-2 text-gray-800"></i>
+                    <strong>Please select the data fields you want to retrieve from <span class="text-gray-800">${NamesCards[apiKey]}</span>.</strong><br>
+                    <i class="fas fa-lock mr-2 text-gray-600"></i>
+                    Fields marked with <b class="text-black">*</b> are mandatory and cannot be unchecked <b>( <i class="fas fa-lock text-gray-800"></i> )</b>.<br>
+                    <i class="fas fa-info-circle mr-2 text-gray-600"></i>
+                    Hover over each option to see a description.
+                </p>
+            </div>
+        </div>
+    `;
+    cardElement.appendChild(infoDiv);
 
     // Special options for specific APIs
     if (apiKey === 'bold') {
@@ -250,64 +322,134 @@ function createCheckboxesForCards(Cards) {
         stateIcon.style.transform = 'translate(-50%, -50%)';
         
         // Add checkbox to list for global control
-        allCheckboxes.push({ checkbox, label, stateIcon });
+        allCheckboxes.push({ checkbox, label, stateIcon, wrapperDiv });
         
         // Update styles based on checkbox state
         const updateStyles = () => {
-            if (checkbox.checked) {
-                label.classList.remove('bg-orange-500');
-                label.classList.add('bg-gray-800');
-                stateIcon.className = 'fas fa-check text-white text-xl absolute';
-            } else {
-                label.classList.remove('bg-gray-800');
-                label.classList.add('bg-orange-500');
-                stateIcon.className = 'fas fa-times text-black text-xl absolute';
-            }
-            
-            // Manage disabling other checkboxes (only one at a time)
-            const anyChecked = allCheckboxes.some(item => item.checkbox.checked);
+            const checkedBoxes = allCheckboxes.filter(item => item.checkbox.checked);
+            const anyChecked = checkedBoxes.length > 0;
             allCheckboxes.forEach(item => {
-                if (!item.checkbox.checked && anyChecked) {
-                    item.label.classList.add('bg-gray-200', 'cursor-not-allowed', 'disabled');
-                    item.label.classList.remove('bg-orange-500', 'bg-gray-800');
+                if (item.checkbox.checked) {
+                    // Selecionado: cinza escuro, ícone check
+                    item.label.classList.remove('bg-gray-400', 'bg-orange-500', 'cursor-not-allowed');
+                    item.label.classList.add('bg-gray-800', 'cursor-pointer');
+                    item.stateIcon.className = 'fas fa-check text-white text-xl absolute';
+                    item.checkbox.disabled = false;
+                    item.wrapperDiv.style.pointerEvents = 'auto';
+                    item.wrapperDiv.style.opacity = '1';
+                } else if (anyChecked) {
+                    // Não selecionado quando algum está selecionado: laranja, ícone ban
+                    item.label.classList.remove('bg-gray-400', 'bg-gray-800', 'cursor-pointer');
+                    item.label.classList.add('bg-orange-500', 'cursor-not-allowed');
                     item.stateIcon.className = 'fas fa-ban text-gray-500 text-xl absolute';
-                } else if (!item.checkbox.checked) {
-                    item.label.classList.remove('bg-gray-200', 'cursor-not-allowed', 'disabled');
-                    item.label.classList.add('bg-orange-500');
-                    item.stateIcon.className = 'fas fa-times text-black text-xl absolute';
+                    item.checkbox.disabled = true;
+                    item.wrapperDiv.style.pointerEvents = 'none';
+                    item.wrapperDiv.style.opacity = '0.6';
+                    item.wrapperDiv.style.cursor = 'not-allowed';
+                } else {
+                    // Nenhum selecionado: todos cinza claro, ícone círculo vazio
+                    item.label.classList.remove('bg-gray-800', 'bg-orange-500', 'cursor-not-allowed');
+                    item.label.classList.add('bg-gray-400', 'cursor-pointer');
+                    item.stateIcon.className = 'far fa-question text-gray-600 text-xl absolute';
+                    item.checkbox.disabled = false;
+                    item.wrapperDiv.style.pointerEvents = 'auto';
+                    item.wrapperDiv.style.opacity = '1';
+                    item.wrapperDiv.style.cursor = 'pointer';
                 }
             });
         };
 
-        // Checkbox change event
-        checkbox.addEventListener('change', function () {
+        // Função para alternar checkbox (só funciona se não estiver desabilitado)
+        const toggleCheckbox = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Verificar se o checkbox está desabilitado
+            if (checkbox.disabled) {
+                return false;
+            }
+            
             const card = document.getElementById(key + 'Card');
-            if (this.checked) {
-                card.classList.remove('hidden');
-                card.classList.add('fade-in');
+            
+            if (checkbox.checked) {
+                // Desmarcando
+                checkbox.checked = false;
+                if (card) {
+                    card.classList.add('fade-out');
+                    setTimeout(() => {
+                        card.classList.add('hidden');
+                        card.classList.remove('fade-out');
+                    }, 500);
+                }
             } else {
-                card.classList.add('fade-out');
-                setTimeout(() => {
-                    card.classList.add('hidden');
-                    card.classList.remove('fade-out');
-                }, 500);
+                // Marcando - desmarcar todos os outros primeiro
+                allCheckboxes.forEach(item => {
+                    if (item.checkbox !== checkbox) {
+                        item.checkbox.checked = false;
+                        const otherCard = document.getElementById(item.checkbox.id.replace('-checkbox', 'Card'));
+                        if (otherCard) {
+                            otherCard.classList.add('hidden');
+                            otherCard.classList.remove('fade-in');
+                        }
+                    }
+                });
+
+                // Marcar o atual
+                checkbox.checked = true;
+                if (card) {
+                    card.classList.remove('hidden');
+                    card.classList.add('fade-in');
+                }
+            }
+            
+            updateStyles();
+            return false;
+        };
+
+        // Adicionar event listeners para o wrapper inteiro
+        wrapperDiv.addEventListener('click', toggleCheckbox);
+        wrapperDiv.addEventListener('mousedown', (e) => {
+            if (checkbox.disabled) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        });
+
+        // Event listener direto no checkbox também
+        checkbox.addEventListener('change', function(e) {
+            if (this.disabled) {
+                e.preventDefault();
+                return false;
             }
             updateStyles();
         });
 
-        // Initial setup
-        label.classList.add('bg-orange-500');
+        // Configuração inicial
+        label.classList.add('bg-orange-500', 'cursor-pointer');
         
         label.appendChild(checkbox);
         label.appendChild(stateIcon);
 
         const textLabel = document.createElement('span');
         textLabel.className = 'ml-5 text-xl text-gray-800';
-        textLabel.innerHTML = `${NamesCards[key]}<br>(<strong>${key.toUpperCase()}</strong>)`;
+        // Remover o acrônimo do nome exibido
+        textLabel.innerHTML = NamesCards[key];
 
         wrapperDiv.appendChild(label);
         wrapperDiv.appendChild(textLabel);
         container.appendChild(wrapperDiv);
+    });
+
+    // Configuração inicial dos estilos
+    allCheckboxes.forEach(item => {
+        item.label.classList.remove('bg-gray-800', 'bg-orange-500');
+        item.label.classList.add('bg-gray-400', 'cursor-pointer');
+        item.stateIcon.className = 'far fa-question text-gray-600 text-xl absolute';
+        item.stateIcon.style.top = '50%';
+        item.stateIcon.style.left = '50%';
+        item.stateIcon.style.transform = 'translate(-50%, -50%)';
+        item.wrapperDiv.style.cursor = 'pointer';
     });
 }
 
@@ -321,6 +463,55 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Create checkboxes for database selection
     createCheckboxesForCards(Cards);
+
+    // Melhorar texto de instrução com ícone
+    const infoCard = document.querySelector('.bg-gray-200.border-l-4.border-gray-800.p-5.my-1.mx-1.rounded-lg.shadow-sm');
+    if (infoCard) {
+        infoCard.querySelector('p.text-black.text-base').innerHTML = `
+            <i class="fas fa-hand-pointer mr-2 text-xl text-gray-800"></i>
+            <strong>Please select <span class="text-gray-800">one</span> data source at a time</strong> <b>( <i class="far fa-question text-gray-800"></i> )</b> to search for biodiversity information.<br>
+            <i class="fas fa-lock mr-2 text-gray-600"></i>
+            When you select an option, the other options will be automatically disabled <b>( <i class="fas fa-ban text-gray-800"></i> )</b><br>
+            <i class="fas fa-undo-alt mr-2 text-gray-600"></i>
+            To choose a different data source, you must first uncheck the currently selected option <b>( <i class="fas fa-check text-gray-800"></i> )</b>
+        `;
+    }
+
+    // Exibir/esconder o bloco Species Names conforme cards de opções (tópico 2)
+    const cardsOpt = document.getElementById('CardsOpt');
+    const spForm = document.getElementById('spForm');
+    // Inicialmente esconde o bloco 3
+    if (spForm) spForm.style.display = 'none';
+
+    // Função para monitorar visibilidade dos cards de opções
+    function updateSpeciesFormVisibility() {
+        // Se algum card de opções estiver visível, mostra o bloco 3
+        const anyCardVisible = Array.from(cardsOpt.children).some(card => !card.classList.contains('hidden'));
+        if (spForm) spForm.style.display = anyCardVisible ? '' : 'none';
+    }
+
+    // Hook nos cards de opções para atualizar visibilidade do bloco 3
+    const observer = new MutationObserver(updateSpeciesFormVisibility);
+    observer.observe(cardsOpt, { attributes: true, childList: true, subtree: true });
+
+    // Também atualizar ao clicar nos checkboxes
+    document.getElementById('checkbox-container').addEventListener('click', () => {
+        setTimeout(updateSpeciesFormVisibility, 100);
+    });
+
+    // Atualizar na inicialização
+    updateSpeciesFormVisibility();
+
+    // Atualizar barra do bloco 3 para o mesmo modelo das demais
+    const spFormHeader = document.querySelector('#spForm > .bg-gray-800, #spForm > .bg-gray-200');
+    if (spFormHeader) {
+        // Substitui qualquer barra antiga por uma igual às demais (bg-gray-800, texto branco, padding igual)
+        spFormHeader.className = 'bg-gray-800 flex items-center text-white py-2 px-2 rounded my-1';
+        spFormHeader.innerHTML = `
+            <div class="flex items-center justify-center h-12 w-12 rounded-full bg-gray-200 text-black mr-3 font-bold text-xl">3</div>
+            <div class="text-2xl font-semibold">Species Names:</div>
+        `;
+    }
 
     // Example species button
     const exampleSpecies = document.getElementById('exampleSpecies');
@@ -338,29 +529,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 "Pan paniscus",
                 "Panthera tigris"
             ];
-            
             const speciesNames = document.getElementById('speciesNames');
             if (speciesNames) {
-                speciesNames.value = "";
-                species.forEach((s, i) => {
-                    setTimeout(() => {
-                        speciesNames.value += s + "\n";
-                        const event = new Event('input', {
-                            bubbles: true,
-                            cancelable: true,
-                        });
-                        speciesNames.dispatchEvent(event);
-                    }, i * 500);
+                // Corrigir duplicação: sobrescreve o valor ao invés de concatenar
+                speciesNames.value = species.join('\n');
+                const event = new Event('input', {
+                    bubbles: true,
+                    cancelable: true,
                 });
-                
-                setTimeout(() => {
-                    speciesNames.value = speciesNames.value.trim();
-                    const event = new Event('input', {
-                        bubbles: true,
-                        cancelable: true,
-                    });
-                    speciesNames.dispatchEvent(event);
-                }, species.length * 500);
+                speciesNames.dispatchEvent(event);
             }
         });
     }

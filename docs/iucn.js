@@ -8,6 +8,13 @@ class IucnAPI {
         this.apiKey = this.loadApiKey();
         this.maxRetries = 3;
         this.retryDelay = 2000;
+        // Lista de proxies CORS para contornar restrições
+        this.proxies = [
+            'https://api.allorigins.win/get?url=',
+            'https://corsproxy.io/?',
+            'https://cors-proxy.fringe.zone/',
+            'https://proxy.cors.sh/'
+        ];
         console.log('🔴 IUCN API instance created');
     }
 
@@ -124,6 +131,52 @@ class IucnAPI {
         return this.apiKey;
     }
 
+    async makeApiRequest(url, useProxy = false, proxyIndex = 0) {
+        let requestUrl = url;
+        let fetchOptions = {
+            method: 'GET',
+            headers: {
+                'accept': 'application/json',
+                'Authorization': this.apiKey
+            }
+        };
+
+        if (useProxy && proxyIndex < this.proxies.length) {
+            const proxy = this.proxies[proxyIndex];
+            
+            if (proxy.includes('allorigins')) {
+                // AllOrigins precisa de URL encoding especial
+                requestUrl = `${proxy}${encodeURIComponent(url)}`;
+                fetchOptions.headers = {
+                    'accept': 'application/json'
+                };
+            } else {
+                // Outros proxies
+                requestUrl = `${proxy}${encodeURIComponent(url)}`;
+                fetchOptions.headers = {
+                    'accept': 'application/json'
+                };
+            }
+        }
+
+        const response = await fetch(requestUrl, fetchOptions);
+        
+        if (useProxy && proxy.includes('allorigins') && response.ok) {
+            // Para AllOrigins, extrair conteúdo do JSON
+            const jsonResponse = await response.json();
+            if (jsonResponse.contents) {
+                // Simular resposta normal
+                return {
+                    ok: true,
+                    status: 200,
+                    json: async () => JSON.parse(jsonResponse.contents)
+                };
+            }
+        }
+
+        return response;
+    }
+
     async iucnTaxa(species_name) {
         const genus_name = species_name.split(' ')[0];
         const species_epithet = species_name.split(' ')[1];
@@ -143,79 +196,63 @@ class IucnAPI {
             'Errata Flag': '-', 'Errata Reason': '-', 'Amended Flag': '-', 'Amended Reason': '-'
         };
 
+        const targetUrl = `${this.baseURL}/taxa/scientific_name?genus_name=${encodeURIComponent(genus_name)}&species_name=${encodeURIComponent(species_epithet)}&token=${this.apiKey}`;
+
         for (let attempt = 0; attempt < this.maxRetries; attempt++) {
             try {
                 console.log(`🔴 IUCN - ${species_name} Getting taxonomy from IUCN... (attempt ${attempt + 1}/${this.maxRetries})`);
                 
-                const url = `${this.baseURL}/taxa/scientific_name?genus_name=${encodeURIComponent(genus_name)}&species_name=${encodeURIComponent(species_epithet)}`;
-                const response = await fetch(url, {
-                    method: 'GET',
-                    headers: {
-                        'accept': 'application/json',
-                        'Authorization': this.apiKey
+                // Primeira tentativa: requisição direta
+                if (attempt === 0) {
+                    try {
+                        const response = await this.makeApiRequest(targetUrl, false);
+                        
+                        if (response.status === 401) {
+                            console.error('🔴 IUCN - Invalid API key, prompting for new key...');
+                            this.clearApiKey();
+                            const newKey = await this.promptForApiKey();
+                            if (!newKey) {
+                                throw new Error('API key required for IUCN access');
+                            }
+                            continue;
+                        }
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            return this.processIucnResponse(data, species_name, data_dict);
+                        }
+                    } catch (error) {
+                        console.warn(`🔴 IUCN - ${species_name} Direct request failed:`, error.message);
                     }
-                });
-                
-                if (response.status === 401) {
-                    console.error('🔴 IUCN - Invalid API key, prompting for new key...');
-                    this.clearApiKey();
-                    const newKey = await this.promptForApiKey();
-                    if (!newKey) {
-                        throw new Error('API key required for IUCN access');
+                }
+
+                // Tentar com proxies CORS
+                for (let proxyIndex = 0; proxyIndex < this.proxies.length; proxyIndex++) {
+                    try {
+                        const proxyName = this.proxies[proxyIndex].includes('allorigins') ? 'AllOrigins' : 
+                                         this.proxies[proxyIndex].includes('corsproxy') ? 'CORSProxy' : 
+                                         this.proxies[proxyIndex].includes('fringe') ? 'Fringe' : 'CORS.sh';
+                        
+                        console.log(`🔴 IUCN - ${species_name} Trying proxy: ${proxyName} (attempt ${attempt + 1}/${this.maxRetries})...`);
+                        
+                        const response = await this.makeApiRequest(targetUrl, true, proxyIndex);
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            console.log(`🔴 IUCN - ${species_name} Successfully retrieved data via ${proxyName} proxy`);
+                            return this.processIucnResponse(data, species_name, data_dict);
+                        }
+                    } catch (proxyError) {
+                        console.warn(`🔴 IUCN - ${species_name} Proxy ${proxyIndex + 1} failed:`, proxyError.message);
+                        continue;
                     }
-                    continue; // Retry with new key
+                }
+
+                if (attempt < this.maxRetries - 1) {
+                    console.warn(`🔴 IUCN - ${species_name} All methods failed, retrying in ${this.retryDelay}ms...`);
+                    await this.delay(this.retryDelay);
                 }
                 
-                if (response.ok) {
-                    const data = await response.json();
-                    
-                    if (data && data.result && data.result.length > 0) {
-                        const result = data.result[0];
-                        
-                        // Extract all available fields based on Python implementation
-                        data_dict['Tax ID'] = String(result.taxonid || '-');
-                        data_dict['Kingdom'] = String(result.kingdom_name || '-');
-                        data_dict['Phylum'] = String(result.phylum_name || '-');
-                        data_dict['Class'] = String(result.class_name || '-');
-                        data_dict['Order'] = String(result.order_name || '-');
-                        data_dict['Family'] = String(result.family_name || '-');
-                        data_dict['Genus'] = String(result.genus_name || genus_name);
-                        data_dict['Species Name'] = String(result.species_name || species_name);
-                        data_dict['Scientific Name'] = String(result.scientific_name || '-');
-                        data_dict['Authority'] = String(result.authority || '-');
-                        data_dict['Published Year'] = String(result.published_year || '-');
-                        data_dict['Assessment Date'] = String(result.assessment_date || '-');
-                        data_dict['Category'] = String(result.category || '-');
-                        data_dict['Criteria'] = String(result.criteria || '-');
-                        data_dict['Population Trend'] = String(result.population_trend || '-');
-                        data_dict['Marine System'] = String(result.marine_system ? 'true' : 'false');
-                        data_dict['Freshwater System'] = String(result.freshwater_system ? 'true' : 'false');
-                        data_dict['Terrestrial System'] = String(result.terrestrial_system ? 'true' : 'false');
-                        data_dict['Assessor'] = String(result.assessor || '-');
-                        data_dict['Reviewer'] = String(result.reviewer || '-');
-                        data_dict['AOO'] = String(result.aoo_km2 || '-');
-                        data_dict['EOO'] = String(result.eoo_km2 || '-');
-                        data_dict['Elevation Lower'] = String(result.elevation_lower || '-');
-                        data_dict['Elevation Upper'] = String(result.elevation_upper || '-');
-                        data_dict['Depth Lower'] = String(result.depth_lower || '-');
-                        data_dict['Depth Upper'] = String(result.depth_upper || '-');
-                        data_dict['Errata Flag'] = String(result.errata_flag ? 'true' : 'false');
-                        data_dict['Errata Reason'] = String(result.errata_reason || '-');
-                        data_dict['Amended Flag'] = String(result.amended_flag ? 'true' : 'false');
-                        data_dict['Amended Reason'] = String(result.amended_reason || '-');
-                        
-                        console.log(`🔴 IUCN - ${species_name} Found: ${data_dict['Category']}, ${data_dict['Population Trend']}`);
-                        return data_dict;
-                    } else {
-                        console.warn(`🔴 IUCN - ${species_name} No results found`);
-                        return data_dict;
-                    }
-                } else if (response.status === 404) {
-                    console.warn(`🔴 IUCN - ${species_name} Species not found in IUCN database`);
-                    return data_dict;
-                } else {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
             } catch (error) {
                 if (attempt < this.maxRetries - 1) {
                     console.warn(`🔴 IUCN - ${species_name} Request failed: ${error.message}. Retrying in ${this.retryDelay}ms...`);
@@ -228,7 +265,54 @@ class IucnAPI {
             }
         }
         
+        // Se chegou aqui, todas as tentativas falharam
+        console.error(`🔴 IUCN - ${species_name} All attempts failed after ${this.maxRetries} retries`);
+        data_dict['Category'] = 'Error';
         return data_dict;
+    }
+
+    processIucnResponse(data, species_name, data_dict) {
+        if (data && data.result && data.result.length > 0) {
+            const result = data.result[0];
+            
+            // Extract all available fields based on Python implementation
+            data_dict['Tax ID'] = String(result.taxonid || '-');
+            data_dict['Kingdom'] = String(result.kingdom_name || '-');
+            data_dict['Phylum'] = String(result.phylum_name || '-');
+            data_dict['Class'] = String(result.class_name || '-');
+            data_dict['Order'] = String(result.order_name || '-');
+            data_dict['Family'] = String(result.family_name || '-');
+            data_dict['Genus'] = String(result.genus_name || data_dict['Genus']);
+            data_dict['Species Name'] = String(result.species_name || species_name);
+            data_dict['Scientific Name'] = String(result.scientific_name || '-');
+            data_dict['Authority'] = String(result.authority || '-');
+            data_dict['Published Year'] = String(result.published_year || '-');
+            data_dict['Assessment Date'] = String(result.assessment_date || '-');
+            data_dict['Category'] = String(result.category || '-');
+            data_dict['Criteria'] = String(result.criteria || '-');
+            data_dict['Population Trend'] = String(result.population_trend || '-');
+            data_dict['Marine System'] = String(result.marine_system ? 'true' : 'false');
+            data_dict['Freshwater System'] = String(result.freshwater_system ? 'true' : 'false');
+            data_dict['Terrestrial System'] = String(result.terrestrial_system ? 'true' : 'false');
+            data_dict['Assessor'] = String(result.assessor || '-');
+            data_dict['Reviewer'] = String(result.reviewer || '-');
+            data_dict['AOO'] = String(result.aoo_km2 || '-');
+            data_dict['EOO'] = String(result.eoo_km2 || '-');
+            data_dict['Elevation Lower'] = String(result.elevation_lower || '-');
+            data_dict['Elevation Upper'] = String(result.elevation_upper || '-');
+            data_dict['Depth Lower'] = String(result.depth_lower || '-');
+            data_dict['Depth Upper'] = String(result.depth_upper || '-');
+            data_dict['Errata Flag'] = String(result.errata_flag ? 'true' : 'false');
+            data_dict['Errata Reason'] = String(result.errata_reason || '-');
+            data_dict['Amended Flag'] = String(result.amended_flag ? 'true' : 'false');
+            data_dict['Amended Reason'] = String(result.amended_reason || '-');
+            
+            console.log(`🔴 IUCN - ${species_name} Found: ${data_dict['Category']}, ${data_dict['Population Trend']}`);
+            return data_dict;
+        } else {
+            console.warn(`🔴 IUCN - ${species_name} No results found`);
+            return data_dict;
+        }
     }
 
     async iucnCommonNames(species_name) {
@@ -240,19 +324,27 @@ class IucnAPI {
         }
 
         try {
-            const url = `${this.baseURL}/taxa/common_names?genus_name=${encodeURIComponent(genus_name)}&species_name=${encodeURIComponent(species_epithet)}`;
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'accept': 'application/json',
-                    'Authorization': this.apiKey
-                }
-            });
+            const targetUrl = `${this.baseURL}/taxa/common_names?genus_name=${encodeURIComponent(genus_name)}&species_name=${encodeURIComponent(species_epithet)}&token=${this.apiKey}`;
             
-            if (response.ok) {
-                const data = await response.json();
-                if (data && data.result && data.result.length > 0) {
-                    return data.result.map(name => `${name.taxonname || name.name} (${name.language || 'Unknown'})`).join('; ');
+            // Tentar requisição direta primeiro, depois proxies
+            for (let proxyIndex = -1; proxyIndex < this.proxies.length; proxyIndex++) {
+                try {
+                    const response = await this.makeApiRequest(targetUrl, proxyIndex >= 0, proxyIndex);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data && data.result && data.result.length > 0) {
+                            return data.result.map(name => `${name.taxonname || name.name} (${name.language || 'Unknown'})`).join('; ');
+                        }
+                        return '-';
+                    }
+                } catch (error) {
+                    if (proxyIndex === -1) {
+                        console.debug(`🔴 IUCN - Error getting common names for ${species_name} (direct):`, error.message);
+                    } else {
+                        console.debug(`🔴 IUCN - Error getting common names for ${species_name} (proxy ${proxyIndex + 1}):`, error.message);
+                    }
+                    continue;
                 }
             }
         } catch (error) {
@@ -270,19 +362,23 @@ class IucnAPI {
         }
 
         try {
-            const url = `${this.baseURL}/taxa/synonyms?genus_name=${encodeURIComponent(genus_name)}&species_name=${encodeURIComponent(species_epithet)}`;
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'accept': 'application/json',
-                    'Authorization': this.apiKey
-                }
-            });
+            const targetUrl = `${this.baseURL}/taxa/synonyms?genus_name=${encodeURIComponent(genus_name)}&species_name=${encodeURIComponent(species_epithet)}&token=${this.apiKey}`;
             
-            if (response.ok) {
-                const data = await response.json();
-                if (data && data.result && data.result.length > 0) {
-                    return data.result.map(syn => syn.accepted_name || syn.synonym || syn.scientific_name).join('; ');
+            // Tentar requisição direta primeiro, depois proxies
+            for (let proxyIndex = -1; proxyIndex < this.proxies.length; proxyIndex++) {
+                try {
+                    const response = await this.makeApiRequest(targetUrl, proxyIndex >= 0, proxyIndex);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data && data.result && data.result.length > 0) {
+                            return data.result.map(syn => syn.accepted_name || syn.synonym || syn.scientific_name).join('; ');
+                        }
+                        return '-';
+                    }
+                } catch (error) {
+                    console.debug(`🔴 IUCN - Error getting synonyms for ${species_name} (attempt ${proxyIndex + 2}):`, error.message);
+                    continue;
                 }
             }
         } catch (error) {
@@ -300,19 +396,23 @@ class IucnAPI {
         }
 
         try {
-            const url = `${this.baseURL}/taxa/countries?genus_name=${encodeURIComponent(genus_name)}&species_name=${encodeURIComponent(species_epithet)}`;
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'accept': 'application/json',
-                    'Authorization': this.apiKey
-                }
-            });
+            const targetUrl = `${this.baseURL}/taxa/countries?genus_name=${encodeURIComponent(genus_name)}&species_name=${encodeURIComponent(species_epithet)}&token=${this.apiKey}`;
             
-            if (response.ok) {
-                const data = await response.json();
-                if (data && data.result && data.result.length > 0) {
-                    return data.result.map(country => `${country.country || country.name} (${country.presence || country.distribution_code || 'Unknown'})`).join('; ');
+            // Tentar requisição direta primeiro, depois proxies
+            for (let proxyIndex = -1; proxyIndex < this.proxies.length; proxyIndex++) {
+                try {
+                    const response = await this.makeApiRequest(targetUrl, proxyIndex >= 0, proxyIndex);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data && data.result && data.result.length > 0) {
+                            return data.result.map(country => `${country.country || country.name} (${country.presence || country.distribution_code || 'Unknown'})`).join('; ');
+                        }
+                        return '-';
+                    }
+                } catch (error) {
+                    console.debug(`🔴 IUCN - Error getting country occurrence for ${species_name} (attempt ${proxyIndex + 2}):`, error.message);
+                    continue;
                 }
             }
         } catch (error) {
@@ -330,19 +430,23 @@ class IucnAPI {
         }
 
         try {
-            const url = `${this.baseURL}/taxa/threats?genus_name=${encodeURIComponent(genus_name)}&species_name=${encodeURIComponent(species_epithet)}`;
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'accept': 'application/json',
-                    'Authorization': this.apiKey
-                }
-            });
+            const targetUrl = `${this.baseURL}/taxa/threats?genus_name=${encodeURIComponent(genus_name)}&species_name=${encodeURIComponent(species_epithet)}&token=${this.apiKey}`;
             
-            if (response.ok) {
-                const data = await response.json();
-                if (data && data.result && data.result.length > 0) {
-                    return data.result.map(threat => threat.title || threat.name || threat.code).join('; ');
+            // Tentar requisição direta primeiro, depois proxies
+            for (let proxyIndex = -1; proxyIndex < this.proxies.length; proxyIndex++) {
+                try {
+                    const response = await this.makeApiRequest(targetUrl, proxyIndex >= 0, proxyIndex);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data && data.result && data.result.length > 0) {
+                            return data.result.map(threat => threat.title || threat.name || threat.code).join('; ');
+                        }
+                        return '-';
+                    }
+                } catch (error) {
+                    console.debug(`🔴 IUCN - Error getting threats for ${species_name} (attempt ${proxyIndex + 2}):`, error.message);
+                    continue;
                 }
             }
         } catch (error) {
@@ -360,19 +464,23 @@ class IucnAPI {
         }
 
         try {
-            const url = `${this.baseURL}/taxa/habitats?genus_name=${encodeURIComponent(genus_name)}&species_name=${encodeURIComponent(species_epithet)}`;
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'accept': 'application/json',
-                    'Authorization': this.apiKey
-                }
-            });
+            const targetUrl = `${this.baseURL}/taxa/habitats?genus_name=${encodeURIComponent(genus_name)}&species_name=${encodeURIComponent(species_epithet)}&token=${this.apiKey}`;
             
-            if (response.ok) {
-                const data = await response.json();
-                if (data && data.result && data.result.length > 0) {
-                    return data.result.map(habitat => habitat.habitat || habitat.name || habitat.code).join('; ');
+            // Tentar requisição direta primeiro, depois proxies
+            for (let proxyIndex = -1; proxyIndex < this.proxies.length; proxyIndex++) {
+                try {
+                    const response = await this.makeApiRequest(targetUrl, proxyIndex >= 0, proxyIndex);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data && data.result && data.result.length > 0) {
+                            return data.result.map(habitat => habitat.habitat || habitat.name || habitat.code).join('; ');
+                        }
+                        return '-';
+                    }
+                } catch (error) {
+                    console.debug(`🔴 IUCN - Error getting habitats for ${species_name} (attempt ${proxyIndex + 2}):`, error.message);
+                    continue;
                 }
             }
         } catch (error) {
@@ -407,7 +515,8 @@ class IucnAPI {
         const results = [];
         const total = speciesList.length;
 
-        console.log(`🔴 IUCN - Starting search for ${total} species...`);
+        console.log(`🔴 IUCN - Starting search for ${total} species using CORS proxy...`);
+        console.log(`🔴 IUCN - Note: Using proxy servers to bypass browser CORS restrictions`);
 
         for (let i = 0; i < speciesList.length; i++) {
             const species = speciesList[i];
@@ -457,7 +566,7 @@ class IucnAPI {
                     onProgress(i + 1, total);
                 }
 
-                // Rate limiting para respeitar limites da API IUCN
+                // Rate limiting mais conservador devido ao uso de proxy
                 if (i < speciesList.length - 1) {
                     await this.delay(2000); // 2 segundos entre requests
                 }
@@ -793,7 +902,7 @@ async function getIUCN() {
                     </div>
                     <div class="ml-3">
                         <p class="text-sm">
-                            <strong>Success:</strong> Successfully accessed IUCN Red List API v4.
+                            <strong>Success:</strong> Successfully accessed IUCN Red List API using CORS proxy.
                         </p>
                         <p class="text-sm mt-2">
                             Results: ${successCount}/${results.length} species found with conservation data
@@ -814,14 +923,17 @@ async function getIUCN() {
                     </div>
                     <div class="ml-3">
                         <p class="text-sm">
-                            <strong>API Notice:</strong> ${errorCount} of ${results.length} requests failed.
+                            <strong>Browser Notice:</strong> ${errorCount} of ${results.length} requests failed.
+                        </p>
+                        <p class="text-sm mt-2">
+                            The IUCN API requires proxy servers for browser access due to CORS restrictions.
                         </p>
                         <p class="text-sm mt-2">
                             Successfully processed: ${successCount}/${results.length} species
                         </p>
                         <p class="text-sm mt-2">
                             <i class="fas fa-lightbulb"></i> 
-                            <strong>Note:</strong> Some species may not be listed in the IUCN Red List database.
+                            <strong>Tip:</strong> For better reliability with large datasets, consider using the Python version of dataFishing.
                         </p>
                     </div>
                 </div>
