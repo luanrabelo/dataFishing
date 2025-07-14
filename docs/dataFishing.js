@@ -209,6 +209,15 @@ class DataFishingApp {
                     }
                 );
             
+            case 'bold':
+                return await boldAPI.searchBatch(
+                    speciesList,
+                    onProgress,
+                    (result, current, total) => {
+                        console.log(`🧬 BOLD - Completed ${current}/${total}: ${result.speciesName} (${result.sequencesCount} sequences)`);
+                    }
+                );
+            
             // Add cases for other APIs here as they are implemented
             default:
                 throw new Error(`Unknown API: ${apiName}`);
@@ -1264,10 +1273,12 @@ document.addEventListener('DOMContentLoaded', function () {
             } else if (gbif) {
                 console.log('Starting GBIF search...');
                 getGBIF();
-            } else if (iucn) {
-                alert('IUCN API not yet implemented in web version');
             } else if (bold) {
-                alert('BOLD Systems API not yet implemented in web version');
+                console.log('Starting BOLD search...');
+                getBOLD();
+            } else if (iucn) {
+                console.log('Starting IUCN search...');
+                getIUCN();
             } else {
                 alert('Please select a database to search.');
                 return;
