@@ -241,5 +241,3 @@ if __name__ == '__main__':
                 sys.exit(1)
     print(f"{time.strftime('%Y/%m/%d - %H:%M:%S', time.localtime())}: {TerminalColors.Green}dataFishing process completed successfully!{TerminalColors.End}")
     # Citation
-    print(f"{TerminalColors.Bold}\n\nHow to cite dataFishing:{TerminalColors.End}")
-    print(f"Rabelo, L., Sodré, D., Balcázar, O. D. A., do Rosário, M. F., Guimarães-Costa, A. J., Gomes, G., Sampaio, I., & Vallinoto, M. (2025). dataFishing: An efficient Python tool and user-friendly web-form for mining mitochondrial and chloroplast sequences, taxonomic, and biodiversity data. Ecological Informatics, 85, 102970. https://doi.org/10.1016/j.ecoinf.2024.102970")

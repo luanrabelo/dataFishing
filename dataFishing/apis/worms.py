@@ -54,7 +54,7 @@ async def worms_taxonomy(**kwargs):
     if time_delay > 0:
         await asyncio.sleep(time_delay)
     if verbose:
-        logging.info(f"WoRMS - {species_name} Getting taxonomy from WoRMS...")
+        logging.info(f"🌊 WoRMS - {species_name} Getting taxonomy from WoRMS...")
     
     url = f"https://www.marinespecies.org/rest/AphiaRecordsByName/{species_name}?like=false&marine_only=false&offset=1"
     
@@ -104,53 +104,53 @@ async def worms_taxonomy(**kwargs):
                             env_info = f"Environments: {', '.join(environments) if environments else 'None'}"
                             
                             if verbose:
-                                logging.info(f"WoRMS - {species_name} Found in WoRMS: AphiaID={data_dict['AphiaID']}, {status_info}, {env_info}")
+                                logging.info(f"🌊 WoRMS - {species_name} Found in WoRMS: AphiaID={data_dict['AphiaID']}, {status_info}, {env_info}")
                             if log_to_file:
-                                log_message = f"WoRMS - {species_name} Found: AphiaID={data_dict['AphiaID']}, {status_info}, {env_info}"
+                                log_message = f"🌊 WoRMS - {species_name} Found: AphiaID={data_dict['AphiaID']}, {status_info}, {env_info}"
                                 with open(log_file, 'a+', encoding='utf-8') as f:
                                     f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - INFO - {log_message}\n")
                             break
                         else:
                             if verbose:
-                                logging.warning(f"WoRMS - {species_name} No results found in WoRMS")
+                                logging.warning(f"🌊 WoRMS - {species_name} No results found in WoRMS")
                             if log_to_file:
                                 with open(log_file, 'a+', encoding='utf-8') as f:
-                                    f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - WARNING - WoRMS - {species_name} No results found in WoRMS\n")
+                                    f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - WARNING - 🌊 WoRMS - {species_name} No results found in WoRMS\n")
                             break
                     else:
                         error_msg = error_messages.get(response.status, 'Unknown Error')
                         if attempt < max_retries - 1:
                             if verbose:
-                                logging.warning(f"WoRMS - {species_name} Error {response.status} - {error_msg}. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
+                                logging.warning(f"🌊 WoRMS - {species_name} Error {response.status} - {error_msg}. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
                             await asyncio.sleep(retry_delay)
                         else:
                             if verbose:
-                                logging.error(f"WoRMS - {species_name} Error {response.status} - {error_msg}. Max retries exceeded")  
+                                logging.error(f"🌊 WoRMS - {species_name} Error {response.status} - {error_msg}. Max retries exceeded")  
                             if log_to_file:
                                 with open(log_file, 'a+', encoding='utf-8') as f:
-                                    f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - ERROR - WoRMS - {species_name} Error {response.status} - {error_msg}\n")
+                                    f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - ERROR - 🌊 WoRMS - {species_name} Error {response.status} - {error_msg}\n")
         except asyncio.TimeoutError:
             if attempt < max_retries - 1:
                 if verbose:
-                    logging.warning(f"WoRMS - {species_name} Request timeout. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
+                    logging.warning(f"🌊 WoRMS - {species_name} Request timeout. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
                 await asyncio.sleep(retry_delay)
             else:
                 if verbose:
-                    logging.error(f"WoRMS - {species_name} Request timeout. Max retries exceeded")
+                    logging.error(f"🌊 WoRMS - {species_name} Request timeout. Max retries exceeded")
                 if log_to_file:
                     with open(log_file, 'a+', encoding='utf-8') as f:
-                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - ERROR - WoRMS - {species_name} Request timeout. Max retries exceeded\n")
+                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - ERROR - 🌊 WoRMS - {species_name} Request timeout. Max retries exceeded\n")
         except Exception as e:
             if attempt < max_retries - 1:
                 if verbose:
-                    logging.warning(f"WoRMS - {species_name} Connection error: {e}. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
+                    logging.warning(f"🌊 WoRMS - {species_name} Connection error: {e}. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
                 await asyncio.sleep(retry_delay)
             else:
                 if verbose:
-                    logging.error(f"WoRMS - {species_name} Connection error: {e}. Max retries exceeded")
+                    logging.error(f"🌊 WoRMS - {species_name} Connection error: {e}. Max retries exceeded")
                 if log_to_file:
                     with open(log_file, 'a+', encoding='utf-8') as f:
-                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - ERROR - WoRMS - {species_name} Connection error: {e}. Max retries exceeded\n")
+                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - ERROR - 🌊 WoRMS - {species_name} Connection error: {e}. Max retries exceeded\n")
     
     worms_result.append(';'.join(data_dict.values()))
     return worms_result
@@ -165,7 +165,7 @@ async def get_worms_data_batch(species_list, **kwargs):
     output_folder = kwargs.get('output_folder', ".")
     
     if verbose:
-        logging.info(f"WoRMS - Starting taxonomy lookup for {len(species_list)} species...")
+        logging.info(f"🌊 WoRMS - Starting taxonomy lookup for {len(species_list)} species...")
 
     semaphore = asyncio.Semaphore(max_concurrent)
     
@@ -260,5 +260,5 @@ async def get_worms_data_batch(species_list, **kwargs):
     if verbose:
         successful_records = len(df_taxonomy[df_taxonomy['AphiaID'] != '-'])
         total_species = len(species_list)
-        logging.info(f"WoRMS - Taxonomy lookup completed: {successful_records}/{total_species} species found")
+        logging.info(f"🌊 WoRMS - Taxonomy lookup completed: {successful_records}/{total_species} species found")
     return df_taxonomy

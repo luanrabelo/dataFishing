@@ -360,3 +360,234 @@ async function getWoRMS() {
     await Promise.all(promises);
     updateDataResults();
 }
+
+/**
+ * WoRMS (World Register of Marine Species) API Integration
+ * Based on the Python implementation with emojis
+ */
+
+class WormsAPI {
+    constructor() {
+        this.baseURL = 'https://www.marinespecies.org/rest';
+        this.maxRetries = 3;
+        this.retryDelay = 2000; // 2 seconds
+    }
+
+    /**
+     * Search species in WoRMS database
+     * @param {string} speciesName - Species name (genus + species)
+     * @returns {Promise<Object>} Search results
+     */
+    async searchSpecies(speciesName) {
+        const url = `${this.baseURL}/AphiaRecordsByName/${encodeURIComponent(speciesName)}?like=false&marine_only=false&offset=1`;
+
+        for (let attempt = 0; attempt < this.maxRetries; attempt++) {
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                return this.parseWormsData(data, speciesName);
+
+            } catch (error) {
+                console.warn(`🌊 WoRMS - ${speciesName} Attempt ${attempt + 1}/${this.maxRetries} failed:`, error.message);
+                
+                if (attempt < this.maxRetries - 1) {
+                    await this.delay(this.retryDelay);
+                } else {
+                    throw error;
+                }
+            }
+        }
+    }
+
+    /**
+     * Parse WoRMS API response data
+     * @param {Array} data - Raw API response
+     * @param {string} speciesName - Original species name
+     * @returns {Object} Parsed data
+     */
+    parseWormsData(data, speciesName) {
+        if (!data || data.length === 0) {
+            return {
+                speciesName: speciesName,
+                aphiaID: '-',
+                kingdom: '-',
+                phylum: '-',
+                class: '-',
+                order: '-',
+                family: '-',
+                genus: speciesName.split(' ')[0] || '-',
+                species: speciesName,
+                authority: '-',
+                validName: '-',
+                validAuthority: '-',
+                status: 'Not Found',
+                isMarine: '-',
+                isBrackish: '-',
+                isFreshwater: '-',
+                isTerrestrial: '-',
+                isExtinct: '-',
+                matchType: '-',
+                modified: '-',
+                citation: '-',
+                url: '-'
+            };
+        }
+
+        // Get the first result (best match)
+        const record = data[0];
+
+        return {
+            speciesName: speciesName,
+            aphiaID: record.AphiaID || '-',
+            kingdom: record.kingdom || '-',
+            phylum: record.phylum || '-',
+            class: record.class || '-',
+            order: record.order || '-',
+            family: record.family || '-',
+            genus: record.genus || speciesName.split(' ')[0] || '-',
+            species: record.scientificname || speciesName,
+            authority: record.authority || '-',
+            validName: record.valid_name || '-',
+            validAuthority: record.valid_authority || '-',
+            status: record.status || '-',
+            isMarine: this.formatEnvironment(record.isMarine),
+            isBrackish: this.formatEnvironment(record.isBrackish),
+            isFreshwater: this.formatEnvironment(record.isFreshwater),
+            isTerrestrial: this.formatEnvironment(record.isTerrestrial),
+            isExtinct: this.formatEnvironment(record.isExtinct),
+            matchType: record.match_type || '-',
+            modified: this.formatDate(record.modified),
+            citation: record.citation || '-',
+            url: record.AphiaID ? `https://www.marinespecies.org/aphia.php?p=taxdetails&id=${record.AphiaID}` : '-'
+        };
+    }
+
+    /**
+     * Format environment values (0/1 to No/Yes)
+     * @param {number|null} value - Environment value
+     * @returns {string} Formatted value
+     */
+    formatEnvironment(value) {
+        if (value === 1) return 'Yes';
+        if (value === 0) return 'No';
+        return '-';
+    }
+
+    /**
+     * Format date string
+     * @param {string} dateString - ISO date string
+     * @returns {string} Formatted date
+     */
+    formatDate(dateString) {
+        if (!dateString) return '-';
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString();
+        } catch (e) {
+            return dateString;
+        }
+    }
+
+    /**
+     * Delay function for retries
+     * @param {number} ms - Milliseconds to delay
+     * @returns {Promise}
+     */
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    /**
+     * Search multiple species (batch processing)
+     * @param {Array<string>} speciesList - Array of species names
+     * @param {Function} onProgress - Progress callback
+     * @param {Function} onSpeciesComplete - Called when each species is complete
+     * @returns {Promise<Array>} Array of results
+     */
+    async searchBatch(speciesList, onProgress = null, onSpeciesComplete = null) {
+        const results = [];
+        const total = speciesList.length;
+
+        for (let i = 0; i < speciesList.length; i++) {
+            const species = speciesList[i];
+            
+            try {
+                console.log(`🌊 WoRMS - Processing ${species} (${i + 1}/${total})...`);
+                
+                const result = await this.searchSpecies(species);
+                results.push(result);
+
+                if (onSpeciesComplete) {
+                    onSpeciesComplete(result, i + 1, total);
+                }
+
+                if (onProgress) {
+                    onProgress(i + 1, total);
+                }
+
+                // Rate limiting - 1 second delay between requests
+                if (i < speciesList.length - 1) {
+                    await this.delay(1000);
+                }
+
+            } catch (error) {
+                console.error(`🌊 WoRMS - Error processing ${species}:`, error);
+                
+                // Add error result
+                results.push({
+                    speciesName: species,
+                    aphiaID: '-',
+                    kingdom: '-',
+                    phylum: '-',
+                    class: '-',
+                    order: '-',
+                    family: '-',
+                    genus: species.split(' ')[0] || '-',
+                    species: species,
+                    authority: '-',
+                    validName: '-',
+                    validAuthority: '-',
+                    status: 'Error',
+                    isMarine: '-',
+                    isBrackish: '-',
+                    isFreshwater: '-',
+                    isTerrestrial: '-',
+                    isExtinct: '-',
+                    matchType: '-',
+                    modified: '-',
+                    citation: `Error: ${error.message}`,
+                    url: '-'
+                });
+
+                if (onSpeciesComplete) {
+                    onSpeciesComplete(results[results.length - 1], i + 1, total);
+                }
+
+                if (onProgress) {
+                    onProgress(i + 1, total);
+                }
+            }
+        }
+
+        return results;
+    }
+}
+
+// Create global instance
+const wormsAPI = new WormsAPI();
+
+// Export for use in other modules
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = WormsAPI;
+}

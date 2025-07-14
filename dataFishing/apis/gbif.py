@@ -48,7 +48,7 @@ async def gbif_taxonomy(**kwargs):
     if time_delay > 0:
         await asyncio.sleep(time_delay)
     if verbose:
-        logging.info(f"GBIF - {species_name} Getting taxonomy from GBIF...")
+        logging.info(f"🌍 GBIF - {species_name} Getting taxonomy from GBIF...")
     
     url = f"https://api.gbif.org/v1/species?name={species_name}"
     
@@ -83,60 +83,60 @@ async def gbif_taxonomy(**kwargs):
                                     taxonomy_info = f"Kingdom: {data_dict['Kingdom']}, Family: {data_dict['Family']}"
                                     
                                     if verbose:
-                                        logging.info(f"GBIF - {species_name} Found in GBIF: Key={data_dict['Key']}, {taxonomy_info}")
+                                        logging.info(f"🌍 GBIF - {species_name} Found in GBIF: Key={data_dict['Key']}, {taxonomy_info}")
                                     if log_to_file:
-                                        log_message = f"GBIF - {species_name} Found: Key={data_dict['Key']}, {taxonomy_info}"
+                                        log_message = f"🌍 GBIF - {species_name} Found: Key={data_dict['Key']}, {taxonomy_info}"
                                         with open(log_file, 'a+', encoding='utf-8') as f:
                                             f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - INFO - {log_message}\n")
                                     break
                             else:
                                 if verbose:
-                                    logging.warning(f"GBIF - {species_name} No accepted results found in GBIF")
+                                    logging.warning(f"🌍 GBIF - {species_name} No accepted results found in GBIF")
                                 if log_to_file:
                                     with open(log_file, 'a+', encoding='utf-8') as f:
-                                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - WARNING - GBIF - {species_name} No accepted results found in GBIF\n")
+                                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - WARNING - 🌍 GBIF - {species_name} No accepted results found in GBIF\n")
                             break
                         else:
                             if verbose:
-                                logging.warning(f"GBIF - {species_name} No results found in GBIF")
+                                logging.warning(f"🌍 GBIF - {species_name} No results found in GBIF")
                             if log_to_file:
                                 with open(log_file, 'a+', encoding='utf-8') as f:
-                                    f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - WARNING - GBIF - {species_name} No results found in GBIF\n")
+                                    f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - WARNING - 🌍 GBIF - {species_name} No results found in GBIF\n")
                             break
                     else:
                         error_msg = error_messages.get(response.status, 'Unknown Error')
                         if attempt < max_retries - 1:
                             if verbose:
-                                logging.warning(f"GBIF - {species_name} Error {response.status} - {error_msg}. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
+                                logging.warning(f"🌍 GBIF - {species_name} Error {response.status} - {error_msg}. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
                             await asyncio.sleep(retry_delay)
                         else:
                             if verbose:
-                                logging.error(f"GBIF - {species_name} Error {response.status} - {error_msg}. Max retries exceeded")
+                                logging.error(f"🌍 GBIF - {species_name} Error {response.status} - {error_msg}. Max retries exceeded")
                             if log_to_file:
                                 with open(log_file, 'a+', encoding='utf-8') as f:
-                                    f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - ERROR - GBIF - {species_name} Error {response.status} - {error_msg}\n")
+                                    f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - ERROR - 🌍 GBIF - {species_name} Error {response.status} - {error_msg}\n")
         except asyncio.TimeoutError:
             if attempt < max_retries - 1:
                 if verbose:
-                    logging.warning(f"GBIF - {species_name} Request timeout. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
+                    logging.warning(f"🌍 GBIF - {species_name} Request timeout. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
                 await asyncio.sleep(retry_delay)
             else:
                 if verbose:
-                    logging.error(f"GBIF - {species_name} Request timeout. Max retries exceeded")
+                    logging.error(f"🌍 GBIF - {species_name} Request timeout. Max retries exceeded")
                 if log_to_file:
                     with open(log_file, 'a+', encoding='utf-8') as f:
-                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - ERROR - GBIF - {species_name} Request timeout. Max retries exceeded\n")
+                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - ERROR - 🌍 GBIF - {species_name} Request timeout. Max retries exceeded\n")
         except Exception as e:
             if attempt < max_retries - 1:
                 if verbose:
-                    logging.warning(f"GBIF - {species_name} Connection error: {e}. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
+                    logging.warning(f"🌍 GBIF - {species_name} Connection error: {e}. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
                 await asyncio.sleep(retry_delay)
             else:
                 if verbose:
-                    logging.error(f"GBIF - {species_name} Connection error: {e}. Max retries exceeded")
+                    logging.error(f"🌍 GBIF - {species_name} Connection error: {e}. Max retries exceeded")
                 if log_to_file:
                     with open(log_file, 'a+', encoding='utf-8') as f:
-                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - ERROR - GBIF - {species_name} Connection error: {e}. Max retries exceeded\n")
+                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - ERROR - 🌍 GBIF - {species_name} Connection error: {e}. Max retries exceeded\n")
     
     gbif_result.append(';'.join(data_dict.values()))
     return gbif_result
@@ -151,7 +151,7 @@ async def get_gbif_data_batch(species_list, **kwargs):
     output_folder = kwargs.get('output_folder', ".")
     
     if verbose:
-        logging.info(f"GBIF - Starting taxonomy lookup for {len(species_list)} species...")
+        logging.info(f"🌍 GBIF - Starting taxonomy lookup for {len(species_list)} species...")
 
     semaphore = asyncio.Semaphore(max_concurrent)
     
@@ -227,5 +227,5 @@ async def get_gbif_data_batch(species_list, **kwargs):
     if verbose:
         successful_records = len(df_taxonomy[df_taxonomy['Key'] != '-'])
         total_species = len(species_list)
-        logging.info(f"GBIF - Taxonomy lookup completed: {successful_records}/{total_species} species found")
+        logging.info(f"🌍 GBIF - Taxonomy lookup completed: {successful_records}/{total_species} species found")
     return df_taxonomy

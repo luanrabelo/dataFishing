@@ -129,7 +129,7 @@ async def eschmeyer_taxonomy(**kwargs):
     if time_delay > 0:
         await asyncio.sleep(time_delay)
     if verbose:
-        logging.info(f"Eschmeyer - {species_name} Getting taxonomy from Eschmeyer's Catalog of Fishes...")
+        logging.info(f"🐟 Eschmeyer - {species_name} Getting taxonomy from Eschmeyer's Catalog of Fishes...")
     
     # Construir parâmetros da URL
     base_url = "https://researcharchive.calacademy.org/research/ichthyology/catalog/fishcatget.asp"
@@ -137,10 +137,10 @@ async def eschmeyer_taxonomy(**kwargs):
     parts = species_name.split(" ", 1)
     if len(parts) < 2:
         if verbose:
-            logging.warning(f"Eschmeyer - {species_name} Invalid species name format (must contain genus and species)")
+            logging.warning(f"🐟 Eschmeyer - {species_name} Invalid species name format (must contain genus and species)")
         if log_to_file:
             with open(log_file, 'a+', encoding='utf-8') as f:
-                f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - WARNING - Eschmeyer - {species_name} Invalid species name format\n")
+                f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - WARNING - 🐟 Eschmeyer - {species_name} Invalid species name format\n")
         eschmeyer_result.append(';'.join(data_dict.values()))
         return eschmeyer_result
     
@@ -205,53 +205,53 @@ async def eschmeyer_taxonomy(**kwargs):
                                 taxonomy_info = f"Status: {data_dict['Status']}, Family: {data_dict['Family']}, Synonyms: {data_dict['Synonyms_Count']}"
                                 
                                 if verbose:
-                                    logging.info(f"Eschmeyer - {species_name} Found in Eschmeyer's Catalog: {taxonomy_info}")
+                                    logging.info(f"🐟 Eschmeyer - {species_name} Found in Eschmeyer's Catalog: {taxonomy_info}")
                                 if log_to_file:
-                                    log_message = f"Eschmeyer - {species_name} Found: {taxonomy_info}"
+                                    log_message = f"🐟 Eschmeyer - {species_name} Found: {taxonomy_info}"
                                     with open(log_file, 'a+', encoding='utf-8') as f:
                                         f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - INFO - {log_message}\n")
                                 break
                         else:
                             if verbose:
-                                logging.warning(f"Eschmeyer - {species_name} No results found in Eschmeyer's Catalog")
+                                logging.warning(f"🐟 Eschmeyer - {species_name} No results found in Eschmeyer's Catalog")
                             if log_to_file:
                                 with open(log_file, 'a+', encoding='utf-8') as f:
-                                    f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - WARNING - Eschmeyer - {species_name} No results found\n")
+                                    f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - WARNING - 🐟 Eschmeyer - {species_name} No results found\n")
                             break
                     else:
                         error_msg = error_messages.get(response.status, 'Unknown Error')
                         if attempt < max_retries - 1:
                             if verbose:
-                                logging.warning(f"Eschmeyer - {species_name} Error {response.status} - {error_msg}. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
+                                logging.warning(f"🐟 Eschmeyer - {species_name} Error {response.status} - {error_msg}. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
                             await asyncio.sleep(retry_delay)
                         else:
                             if verbose:
-                                logging.error(f"Eschmeyer - {species_name} Error {response.status} - {error_msg}. Max retries exceeded")
+                                logging.error(f"🐟 Eschmeyer - {species_name} Error {response.status} - {error_msg}. Max retries exceeded")
                             if log_to_file:
                                 with open(log_file, 'a+', encoding='utf-8') as f:
-                                    f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - ERROR - Eschmeyer - {species_name} Error {response.status} - {error_msg}\n")
+                                    f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - ERROR - 🐟 Eschmeyer - {species_name} Error {response.status} - {error_msg}\n")
         except asyncio.TimeoutError:
             if attempt < max_retries - 1:
                 if verbose:
-                    logging.warning(f"Eschmeyer - {species_name} Request timeout. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
+                    logging.warning(f"🐟 Eschmeyer - {species_name} Request timeout. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
                 await asyncio.sleep(retry_delay)
             else:
                 if verbose:
-                    logging.error(f"Eschmeyer - {species_name} Request timeout. Max retries exceeded")
+                    logging.error(f"🐟 Eschmeyer - {species_name} Request timeout. Max retries exceeded")
                 if log_to_file:
                     with open(log_file, 'a+', encoding='utf-8') as f:
-                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - ERROR - Eschmeyer - {species_name} Request timeout\n")
+                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - ERROR - 🐟 Eschmeyer - {species_name} Request timeout\n")
         except Exception as e:
             if attempt < max_retries - 1:
                 if verbose:
-                    logging.warning(f"Eschmeyer - {species_name} Connection error: {e}. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
+                    logging.warning(f"🐟 Eschmeyer - {species_name} Connection error: {e}. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
                 await asyncio.sleep(retry_delay)
             else:
                 if verbose:
-                    logging.error(f"Eschmeyer - {species_name} Connection error: {e}. Max retries exceeded")
+                    logging.error(f"🐟 Eschmeyer - {species_name} Connection error: {e}. Max retries exceeded")
                 if log_to_file:
                     with open(log_file, 'a+', encoding='utf-8') as f:
-                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - ERROR - Eschmeyer - {species_name} Connection error: {e}\n")
+                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - ERROR - 🐟 Eschmeyer - {species_name} Connection error: {e}\n")
     
     eschmeyer_result.append(';'.join(data_dict.values()))
     return eschmeyer_result
@@ -266,7 +266,7 @@ async def get_eschmeyer_data_batch(species_list, **kwargs):
     output_folder = kwargs.get('output_folder', ".")
     
     if verbose:
-        logging.info(f"Eschmeyer - Starting taxonomy lookup for {len(species_list)} species...")
+        logging.info(f"🐟 Eschmeyer - Starting taxonomy lookup for {len(species_list)} species...")
 
     semaphore = asyncio.Semaphore(max_concurrent)
     
@@ -354,8 +354,8 @@ async def get_eschmeyer_data_batch(species_list, **kwargs):
         successful_records = len(df_taxonomy[df_taxonomy['Status'] != '-'])
         total_species = len(species_list)
         total_synonyms = df_taxonomy['Synonyms_Count'].apply(lambda x: int(x) if x.isdigit() else 0).sum()
-        logging.info(f"Eschmeyer - Taxonomy lookup completed: {successful_records}/{total_species} species found")
+        logging.info(f"🐟 Eschmeyer - Taxonomy lookup completed: {successful_records}/{total_species} species found")
         if total_synonyms > 0:
-            logging.info(f"Eschmeyer - Total synonyms found: {total_synonyms}")
+            logging.info(f"🐟 Eschmeyer - Total synonyms found: {total_synonyms}")
     
     return df_taxonomy

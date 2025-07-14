@@ -115,7 +115,7 @@ async def bold_sequences_data(species_name, verbose=True, download_sequences=Fal
                     # Se o conteúdo estiver vazio ou for apenas "[]", não há sequências disponíveis
                     if not text_content or text_content == "[]" or text_content.strip() == "":
                         if verbose:
-                            logging.warning(f"BOLD - {species_name} No sequences available")
+                            logging.warning(f"🧬 BOLD - {species_name} No sequences available")
                         return sequences_data, 0
                     
                     # Tentar converter para JSON com tratamento de erros específico
@@ -216,7 +216,7 @@ async def bold_sequences_data(species_name, verbose=True, download_sequences=Fal
                         sequence_count = total_sequences
                         
                         if verbose and total_sequences > 0:
-                            logging.info(f"BOLD - {species_name} Downloaded {total_sequences} sequences across {len(sequences_by_marker)} markers")
+                            logging.info(f"🧬 BOLD - {species_name} Downloaded {total_sequences} sequences across {len(sequences_by_marker)} markers")
                         
                         # Create summary file
                         summary_file = os.path.join(species_dir, f"{clean_name}_summary.txt")
@@ -234,14 +234,14 @@ async def bold_sequences_data(species_name, verbose=True, download_sequences=Fal
                 
                 elif response.status == 404:
                     if verbose:
-                        logging.warning(f"BOLD - {species_name} No sequences found")
+                        logging.warning(f"🧬 BOLD - {species_name} No sequences found")
                 else:
                     if verbose:
-                        logging.error(f"BOLD - {species_name} Error {response.status} getting sequences")
+                        logging.error(f"🧬 BOLD - {species_name} Error {response.status} getting sequences")
                         
     except Exception as e:
         if verbose:
-            logging.error(f"BOLD - {species_name} Error downloading sequences: {e}")
+            logging.error(f"🧬 BOLD - {species_name} Error downloading sequences: {e}")
     
     return sequences_data, sequence_count
 
@@ -285,7 +285,7 @@ async def bold_taxonomy(**kwargs):
     if time_delay > 0:
         await asyncio.sleep(time_delay)
     if verbose:
-        logging.info(f"BOLD - {species_name} Getting taxonomy from BOLD Systems...")
+        logging.info(f"🧬 BOLD - {species_name} Getting taxonomy from BOLD Systems...")
     
     url = f"http://v3.boldsystems.org/index.php/API_Tax/TaxonSearch?taxName={species_name}"
     
@@ -333,25 +333,25 @@ async def bold_taxonomy(**kwargs):
                                     sequence_info = f"Sequences: {data_dict['Sequences_Count']}"
                                     
                                     if verbose:
-                                        logging.info(f"BOLD - {species_name} Found in BOLD Systems: TaxID={data_dict['TaxID']}, {taxonomy_info}, {sequence_info}")
+                                        logging.info(f"🧬 BOLD - {species_name} Found in BOLD Systems: TaxID={data_dict['TaxID']}, {taxonomy_info}, {sequence_info}")
                                     if log_to_file:
-                                        log_message = f"BOLD - {species_name} Found: TaxID={data_dict['TaxID']}, {taxonomy_info}, {sequence_info}"
+                                        log_message = f"🧬 BOLD - {species_name} Found: TaxID={data_dict['TaxID']}, {taxonomy_info}, {sequence_info}"
                                         with open(log_file, 'a+', encoding='utf-8') as f:
                                             f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - INFO - {log_message}\n")
                                     break
                             else:
                                 if verbose:
-                                    logging.warning(f"BOLD - {species_name} No taxonomy ID found in BOLD Systems")
+                                    logging.warning(f"🧬 BOLD - {species_name} No taxonomy ID found in BOLD Systems")
                                 if log_to_file:
                                     with open(log_file, 'a+', encoding='utf-8') as f:
-                                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - WARNING - BOLD - {species_name} No taxonomy ID found in BOLD Systems\n")
+                                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - WARNING - 🧬 BOLD - {species_name} No taxonomy ID found in BOLD Systems\n")
                                 break
                         else:
                             if verbose:
-                                logging.warning(f"BOLD - {species_name} No results found in BOLD Systems")
+                                logging.warning(f"🧬 BOLD - {species_name} No results found in BOLD Systems")
                             if log_to_file:
                                 with open(log_file, 'a+', encoding='utf-8') as f:
-                                    f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - WARNING - BOLD - {species_name} No results found in BOLD Systems\n")
+                                    f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - WARNING - 🧬 BOLD - {species_name} No results found in BOLD Systems\n")
                             break
                     else:
                         error_msg = error_messages.get(response.status, 'Unknown Error')
@@ -361,36 +361,36 @@ async def bold_taxonomy(**kwargs):
                         
                         if attempt < max_retries - 1:
                             if verbose:
-                                logging.warning(f"BOLD - {species_name} Error {response.status} - {error_msg}. Retrying in {current_retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
+                                logging.warning(f"🧬 BOLD - {species_name} Error {response.status} - {error_msg}. Retrying in {current_retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
                             await asyncio.sleep(current_retry_delay)
                         else:
                             if verbose:
-                                logging.error(f"BOLD - {species_name} Error {response.status} - {error_msg}. Max retries exceeded")
+                                logging.error(f"🧬 BOLD - {species_name} Error {response.status} - {error_msg}. Max retries exceeded")
                             if log_to_file:
                                 with open(log_file, 'a+', encoding='utf-8') as f:
-                                    f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - ERROR - BOLD - {species_name} Error {response.status} - {error_msg}\n")
+                                    f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - ERROR - 🧬 BOLD - {species_name} Error {response.status} - {error_msg}\n")
         except asyncio.TimeoutError:
             if attempt < max_retries - 1:
                 if verbose:
-                    logging.warning(f"BOLD - {species_name} Request timeout. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
+                    logging.warning(f"🧬 BOLD - {species_name} Request timeout. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
                 await asyncio.sleep(retry_delay)
             else:
                 if verbose:
-                    logging.error(f"BOLD - {species_name} Request timeout. Max retries exceeded")
+                    logging.error(f"🧬 BOLD - {species_name} Request timeout. Max retries exceeded")
                 if log_to_file:
                     with open(log_file, 'a+', encoding='utf-8') as f:
-                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - ERROR - BOLD - {species_name} Request timeout. Max retries exceeded\n")
+                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - ERROR - 🧬 BOLD - {species_name} Request timeout. Max retries exceeded\n")
         except Exception as e:
             if attempt < max_retries - 1:
                 if verbose:
-                    logging.warning(f"BOLD - {species_name} Connection error: {e}. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
+                    logging.warning(f"🧬 BOLD - {species_name} Connection error: {e}. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
                 await asyncio.sleep(retry_delay)
             else:
                 if verbose:
-                    logging.error(f"BOLD - {species_name} Connection error: {e}. Max retries exceeded")
+                    logging.error(f"🧬 BOLD - {species_name} Connection error: {e}. Max retries exceeded")
                 if log_to_file:
                     with open(log_file, 'a+', encoding='utf-8') as f:
-                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - ERROR - BOLD - {species_name} Connection error: {e}. Max retries exceeded\n")
+                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - ERROR - 🧬 BOLD - {species_name} Connection error: {e}. Max retries exceeded\n")
     
     bold_result.append(';'.join(data_dict.values()))
     return bold_result
@@ -406,14 +406,14 @@ async def get_bold_data_batch(species_list, **kwargs):
     output_folder = kwargs.get('output_folder', ".")
     
     if verbose:
-        logging.info(f"BOLD - Starting taxonomy lookup for {len(species_list)} species...")
+        logging.info(f"🧬 BOLD - Starting taxonomy lookup for {len(species_list)} species...")
         if download_sequences:
             bold_sequences_dir = os.path.join(output_folder, "BOLD_Sequences")
-            logging.info(f"BOLD - Sequence download enabled - files will be saved to {bold_sequences_dir}/")
+            logging.info(f"🧬 BOLD - Sequence download enabled - files will be saved to {bold_sequences_dir}/")
             # Criar diretório raiz se não existir
             if not os.path.exists(bold_sequences_dir):
                 os.makedirs(bold_sequences_dir, exist_ok=True)
-                logging.info(f"BOLD - Created directory: {bold_sequences_dir}/")
+                logging.info(f"🧬 BOLD - Created directory: {bold_sequences_dir}/")
 
     semaphore = asyncio.Semaphore(max_concurrent)
     
@@ -486,7 +486,7 @@ async def get_bold_data_batch(species_list, **kwargs):
         successful_records = len(df_taxonomy[df_taxonomy['TaxID'] != '-'])
         total_species = len(species_list)
         total_sequences = df_taxonomy['Sequences_Count'].apply(lambda x: int(x) if x.isdigit() else 0).sum()
-        logging.info(f"BOLD - Taxonomy lookup completed: {successful_records}/{total_species} species found")
+        logging.info(f"🧬 BOLD - Taxonomy lookup completed: {successful_records}/{total_species} species found")
         if download_sequences and total_sequences > 0:
-            logging.info(f"BOLD - Total sequences downloaded: {total_sequences}")
+            logging.info(f"🧬 BOLD - Total sequences downloaded: {total_sequences}")
     return df_taxonomy

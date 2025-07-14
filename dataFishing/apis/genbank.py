@@ -41,7 +41,7 @@ async def ncbi_taxonomy(**kwargs):
     # Validar email
     if not email:
         if verbose:
-            logging.error("NCBI - Email is required for NCBI API access")
+            logging.error("🔬 NCBI - Email is required for NCBI API access")
         return None
     
     # Configurar delay baseado na disponibilidade da API key
@@ -50,10 +50,10 @@ async def ncbi_taxonomy(**kwargs):
     
     if not api_key:
         if verbose:
-            logging.warning("NCBI - API key not provided, using reduced rate limits (2 requests/second)")
+            logging.warning("🔬 NCBI - API key not provided, using reduced rate limits (2 requests/second)")
     else:
         if verbose:
-            logging.info("NCBI - API key found, using standard rate limits (4 requests/second)")
+            logging.info("🔬 NCBI - API key found, using standard rate limits (4 requests/second)")
     
     data_dict = {
         'TaxID': '-',
@@ -83,7 +83,7 @@ async def ncbi_taxonomy(**kwargs):
     await asyncio.sleep(rate_delay)
     
     if verbose:
-        logging.info(f"NCBI - {species_name} Getting taxonomy from NCBI...")
+        logging.info(f"🔬 NCBI - {species_name} Getting taxonomy from NCBI...")
     
     for attempt in range(max_retries):
         try:
@@ -102,7 +102,7 @@ async def ncbi_taxonomy(**kwargs):
                 tax_id = search_record["IdList"][0]
                 
                 if verbose:
-                    logging.info(f"NCBI - {species_name} Found in NCBI: TaxID={tax_id}")
+                    logging.info(f"🔬 NCBI - {species_name} Found in NCBI: TaxID={tax_id}")
                 
                 # Delay antes de buscar dados detalhados
                 await asyncio.sleep(rate_delay)
@@ -134,39 +134,39 @@ async def ncbi_taxonomy(**kwargs):
                     taxonomy_info = f"TaxID: {data_dict['TaxID']}, Kingdom: {data_dict['Kingdom']}, Family: {data_dict['Family']}"
                     
                     if verbose:
-                        logging.info(f"NCBI - {species_name} Taxonomy retrieved: {taxonomy_info}")
+                        logging.info(f"🔬 NCBI - {species_name} Taxonomy retrieved: {taxonomy_info}")
                     
                     if log_to_file:
-                        log_message = f"NCBI - {species_name} Found: {taxonomy_info}"
+                        log_message = f"🔬 NCBI - {species_name} Found: {taxonomy_info}"
                         with open(log_file, 'a+', encoding='utf-8') as f:
                             f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - INFO - {log_message}\n")
                     break
                 else:
                     if verbose:
-                        logging.warning(f"NCBI - {species_name} No detailed taxonomy data found")
+                        logging.warning(f"🔬 NCBI - {species_name} No detailed taxonomy data found")
                     if log_to_file:
                         with open(log_file, 'a+', encoding='utf-8') as f:
-                            f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - WARNING - NCBI - {species_name} No detailed taxonomy data found\n")
+                            f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - WARNING - 🔬 NCBI - {species_name} No detailed taxonomy data found\n")
                     break
             else:
                 if verbose:
-                    logging.warning(f"NCBI - {species_name} No results found in NCBI")
+                    logging.warning(f"🔬 NCBI - {species_name} No results found in NCBI")
                 if log_to_file:
                     with open(log_file, 'a+', encoding='utf-8') as f:
-                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - WARNING - NCBI - {species_name} No results found in NCBI\n")
+                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - WARNING - 🔬 NCBI - {species_name} No results found in NCBI\n")
                 break
                 
         except Exception as e:
             if attempt < max_retries - 1:
                 if verbose:
-                    logging.warning(f"NCBI - {species_name} Error: {e}. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
+                    logging.warning(f"🔬 NCBI - {species_name} Error: {e}. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
                 await asyncio.sleep(retry_delay)
             else:
                 if verbose:
-                    logging.error(f"NCBI - {species_name} Error: {e}. Max retries exceeded")
+                    logging.error(f"🔬 NCBI - {species_name} Error: {e}. Max retries exceeded")
                 if log_to_file:
                     with open(log_file, 'a+', encoding='utf-8') as f:
-                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - ERROR - NCBI - {species_name} Error: {e}\n")
+                        f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - ERROR - 🔬 NCBI - {species_name} Error: {e}\n")
     
     ncbi_result.append(';'.join(data_dict.values()))
     return ncbi_result
@@ -190,7 +190,7 @@ async def ncbi_gene_search(**kwargs):
     
     if not email:
         if verbose:
-            logging.error("NCBI - Email is required for gene search")
+            logging.error("🔬 NCBI - Email is required for gene search")
         return []
     
     # Configurar delay baseado na disponibilidade da API key
@@ -215,11 +215,11 @@ async def ncbi_gene_search(**kwargs):
         gene_type = 'cp'
     else:
         if verbose:
-            logging.error(f"NCBI - Gene '{gene_name}' not found in supported gene lists")
+            logging.error(f"🔬 NCBI - Gene '{gene_name}' not found in supported gene lists")
         return []
     
     if verbose:
-        logging.info(f"NCBI - {species_name} Searching for gene '{gene_name}' ({gene_type})")
+        logging.info(f"🔬 NCBI - {species_name} Searching for gene '{gene_name}' ({gene_type})")
     
     try:
         async with semaphore:
@@ -259,7 +259,7 @@ async def ncbi_gene_search(**kwargs):
                     
                 except Exception as e:
                     if verbose:
-                        logging.debug(f"NCBI - SynGenes error for {gene_name}: {e}")
+                        logging.debug(f"🔬 NCBI - SynGenes error for {gene_name}: {e}")
             
             # Estratégia 2: Query simples com gene
             organelle_filter = "mitochondrion[filter]" if gene_type == 'mt' else "chloroplast[filter]"
@@ -278,7 +278,7 @@ async def ncbi_gene_search(**kwargs):
             for strategy_name, query in query_strategies:
                 try:
                     if verbose:
-                        logging.debug(f"NCBI - {species_name} Trying {strategy_name} strategy: {query[:100]}...")
+                        logging.debug(f"🔬 NCBI - {species_name} Trying {strategy_name} strategy: {query[:100]}...")
                     
                     # Buscar sequências
                     search_handle = await asyncio.to_thread(
@@ -294,26 +294,26 @@ async def ncbi_gene_search(**kwargs):
                     
                     if id_list:
                         if verbose:
-                            logging.info(f"NCBI - {species_name} Found {len(id_list)} sequences for gene '{gene_name}' using {strategy_name} strategy")
+                            logging.info(f"🔬 NCBI - {species_name} Found {len(id_list)} sequences for gene '{gene_name}' using {strategy_name} strategy")
                         return id_list
                     else:
                         if verbose:
-                            logging.debug(f"NCBI - {species_name} No results with {strategy_name} strategy")
+                            logging.debug(f"🔬 NCBI - {species_name} No results with {strategy_name} strategy")
                 
                 except Exception as e:
                     if verbose:
-                        logging.debug(f"NCBI - {species_name} Error with {strategy_name} strategy: {e}")
+                        logging.debug(f"🔬 NCBI - {species_name} Error with {strategy_name} strategy: {e}")
                     continue
             
             # Se chegou aqui, nenhuma estratégia funcionou
             if verbose:
-                logging.warning(f"NCBI - {species_name} No sequences found for gene '{gene_name}' with any strategy")
+                logging.warning(f"🔬 NCBI - {species_name} No sequences found for gene '{gene_name}' with any strategy")
             
             return []
             
     except Exception as e:
         if verbose:
-            logging.error(f"NCBI - {species_name} Error searching for gene '{gene_name}': {e}")
+            logging.error(f"🔬 NCBI - {species_name} Error searching for gene '{gene_name}': {e}")
         return []
 
 async def download_ncbi_sequences(**kwargs):
@@ -328,11 +328,11 @@ async def download_ncbi_sequences(**kwargs):
     
     if not species_list:
         if verbose:
-            logging.warning("NCBI - No species list provided for sequence download")
+            logging.warning("🔬 NCBI - No species list provided for sequence download")
         return
     
     if verbose:
-        logging.info(f"NCBI - Starting sequence download for {len(species_list)} species and {len(gene_list)} genes")
+        logging.info(f"🔬 NCBI - Starting sequence download for {len(species_list)} species and {len(gene_list)} genes")
     
     # Carregar API keys se não fornecidas
     if not email or not api_key:
@@ -344,7 +344,7 @@ async def download_ncbi_sequences(**kwargs):
     
     if not email:
         if verbose:
-            logging.error("NCBI - Email is required for sequence download")
+            logging.error("🔬 NCBI - Email is required for sequence download")
         return
     
     # Configurar delay baseado na disponibilidade da API key
@@ -364,7 +364,7 @@ async def download_ncbi_sequences(**kwargs):
     
     for gene_name in gene_list:
         if verbose:
-            logging.info(f"NCBI - Searching for gene '{gene_name}' across all species")
+            logging.info(f"🔬 NCBI - Searching for gene '{gene_name}' across all species")
         
         gene_tasks = []
         for species in species_list:
@@ -387,7 +387,7 @@ async def download_ncbi_sequences(**kwargs):
         for i, result in enumerate(gene_results):
             if isinstance(result, Exception):
                 if verbose:
-                    logging.error(f"NCBI - Error processing {species_list[i]} for gene {gene_name}: {result}")
+                    logging.error(f"🔬 NCBI - Error processing {species_list[i]} for gene {gene_name}: {result}")
                 continue
             
             if result:
@@ -401,15 +401,15 @@ async def download_ncbi_sequences(**kwargs):
                         gene_sequences_found += 1
         
         if verbose:
-            logging.info(f"NCBI - Found {gene_sequences_found} sequences for gene '{gene_name}' across all species")
+            logging.info(f"🔬 NCBI - Found {gene_sequences_found} sequences for gene '{gene_name}' across all species")
     
     if not all_sequence_ids:
         if verbose:
-            logging.warning("NCBI - No sequences found for download")
+            logging.warning("🔬 NCBI - No sequences found for download")
         return
     
     if verbose:
-        logging.info(f"NCBI - Found {len(all_sequence_ids)} total sequences to download")
+        logging.info(f"🔬 NCBI - Found {len(all_sequence_ids)} total sequences to download")
     
     # Download das sequências
     downloaded_count = 0
@@ -420,7 +420,7 @@ async def download_ncbi_sequences(**kwargs):
             gene_info = gene_species_map.get(seq_id, {'gene': 'unknown', 'species': 'unknown'})
             
             if verbose and (i + 1) % 50 == 0:
-                logging.info(f"NCBI - Downloading sequence {i + 1}/{len(all_sequence_ids)} (ID: {seq_id})")
+                logging.info(f"🔬 NCBI - Downloading sequence {i + 1}/{len(all_sequence_ids)} (ID: {seq_id})")
             
             # URL para download da sequência em formato GenBank
             url = f"https://www.ncbi.nlm.nih.gov/sviewer/viewer.cgi?tool=portal&save=file&log$=seqview&db=nuccore&report=gbwithparts&id={seq_id}&withparts=on"
@@ -460,12 +460,12 @@ async def download_ncbi_sequences(**kwargs):
                     
                     if records_processed == 0:
                         if verbose:
-                            logging.debug(f"NCBI - No valid records found in GenBank file for {seq_id}")
+                            logging.debug(f"🔬 NCBI - No valid records found in GenBank file for {seq_id}")
                         error_count += 1
                 
                 except Exception as e:
                     if verbose:
-                        logging.debug(f"NCBI - Error processing GenBank file for {seq_id}: {e}")
+                        logging.debug(f"🔬 NCBI - Error processing GenBank file for {seq_id}: {e}")
                     error_count += 1
                 
                 # Remover arquivo temporário
@@ -474,21 +474,21 @@ async def download_ncbi_sequences(**kwargs):
                     
             else:
                 if verbose:
-                    logging.debug(f"NCBI - Error downloading sequence {seq_id}: HTTP {response.status_code}")
+                    logging.debug(f"🔬 NCBI - Error downloading sequence {seq_id}: HTTP {response.status_code}")
                 error_count += 1
-                    
+                
         except Exception as e:
             if verbose:
-                logging.debug(f"NCBI - Error downloading sequence {seq_id}: {e}")
+                logging.debug(f"🔬 NCBI - Error downloading sequence {seq_id}: {e}")
             error_count += 1
         
         # Rate limiting entre downloads
         await asyncio.sleep(rate_delay)
     
     if verbose:
-        logging.info(f"NCBI - Sequence download completed: {downloaded_count} sequences downloaded successfully")
+        logging.info(f"🔬 NCBI - Sequence download completed: {downloaded_count} sequences downloaded successfully")
         if error_count > 0:
-            logging.info(f"NCBI - {error_count} sequences had issues during download")
+            logging.info(f"🔬 NCBI - {error_count} sequences had issues during download")
     
     # Criar resumo dos downloads
     summary_file = os.path.join(sequences_dir, "download_summary.txt")
@@ -526,7 +526,7 @@ async def get_ncbi_data_batch(species_list, **kwargs):
     gene_list = kwargs.get('gene_list', ['COI'])
     
     if verbose:
-        logging.info(f"NCBI - Starting taxonomy lookup for {len(species_list)} species...")
+        logging.info(f"🔬 NCBI - Starting taxonomy lookup for {len(species_list)} species...")
     
     # Carregar API keys se não fornecidas
     if not email or not api_key:
@@ -538,7 +538,7 @@ async def get_ncbi_data_batch(species_list, **kwargs):
     
     if not email:
         if verbose:
-            logging.error("NCBI - Email is required for NCBI API access")
+            logging.error("🔬 NCBI - Email is required for NCBI API access")
         return pd.DataFrame()
 
     semaphore = asyncio.Semaphore(max_concurrent)
@@ -570,11 +570,11 @@ async def get_ncbi_data_batch(species_list, **kwargs):
     
     if should_search_sequences:
         if verbose:
-            logging.info(f"NCBI - Sequence download enabled - Searching sequences for genes: {', '.join(gene_list)}")
+            logging.info(f"🔬 NCBI - Sequence download enabled - Searching sequences for genes: {', '.join(gene_list)}")
         
         for gene_name in gene_list:
             if verbose:
-                logging.info(f"NCBI - Searching for gene '{gene_name}' across all species")
+                logging.info(f"🔬 NCBI - Searching for gene '{gene_name}' across all species")
             
             gene_tasks = []
             for species in species_list:
@@ -602,21 +602,21 @@ async def get_ncbi_data_batch(species_list, **kwargs):
                 if isinstance(result, Exception):
                     species_gene_counts[species_name][gene_name] = 0
                     if verbose:
-                        logging.error(f"NCBI - Error processing {species_name} for gene {gene_name}: {result}")
+                        logging.error(f"🔬 NCBI - Error processing {species_name} for gene {gene_name}: {result}")
                 else:
                     sequence_count = len(result) if result else 0
                     species_gene_counts[species_name][gene_name] = sequence_count
                     
                     if verbose and sequence_count > 0:
-                        logging.debug(f"NCBI - {species_name} found {sequence_count} sequences for gene '{gene_name}'")
+                        logging.debug(f"🔬 NCBI - {species_name} found {sequence_count} sequences for gene '{gene_name}'")
     else:
         if verbose:
             if not download_sequences:
-                logging.info("NCBI - Sequence download disabled")
+                logging.info("🔬 NCBI - Sequence download disabled")
             elif not gene_list or len(gene_list) == 0:
-                logging.info("NCBI - No genes list provided - skipping sequence search")
+                logging.info("🔬 NCBI - No genes list provided - skipping sequence search")
             else:
-                logging.info("NCBI - Sequence search not requested")
+                logging.info("🔬 NCBI - Sequence search not requested")
     
     # Processar resultados de taxonomia e adicionar dados de genes
     for i, result in enumerate(results):
@@ -624,7 +624,7 @@ async def get_ncbi_data_batch(species_list, **kwargs):
         
         if isinstance(result, Exception):
             if verbose:
-                logging.error(f"NCBI - Error processing species '{species_name}': {result}")
+                logging.error(f"🔬 NCBI - Error processing species '{species_name}': {result}")
             
             # Criar entrada básica para espécie com erro
             record_dict = {
@@ -719,11 +719,11 @@ async def get_ncbi_data_batch(species_list, **kwargs):
     if verbose:
         successful_records = len(df_taxonomy[df_taxonomy['TaxID'] != '-'])
         total_species = len(species_list)
-        logging.info(f"NCBI - Taxonomy lookup completed: {successful_records}/{total_species} species found")
+        logging.info(f"🔬 NCBI - Taxonomy lookup completed: {successful_records}/{total_species} species found")
         
         if should_search_sequences:
             total_sequences = df_taxonomy['Total_Sequences'].sum() if 'Total_Sequences' in df_taxonomy.columns else 0
-            logging.info(f"NCBI - Gene search completed: {total_sequences} total sequences found")
+            logging.info(f"🔬 NCBI - Gene search completed: {total_sequences} total sequences found")
             
             # Log estatísticas por gene
             for gene in gene_list:
@@ -731,6 +731,6 @@ async def get_ncbi_data_batch(species_list, **kwargs):
                 if gene_col in df_taxonomy.columns:
                     gene_total = df_taxonomy[gene_col].sum()
                     species_with_gene = len(df_taxonomy[df_taxonomy[gene_col] > 0])
-                    logging.info(f"NCBI - Gene {gene}: {gene_total} sequences found in {species_with_gene} species")
+                    logging.info(f"🔬 NCBI - Gene {gene}: {gene_total} sequences found in {species_with_gene} species")
     
     return df_taxonomy

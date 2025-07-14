@@ -312,6 +312,74 @@ async function exportTableToExcel(tableId) {
     a.click();
 }
 
+async function exportTableToCSV(tableId) {
+    const table = document.getElementById(tableId);
+    const rows = Array.from(table.rows);
+    
+    // Filter only visible rows and cells
+    const visibleRows = rows.filter(row => row.style.display !== 'none');
+    
+    let csvContent = '';
+    
+    visibleRows.forEach((row, rowIndex) => {
+        const visibleCells = Array.from(row.cells).filter(cell => cell.style.display !== 'none');
+        const rowData = visibleCells.map(cell => {
+            // Clean the cell content
+            let content = cell.textContent.trim();
+            // Escape quotes and wrap in quotes if contains comma or quote
+            if (content.includes(',') || content.includes('"') || content.includes('\n')) {
+                content = '"' + content.replace(/"/g, '""') + '"';
+            }
+            return content;
+        });
+        
+        csvContent += rowData.join(',') + '\n';
+    });
+    
+    // Create and download file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `dataFishing_${tableId}_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+async function exportTableToTSV(tableId) {
+    const table = document.getElementById(tableId);
+    const rows = Array.from(table.rows);
+    
+    // Filter only visible rows and cells
+    const visibleRows = rows.filter(row => row.style.display !== 'none');
+    
+    let tsvContent = '';
+    
+    visibleRows.forEach((row, rowIndex) => {
+        const visibleCells = Array.from(row.cells).filter(cell => cell.style.display !== 'none');
+        const rowData = visibleCells.map(cell => {
+            // Clean the cell content
+            let content = cell.textContent.trim();
+            // Escape tabs and wrap in quotes if contains tab, quote or newline
+            if (content.includes('\t') || content.includes('"') || content.includes('\n')) {
+                content = '"' + content.replace(/"/g, '""') + '"';
+            }
+            return content;
+        });
+        
+        tsvContent += rowData.join('\t') + '\n';
+    });
+    
+    // Create and download file
+    const blob = new Blob([tsvContent], { type: 'text/tab-separated-values;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `dataFishing_${tableId}_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.tsv`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
 function updateDataResults() {
     const dataResults = document.getElementById('dataResults');
     dataResults.innerHTML = '';

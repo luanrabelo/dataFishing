@@ -103,13 +103,13 @@ async def iucn_taxa(**kwargs):
         await asyncio.sleep(time_delay)
     
     if verbose:
-        logging.info(f"IUCN - {species_name} Fetching taxa data from IUCN Red List API...")
+        logging.info(f"🦎 IUCN - {species_name} Fetching taxa data from IUCN Red List API...")
     
     # Parse species name
     species_parts = species_name.split()
     if len(species_parts) < 2:
         if verbose:
-            logging.error(f"IUCN - {species_name} Invalid species name format")
+            logging.error(f"🦎 IUCN - {species_name} Invalid species name format")
         return [species_name, '|'.join([str(data_dict[field]) for field in data_dict.keys()])]
     
     genus_name = species_parts[0]
@@ -126,7 +126,7 @@ async def iucn_taxa(**kwargs):
                     
                     if taxa_data.get('taxon', None) is not None:
                         if verbose:
-                            logging.info(f"IUCN - {species_name} Found taxa data in IUCN Red List!")
+                            logging.info(f"🦎 IUCN - {species_name} Found taxa data in IUCN Red List!")
                         
                         taxon_info = taxa_data.get('taxon', {})
                         
@@ -541,55 +541,55 @@ async def iucn_taxa(**kwargs):
                                             
                                         else:
                                             if verbose:
-                                                logging.warning(f"IUCN - {species_name} Assessment details not accessible (Status: {assessment_response.status})")
+                                                logging.warning(f"🦎 IUCN - {species_name} Assessment details not accessible (Status: {assessment_response.status})")
                                 except Exception as e:
                                     if verbose:
-                                        logging.warning(f"IUCN - {species_name} Could not fetch detailed assessment data: {e}")
+                                        logging.warning(f"🦎 IUCN - {species_name} Could not fetch detailed assessment data: {e}")
                         
                         taxonomy_info = f"Category: {data_dict['Red List Category']}, Kingdom: {data_dict['Kingdom']}, Family: {data_dict['Family']}"
                         if verbose:
-                            logging.info(f"IUCN - {species_name} Found in IUCN Red List: TaxID={data_dict['Tax ID']}, {taxonomy_info}")
+                            logging.info(f"🦎 IUCN - {species_name} Found in IUCN Red List: TaxID={data_dict['Tax ID']}, {taxonomy_info}")
                         with open(log_file, 'a+', encoding='utf-8') as f:
-                            f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - INFO - IUCN - {species_name} Found: TaxID={data_dict['Tax ID']}, {taxonomy_info}\n")
+                            f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - INFO - 🦎 IUCN - {species_name} Found: TaxID={data_dict['Tax ID']}, {taxonomy_info}\n")
                         break
                     else:
                         if verbose:
-                            logging.warning(f"IUCN - {species_name} No taxon data found in IUCN Red List")
+                            logging.warning(f"🦎 IUCN - {species_name} No taxon data found in IUCN Red List")
                         with open(log_file, 'a+', encoding='utf-8') as f:
-                            f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - WARNING - IUCN - {species_name} No taxon data found\n")
+                            f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - WARNING - 🦎 IUCN - {species_name} No taxon data found\n")
                         break
                 else:
                     error_msg = error_messages.get(response.status, 'Unknown error')
                     if attempt < max_retries - 1:
                         if verbose:
-                            logging.warning(f"IUCN - {species_name} Error {response.status} - {error_msg}. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
+                            logging.warning(f"🦎 IUCN - {species_name} Error {response.status} - {error_msg}. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
                         await asyncio.sleep(retry_delay)
                     else:
                         if verbose:
-                            logging.error(f"IUCN - {species_name} Error {response.status} - {error_msg}. Max retries exceeded")
+                            logging.error(f"🦎 IUCN - {species_name} Error {response.status} - {error_msg}. Max retries exceeded")
                         with open(log_file, 'a+', encoding='utf-8') as f:
-                            f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - ERROR - IUCN - {species_name} Error {response.status} - {error_msg}\n")
+                            f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - ERROR - 🦎 IUCN - {species_name} Error {response.status} - {error_msg}\n")
                 
         except asyncio.TimeoutError:
             if attempt < max_retries - 1:
                 if verbose:
-                    logging.warning(f"IUCN - {species_name} Timeout error. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
+                    logging.warning(f"🦎 IUCN - {species_name} Timeout error. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
                 await asyncio.sleep(retry_delay)
             else:
                 if verbose:
-                    logging.error(f"IUCN - {species_name} Timeout error. Max retries exceeded")
+                    logging.error(f"🦎 IUCN - {species_name} Timeout error. Max retries exceeded")
                 with open(log_file, 'a+', encoding='utf-8') as f:
-                    f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - ERROR - IUCN - {species_name} Timeout error\n")
+                    f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - ERROR - 🦎 IUCN - {species_name} Timeout error\n")
         except Exception as e:
             if attempt < max_retries - 1:
                 if verbose:
-                    logging.warning(f"IUCN - {species_name} Unexpected error: {e}. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
+                    logging.warning(f"🦎 IUCN - {species_name} Unexpected error: {e}. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
                 await asyncio.sleep(retry_delay)
             else:
                 if verbose:
-                    logging.error(f"IUCN - {species_name} Unexpected error: {e}. Max retries exceeded")
+                    logging.error(f"🦎 IUCN - {species_name} Unexpected error: {e}. Max retries exceeded")
                 with open(log_file, 'a+', encoding='utf-8') as f:
-                    f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - ERROR - IUCN - {species_name} Unexpected error: {e}\n")
+                    f.write(f"{time.strftime('%Y/%m/%d - %H:%M:%S')} - ERROR - 🦎 IUCN - {species_name} Unexpected error: {e}\n")
     
     # Return as list with species name and joined data values in correct order
     field_order = [
@@ -629,12 +629,12 @@ async def get_iucn_data_batch(species_list, **kwargs):
     
     if not token:
         if verbose:
-            logging.error("IUCN - API token is required for IUCN API access")
+            logging.error("🦎 IUCN - API token is required for IUCN API access")
         return pd.DataFrame()
     
     if verbose:
-        logging.info(f"IUCN - Starting taxa lookup for {len(species_list)} species...")
-        logging.info(f"IUCN - Using rate limit of {max_concurrent} concurrent requests with aiohttp")
+        logging.info(f"🦎 IUCN - Starting taxa lookup for {len(species_list)} species...")
+        logging.info(f"🦎 IUCN - Using rate limit of {max_concurrent} concurrent requests with aiohttp")
 
     # Create aiohttp connector with proper limits
     connector = aiohttp.TCPConnector(
@@ -666,7 +666,7 @@ async def get_iucn_data_batch(species_list, **kwargs):
         tasks = [get_taxa_with_semaphore(species) for species in species_list]
         
         if verbose:
-            logging.info(f"IUCN - Created {len(tasks)} async tasks, executing with aiohttp...")
+            logging.info(f"🦎 IUCN - Created {len(tasks)} async tasks, executing with aiohttp...")
         
         results = await asyncio.gather(*tasks, return_exceptions=True)
     
@@ -784,5 +784,5 @@ async def get_iucn_data_batch(species_list, **kwargs):
     if verbose:
         successful_records = len(df_taxa[df_taxa['Tax ID'] != '-'])
         total_species = len(species_list)
-        logging.info(f"IUCN - Taxa lookup completed: {successful_records}/{total_species} species found")
+        logging.info(f"🦎 IUCN - Taxa lookup completed: {successful_records}/{total_species} species found")
     return df_taxa
