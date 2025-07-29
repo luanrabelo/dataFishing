@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/dataFishing.png" alt="dataFishing Logo" width="50%">
+  <img src="assets/dataFishing.png" alt="dataFishing Logo" width="50%">
 </p>
 
 <p align="center">
@@ -33,7 +33,7 @@
 # System Overview
 ##### [:rocket: Go to Contents Overview](#contents-overview)
 <p align="center">
-  <img src="docs/assets/dataFishing.png" alt="dataFishing Logo" width="15%">
+  <img src="assets/dataFishing.png" alt="dataFishing Logo" width="15%">
 </p>
 
 ***dataFishing*** is an efficient Python tool and user-friendly web-form for mining Mitochondrial/Chloroplast Sequences and biodiversity data. It is designed to facilitate and automate access to information from various databases, including **NCBI GenBank**, **Bold Systems**, **GBIF**, **WoRMS**, **IUCN Red List**, and **Eschmeyer's Catalog of Fishes**. ***dataFishing*** is faster and more efficient than other tools for obtaining taxonomic information from the databases consulted. It also allows the retrieval of **DNA sequences**, **Common Names**, **Synonyms**, **Conservation Status**, and **Occurrence Points** of species. The ***dataFishing*** repository, hosted on **GitHub** and **licensed under MIT**, is a **freely accessible** resource for the **scientific community**.
@@ -149,7 +149,7 @@ IUCN_API_KEY=your-iucn-api-token-here
 3. Get API key at: https://www.ncbi.nlm.nih.gov/account/settings/
 
 **IUCN Red List:**
-1. Request token at: https://apiv3.iucnredlist.org/api/v3/token
+1. Request token at: https://api.iucnredlist.org/
 2. Academic use is usually free
 3. Commercial use requires subscription
 
