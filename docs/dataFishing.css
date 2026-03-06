@@ -1,0 +1,30 @@
+
+body {
+    font-family: "Montserrat", sans-serif;
+}
+
+/* Table scrolling - horizontal only */
+/* Apply overflow only to specific table wrappers */
+.table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+}
+
+.table-wrapper > table {
+    min-width: 100%;
+}
+
+/* Ensure sticky headers work properly */
+thead[data-sticky="true"] {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background-color: #1f2937;
+}
+
+/* Ensure table cells don't break from overflow context */
+table {
+    border-collapse: collapse;
+}

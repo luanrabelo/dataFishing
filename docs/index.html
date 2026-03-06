@@ -9,6 +9,12 @@
     crossorigin="anonymous"></script>
   <script src="https://kit.fontawesome.com/7d94912b47.js" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/exceljs/dist/exceljs.min.js"></script>
+  <script src="https://unpkg.com/@popperjs/core@2"></script>
+  <script src="https://unpkg.com/tippy.js@6"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Alice&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
   <!-- dataFishing Scripts -->
   <script src="eschmeyer.js"></script>
@@ -16,6 +22,8 @@
   <script src="gbif.js"></script>
   <script src="bold.js"></script>
   <script src="iucn.js"></script>
+  <script src="ncbi-genes.js"></script>
+  <script src="ncbi.js"></script>
   <script src="ui-components.js"></script>
   <script src="table-functions.js"></script>
   <script src="dataFishing.js"></script>
@@ -41,6 +49,8 @@
       content="https://raw.githubusercontent.com/luanrabelo/dataFishing/stable/docs/assets/dataFishing.png" />
 
 </head>
+<!--Add dataFishing CSS-->
+<link rel="stylesheet" href="dataFishing.css">
 <style>
   .fa-2x {
     vertical-align: middle;
@@ -122,27 +132,27 @@
   }
 </style>
 
-<body class="flex flex-col min-h-screen">
+<body>
   
   <script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js" data-id="lprabelo" data-description="Support dataFishing on Buy me a coffee!" data-message="Support dataFishing on Buy me a coffee!" data-color="#FF813F" data-position="Right" data-x_margin="20" data-y_margin="20"></script>
 
-  <header class="bg-gray-800 text-white py-3 px-3">
+  <header class="bg-gray-800 text-white py-3 px-3 sticky top-0 z-40">
     
    <!-- Navegação -->
 <div class="container mx-auto px-4 sm:px-6 lg:px-8">
   <div class="flex justify-between items-center h-16">
     <div class="flex items-center">
       <img src="assets/dataFishing.png" class="mr-3 h-12 w-12" alt="dataFishing">
-      <h1 class="text-lg font-bold select-none">dataFishing<sup class="text-sm">v1.1.5</sup></h1>
+      <h1 class="text-base font-bold select-none">dataFishing<sup class="text-sm">v1.1.5</sup></h1>
     </div>
     <!-- Menu Desktop -->
     <div class="hidden md:flex space-x-4">
       <a href="https://github.com/luanrabelo/dataFishing" target="_blank" 
-         class="px-3 py-2 rounded-md text-base font-bold text-white hover:bg-gray-600 transition-colors duration-300 select-none">
+         class="px-3 py-2 rounded-md text-base font-bold text-white hover:bg-gray-700 transition-colors duration-300 select-none">
          <i class="fa-brands fa-github mr-2"></i>GitHub
       </a>
       <a href="https://www.buymeacoffee.com/lprabelo" target="_blank" 
-         class="px-3 py-2 rounded-md text-base font-bold text-white hover:bg-gray-600 transition-colors duration-300 select-none">
+         class="px-3 py-2 rounded-md text-base font-bold text-white hover:bg-gray-700 transition-colors duration-300 select-none">
          <i class="fa-solid fa-mug-hot mr-2"></i>Donate
       </a>
     </div>
@@ -181,7 +191,7 @@
   </header>
 
   <main class="flex-grow">
-    <div class="tip-container py-2">
+    <div class="tip-container mb-1 sticky top-[88px] z-30">
       <script>
         $(document).ready(function () {
           displayTip();
@@ -190,8 +200,8 @@
     </div>
 
     <div class="bg-gray-800 flex items-center text-white py-2 px-2 rounded">
-      <div class="flex items-center justify-center h-12 w-12 rounded-full bg-gray-200 text-black mr-3 font-bold text-xl">1</div>
-      <div class="text-2xl font-semibold">Select the data source to search for <span class="font-bold">biodiversity</span> information:</div>
+      <div class="flex items-center justify-center h-12 w-12 rounded-full bg-gray-200 text-black mr-5 font-semibold text-base">1</div>
+      <div class="text-base">Select the data source to search for <span class="font-bold">biodiversity</span> information:</div>
     </div>
     <div id="checkbox-container"></div>
     
@@ -202,11 +212,16 @@
           <i class="fas fa-2x fa-exclamation-triangle text-black"></i>
         </div>
         <div class="ml-5">
-          <h3 class="text-lg font-semibold text-black mb-1">
+          <h3 class="text-base font-semibold text-black mb-1">
             <i class="fas fa-info-circle mr-2"></i>Important Information
           </h3>
           <p class="text-black text-base leading-relaxed">
-            <strong>Please select one data source at a time</strong> to search for biodiversity information. When you select an option, the other options will be automatically disabled. To choose a different data source, you must first uncheck the currently selected option.
+            <i class="fas fa-hand-pointer mr-2 text-xl text-gray-800"></i>
+            <strong>Select <span class="text-gray-800">one or more</span> data sources</strong> <b>( <i class="far fa-question text-gray-800"></i> )</b> to search for biodiversity information.<br>
+            <i class="fas fa-check mr-2 text-gray-600"></i>
+            You can select multiple databases simultaneously. Results will be displayed in separate tabs.<br>
+            <i class="fas fa-undo-alt mr-2 text-gray-600"></i>
+            Click a selected option again to deselect it.
           </p>
         </div>
       </div>
@@ -219,17 +234,17 @@
     <div id="spForm" class="w-full py-2">
       <!-- Barra do bloco 3 igual às demais, largura total -->
       <div class="bg-gray-800 flex items-center text-white py-2 px-2 rounded w-full">
-        <div class="flex items-center justify-center h-12 w-12 rounded-full bg-gray-200 text-black mr-3 font-bold text-xl">3</div>
-        <div class="text-2xl font-semibold">Species Names:</div>
+        <div class="flex items-center justify-center h-12 w-12 rounded-full bg-gray-200 text-black mr-3 font-bold text-base">3</div>
+        <div class="text-base font-semibold">Species Names:</div>
       </div>
-      <textarea id="speciesNames" class="rounded-lg border-2 border-gray-800/50 w-full text-lg py-1 px-1" style="height: 30vh;" spellcheck="false"></textarea>
+      <textarea id="speciesNames" class="rounded-lg border-2 border-gray-800/50 w-full text-base py-1 px-1 italic" style="height: 30vh;" spellcheck="false"></textarea>
       <div class="bg-gray-200 border-l-4 border-gray-800 p-4 my-2 mx-1 rounded-lg shadow-sm">
         <div class="flex items-start">
           <div class="flex-shrink-0">
             <i class="fas fa-2x fa-exclamation-triangle text-black"></i>
           </div>
           <div class="ml-5">
-            <h3 class="text-lg font-semibold text-black mb-1">
+            <h3 class="text-base font-semibold text-black mb-1">
               <i class="fas fa-info-circle mr-2"></i>Important Information
             </h3>
             <p class="text-black text-base leading-relaxed">
@@ -247,7 +262,7 @@
       </div>
       <div id="errorDiv" class="text-danger mt-1"></div>
       <div class="flex justify-center">
-        <button id="startSearch" class="bg-gray-800 text-2xl w-96 sm:w-w-96 hover:bg-blue-900 text-white font-bold py-5 px-5 rounded-lg focus:outline-none focus:shadow-outline mt-2" type="button"><i class="fa-solid fa-magnifying-glass"></i> Start dataFishing</button>
+        <button id="startSearch" class="bg-gray-800 text-base w-96 sm:w-w-96 hover:bg-blue-900 text-white font-bold py-5 px-5 rounded-lg focus:outline-none focus:shadow-outline mt-2" type="button"><i class="fa-solid fa-magnifying-glass"></i> Start dataFishing</button>
       </div>
       <script>
         $(document).ready(function () {
@@ -343,22 +358,37 @@
 
     <!-- Modal Melhorado -->
     <div id="progressModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 hidden z-50">
-      <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 shadow-2xl">
+      <div class="bg-white rounded-lg p-8 max-w-2xl w-full mx-4 shadow-2xl">
         <div class="text-center">
-          <div class="mb-4">
+          <div class="mb-6">
             <i class="fas fa-fish text-blue-600 text-4xl mb-2 animate-pulse"></i>
-            <h3 class="text-2xl font-bold text-gray-800 mb-2">dataFishing in Progress</h3>
+            <h3 class="text-base font-bold text-gray-800 mb-2">dataFishing in Progress</h3>
             <p class="text-gray-600 mb-4">Searching biological databases...</p>
           </div>
-          
-          <div class="mb-4">
-            <div class="w-full bg-gray-200 rounded-full h-6 relative">
-              <div id="progressBar" class="bg-gradient-to-r from-blue-500 to-blue-600 h-6 rounded-full transition-all duration-300 ease-out flex items-center justify-center" style="width: 0%;">
-                <span id="progressText" class="text-white text-sm font-semibold">0%</span>
-              </div>
+
+          <!-- Overall Progress -->
+          <div class="mb-6 pb-6 border-b border-gray-300">
+            <div class="text-left mb-2">
+              <label class="text-sm font-semibold text-gray-700">Overall Progress</label>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-3 relative">
+              <div id="progressBar" class="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-300 ease-out" style="width: 0%;"></div>
+            </div>
+            <div class="text-center mt-2 text-sm text-gray-600">
+              <span id="progressText">0%</span> Complete
             </div>
           </div>
-          
+
+          <!-- Per-API Progress -->
+          <div class="mb-4">
+            <div class="text-left mb-3">
+              <label class="text-sm font-semibold text-gray-700">API Queries</label>
+            </div>
+            <div id="apiProgressContainer" class="space-y-3 max-h-48 overflow-y-auto">
+              <!-- Per-API progress bars will be inserted here -->
+            </div>
+          </div>
+
           <div class="text-sm text-gray-500">
             <i class="fas fa-info-circle mr-1"></i>
             Please wait while we gather your data...
@@ -375,12 +405,12 @@
 
   <!-- Footer -->
   <footer
-    class="bg-gray-800 text-white p-5 inset-x-0 bottom-0 text-xl sm:text-2xl md:text-2xl lg:text-base xl:text-base mt-5">
+    class="bg-gray-800 text-white p-5 inset-x-0 bottom-0 text-base mt-5">
     <div class="max-w-screen-2xl mx-auto">
       <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
         
         <div class="lg:col-span-1">
-          <h4 class="font-bold text-lg mb-1">About:</h4>
+          <h4 class="font-bold text-base mb-1">About:</h4>
           <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-1">
             <div class="text-center">
               <img src="assets/dataFishing.png" alt="dataFishing" class="mx-auto" width="45%">
@@ -391,11 +421,11 @@
         <hr class="sm:hidden border-t my-2 border-white">
         
         <div class="lg:col-span-2">
-          <h4 class="font-bold text-lg mb-2">Developers:</h4>
+          <h4 class="font-bold text-base mb-2">Developers:</h4>
           <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-1">
             <div class="text-center text-base">
               <img src="assets/Luan.png" class="mx-auto" alt="Luan Rabelo" width="35%">
-              <h5 class="font-bold mt-2 text-xl">Luan Rabelo</h5>
+              <h5 class="font-bold mt-2 text-base">Luan Rabelo</h5>
               <p><a href="mailto:luanrabelo@outlook.com" class="hover:text-blue-300 text-sm"> luanrabelo@outlook.com</a></p>
               <p><a href="https://x.com/luanrabelo" target="_blank" class="hover:text-blue-300"><i
                     class="fa-brands fa-square-x-twitter"></i> @luanrabelo</a></p>
@@ -403,7 +433,7 @@
             </div>
             <div class="text-center text-base">
               <img src="assets/Marcelo.png" class="mx-auto" alt="Marcelo Vallinoto" width="35%">
-              <h5 class="font-bold mt-2 text-xl">Marcelo Vallinoto</h5>
+              <h5 class="font-bold mt-2 text-base">Marcelo Vallinoto</h5>
               <p><a href="mailto:mvallino@ufpa.br" class="hover:text-blue-300 text-sm"> mvallino@ufpa.br</a></p>
               <p><a href="https://x.com/mvallinoto01" target="_blank" class="hover:text-blue-300"><i
                     class="fa-brands fa-square-x-twitter"></i> @mvallinoto01</a></p>
@@ -411,7 +441,7 @@
             </div>
             <div class="text-center text-base">
               <img src="assets/Davidson.png" class="mx-auto" alt="Davidson Sodré" width="35%">
-              <h5 class="font-bold mt-2 text-xl">Davidson Sodré</h5>
+              <h5 class="font-bold mt-2 text-base">Davidson Sodré</h5>
               <p><a href="mailto:davidson.sodre@ufra.edu.br" class="hover:text-blue-300 text-sm"> davidson.sodre@ufra.edu.br</a></p>
               <p><a href="https://x.com/_DSodre_" target="_blank" class="hover:text-blue-300"><i
                     class="fa-brands fa-square-x-twitter"></i> @_DSodre_</a></p>
@@ -421,7 +451,7 @@
 
         <hr class="sm:hidden border-t my-2 border-white">
         <div class="lg:col-span-1">
-          <h4 class="font-bold text-lg mb-1">Institutions:</h4>
+          <h4 class="font-bold text-base mb-1">Institutions:</h4>
           <div class="grid gap-1 grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2">
             <div class="text-center">
               <img src="assets/LEVO.png" class="mx-auto" alt="Laboratório de Evolução" width="70%">
@@ -437,13 +467,13 @@
 
         <hr class="sm:hidden border-t my-2 border-white">
         <div class="lg:col-span-1">
-          <h4 class="font-bold text-lg mb-1">Cite dataFishing:</h4>
+          <h4 class="font-bold text-base mb-1">Cite dataFishing:</h4>
           <div class="flex items-center">
             <p class="text-justify text-sm"><b>Rabelo, L.</b>, Sodré, D., Balcázar, O. D. A., do Rosário, M. F., Guimarães-Costa, A. J., Gomes, G., Sampaio, I., & Vallinoto, M. (2025). <b>dataFishing: An efficient Python tool and user-friendly web-form for mining mitochondrial and chloroplast sequences, taxonomic, and biodiversity data</b>. Ecological Informatics, 85, 102970. <a target="_blank" class="hover:text-blue-300"
               href="https://doi.org/10.1016/j.ecoinf.2024.102970">doi.org/10.1016/j.ecoinf.2024.102970</a></p>
           </div>
           <hr class="border-gray-600 mt-4 mb-4">
-          <h4 class="font-bold text-lg mb-1">GitHub:</h4>
+          <h4 class="font-bold text-base mb-1">GitHub:</h4>
           <div class="flex items-center">
             <p class="text-left hover:text-blue-300 text-sm"><a class="" target="_blank"
                 href="https://github.com/luanrabelo/dataFishing"><i class="fa-brands fa-github"></i>
@@ -456,17 +486,7 @@
 
   <div class="text-center text-black bg-white mt-0 py-1">dataFishing Page was created by <a
       href="https://x.com/luanrabelo" target="_blank" class="hover:text-blue-300">Luan Rabelo</a>.</div>
-  <script src="ui-components.js"></script>
-  <script src="table-functions.js"></script>
-  <script src="dataFishing.js"></script>
-  <script src="worms.js"></script>
 
-  <script>
-    $(document).ready(function () {
-      createCheckboxesForCards(Cards);
-      displayTip();
-    });
-  </script>
 </body>
 
 </html>

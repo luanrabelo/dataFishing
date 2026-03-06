@@ -1,13 +1,13 @@
 // WoRMS - World Register of Marine Species Functions
 
 // This function fetches data from WoRMS for the given species
-async function getWoRMS() {
-    console.log('getWoRMS called');
-    
+async function getWoRMS(apiKey = 'worms') {
+    console.log(`getWoRMS called with apiKey: ${apiKey}`);
+
     // Verificar se o wormsAPI está disponível
     if (typeof window.wormsAPI === 'undefined' || !window.wormsAPI) {
         console.error('❌ wormsAPI is not available. Attempting to initialize...');
-        
+
         if (typeof WormsAPI !== 'undefined') {
             window.wormsAPI = new WormsAPI();
             console.log('✅ wormsAPI initialized successfully');
@@ -36,17 +36,17 @@ async function getWoRMS() {
     const progressModal = document.getElementById('progressModal');
     const progressBar = document.getElementById('progressBar');
     const progressText = document.getElementById('progressText');
-    
+
     if (!progressModal) {
         console.error('Progress modal not found');
         return;
     }
-    
+
     progressModal.classList.remove('hidden');
 
     let progress = 0;
     const speciesNames = document.getElementById('speciesNames').value.split('\n').filter(name => name.trim());
-    
+
     if (speciesNames.length === 0) {
         alert('Please enter at least one species name.');
         progressModal.classList.add('hidden');
@@ -70,7 +70,7 @@ async function getWoRMS() {
 
     // Criar tabela do WoRMS similar ao Eschmeyer
     const _wormsTable = document.createElement('table');
-    _wormsTable.id = 'TableResults';
+    _wormsTable.id = 'WormsTable';
     _wormsTable.classList.add(
         "text-base",
         "text-blue-800",
@@ -80,63 +80,63 @@ async function getWoRMS() {
     );
 
     let headerHTML = `
-    <thead class="text-base text-white bg-gray-800 text-left whitespace-nowrap">
+    <thead class="text-base text-white bg-gray-800 text-left whitespace-nowrap" data-sticky="true" style="position: sticky; z-index: 20;">
         <tr>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 0)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 0)">
                 AphiaID <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 1)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 1)">
                 Kingdom <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 2)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 2)">
                 Phylum <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 3)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 3)">
                 Class <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 4)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 4)">
                 Order <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 5)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 5)">
                 Family <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 6)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 6)">
                 Genus <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 7)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 7)">
                 Species Name <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 8)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 8)">
                 Authority <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 9)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 9)">
                 Valid Species Name <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 10)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 10)">
                 Valid Authority <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 11)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 11)">
                 Status <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 12)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 12)">
                 Marine <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 13)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 13)">
                 Brackish <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 14)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 14)">
                 Freshwater <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 15)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 15)">
                 Terrestrial <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 16)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 16)">
                 Extinct <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 17)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 17)">
                 Match Type <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 18)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 18)">
                 Modified <i class="fas fa-sort ml-2"></i>
             </th>
             <th scope="col" class="py-5 px-5">Link</th>
@@ -150,27 +150,30 @@ async function getWoRMS() {
     _wormsTableBody.classList.add("text-left", 'divide-y-1', 'divide-blue-800', 'divide-dashed');
 
     const _wormsTableWrapper = document.createElement('div');
-    _wormsTableWrapper.classList.add(
-        "w-full",
-        "overflow-x-auto",
-        "overflow-y-auto",
-        "mx-auto"
-    );
+    _wormsTableWrapper.classList.add("w-full", "table-wrapper");
     _wormsTableWrapper.appendChild(_wormsTable);
 
-    const wormsResults = document.getElementById('Results');
-    wormsResults.innerHTML = '';
+    const wormsResults = document.getElementById('tabPanel-worms');
     wormsResults.appendChild(_wormsTableWrapper);
 
     try {
         console.log('🌊 Using wormsAPI.searchBatch...');
-        
+
         const results = await window.wormsAPI.searchBatch(
             speciesNames,
             (current, total) => {
                 progress = (current / total) * 100;
-                progressBar.style.width = progress + '%';
-                progressText.textContent = Math.round(progress) + '%';
+
+                // Update per-API progress bar only (not main progress bar)
+                const apiProgressBar = document.getElementById(`progressBar-${apiKey}`);
+                const apiProgressText = document.getElementById(`progressText-${apiKey}`);
+                if (apiProgressBar) apiProgressBar.style.width = progress + '%';
+                if (apiProgressText) apiProgressText.textContent = Math.round(progress) + '%';
+
+                // Also update global progress tracker
+                if (typeof window.globalProgressTracker !== 'undefined') {
+                    window.globalProgressTracker.updateApiProgress(apiKey, progress);
+                }
             },
             (result, current, total) => {
                 console.log(`🌊 WoRMS - Completed ${current}/${total}: ${result.speciesName} (${result.status})`);
@@ -193,7 +196,7 @@ async function getWoRMS() {
                 'even:bg-white',
                 'whitespace-nowrap'
             );
-            
+
             let cellIndex = 0;
 
             // AphiaID
@@ -253,10 +256,10 @@ async function getWoRMS() {
 
             // Status
             const statusCell = row.insertCell(cellIndex++);
-            const statusColor = result.status === 'accepted' ? '#BACD92' : 
-                               result.status === 'synonym' ? '#FFE066' : 
-                               result.status === 'unaccepted' ? '#FA7070' : 
-                               result.status === 'uncertain' ? '#D1D1C7' : '#D1D1C7';
+            const statusColor = result.status === 'accepted' ? '#BACD92' :
+                result.status === 'synonym' ? '#FFE066' :
+                    result.status === 'unaccepted' ? '#FA7070' :
+                        result.status === 'uncertain' ? '#D1D1C7' : '#D1D1C7';
             statusCell.innerHTML = result.status || '-';
             statusCell.className = "py-5 px-5 font-bold";
             statusCell.style.backgroundColor = statusColor;
@@ -345,7 +348,7 @@ async function getWoRMS() {
                         <i class="fas fa-2x fa-check-circle text-black"></i>
                     </div>
                     <div class="ml-5">
-                        <p class="text-lg font-semibold text-black mb-1">
+                        <p class="text-base font-semibold text-black mb-1">
                             <strong>Success:</strong> Successfully accessed World Register of Marine Species database.
                         </p>
                         <p class="text-black text-base leading-relaxed">
@@ -364,8 +367,8 @@ async function getWoRMS() {
                         <i class="fas fa-2x fa-exclamation-triangle text-black"></i>
                     </div>
                     <div class="ml-5">
-                        <p class="text-lg font-semibold text-black mb-1">
-                            <strong>Notice:</strong> ${errorCount} of ${results.length} requests had issues. 
+                        <p class="text-base font-semibold text-black mb-1">
+                            <strong>Notice:</strong> ${errorCount} of ${results.length} requests had issues.
                         </p>
                         <p class="text-black text-base leading-relaxed">
                             Successfully processed: ${successCount}/${results.length} species
@@ -383,7 +386,7 @@ async function getWoRMS() {
             <!-- Search Input -->
             <div class="mt-6 mb-6 px-4">
                 <div class="w-full mx-auto">
-                    <label for="worms-table-search" class="text-xl font-semibold text-gray-800 mb-2 block">
+                    <label for="worms-table-search" class="text-base font-semibold text-gray-800 mb-2 block">
                         <i class="fas fa-search mr-2"></i>Search in World Register of Marine Species Results
                     </label>
                     <div class="relative">
@@ -410,7 +413,7 @@ async function getWoRMS() {
 
             <!-- Column Filters -->
             <div class="px-4 py-4">
-                <h4 class="text-lg font-semibold text-gray-800 mb-3">
+                <h4 class="text-base font-semibold text-gray-800 mb-3">
                     <i class="fas fa-columns mr-2"></i>Toggle Column Visibility
                 </h4>
                 <div id="worms-column-filters" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-items-start"></div>
@@ -418,7 +421,7 @@ async function getWoRMS() {
 
             <!-- Export Section -->
             <div class="px-4 py-4 border-t">
-                <h4 class="text-lg font-semibold text-gray-800 mb-3">
+                <h4 class="text-base font-semibold text-gray-800 mb-3">
                     <i class="fas fa-download mr-2"></i>Export Results
                 </h4>
                 <div class="flex flex-wrap gap-3">
@@ -431,7 +434,7 @@ async function getWoRMS() {
                         Export to TSV
                     </button>
                 </div>
-                <p class="text-sm text-gray-600 mt-3">
+                <p class="text-base text-gray-600 mt-3">
                     <i class="fas fa-info-circle mr-1"></i>
                     Export will include only the currently visible columns and filtered results.
                 </p>
@@ -442,7 +445,7 @@ async function getWoRMS() {
         wormsResults.insertBefore(controlsContainer, _wormsTableWrapper);
 
         // Configurar funcionalidades dos controles (similar ao Eschmeyer)
-        createColumnFilters('TableResults', 'worms-column-filters');
+        createColumnFilters('WormsTable', 'worms-column-filters');
 
         const searchInput = document.getElementById('worms-table-search');
         const clearButton = document.getElementById('worms-search-clear');
@@ -457,14 +460,14 @@ async function getWoRMS() {
             }
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
-                filterAndHighlightTable('TableResults', searchTerm);
+                filterAndHighlightTable('WormsTable', searchTerm);
             }, 300);
         });
 
         clearButton.addEventListener('click', function () {
             searchInput.value = '';
             clearButton.classList.add('hidden');
-            filterAndHighlightTable('TableResults', '');
+            filterAndHighlightTable('WormsTable', '');
             updateSearchResultsCounter('', 0);
             searchInput.focus();
         });
@@ -473,22 +476,18 @@ async function getWoRMS() {
             if (e.key === 'Escape') {
                 this.value = '';
                 clearButton.classList.add('hidden');
-                filterAndHighlightTable('TableResults', '');
+                filterAndHighlightTable('WormsTable', '');
                 updateSearchResultsCounter('', 0);
             }
         });
 
-        document.getElementById('worms-export-excel').addEventListener('click', function() {
-            exportTableToExcel('TableResults');
+        document.getElementById('worms-export-excel').addEventListener('click', function () {
+            exportTableToExcel('WormsTable');
         });
 
-        document.getElementById('worms-export-tsv').addEventListener('click', function() {
-            exportTableToTSV('TableResults');
+        document.getElementById('worms-export-tsv').addEventListener('click', function () {
+            exportTableToTSV('WormsTable');
         });
-
-        setTimeout(() => {
-            progressModal.classList.add('hidden');
-        }, 1000);
 
         updateDataResults();
 
@@ -516,11 +515,11 @@ class WormsAPI {
 
     async searchSpecies(speciesName) {
         const url = `${this.baseURL}/${encodeURIComponent(speciesName)}?like=false&marine_only=false`;
-        
+
         for (let attempt = 0; attempt < this.maxRetries; attempt++) {
             try {
                 console.log(`🌊 WoRMS - ${speciesName} Attempting direct request (attempt ${attempt + 1}/${this.maxRetries})...`);
-                
+
                 const response = await fetch(url, {
                     method: 'GET',
                     headers: {
@@ -530,15 +529,28 @@ class WormsAPI {
                 });
 
                 if (response.ok) {
-                    const data = await response.json();
-                    
+                    // Check if response has content before parsing
+                    const contentLength = response.headers.get('content-length');
+                    if (contentLength === '0' || contentLength === null) {
+                        console.warn(`🌊 WoRMS - ${speciesName} Empty response from server`);
+                        return this.createNotFoundResult(speciesName);
+                    }
+
+                    let data;
+                    try {
+                        data = await response.json();
+                    } catch (parseError) {
+                        console.warn(`🌊 WoRMS - ${speciesName} Invalid JSON response: ${parseError.message}`);
+                        return this.createNotFoundResult(speciesName);
+                    }
+
                     if (data && data.length > 0) {
                         // Procurar primeiro um registro aceito
                         let acceptedRecord = data.find(record => record.status === 'accepted');
-                        
+
                         // Se não encontrar aceito, usar o primeiro registro
                         const record = acceptedRecord || data[0];
-                        
+
                         const result = {
                             speciesName: speciesName,
                             aphiaID: record.AphiaID || '-',
@@ -573,7 +585,7 @@ class WormsAPI {
                         console.log(`🌊 WoRMS - ${speciesName} Successfully found: AphiaID=${result.aphiaID}, Status=${result.status}, Family=${result.family}`);
                         return result;
                     } else {
-                        console.warn(`🌊 WoRMS - ${speciesName} No results found`);
+                        console.warn(`🌊 WoRMS - ${speciesName} No results found in WoRMS database`);
                         return this.createNotFoundResult(speciesName);
                     }
                 } else if (response.status === 204) {
@@ -589,7 +601,7 @@ class WormsAPI {
                     await this.delay(this.retryDelay);
                 } else {
                     console.error(`🌊 WoRMS - ${speciesName} All attempts failed: ${error.message}`);
-                    return this.createErrorResult(speciesName, error.message);
+                    return this.createNotFoundResult(speciesName);
                 }
             }
         }
@@ -674,10 +686,10 @@ class WormsAPI {
 
         for (let i = 0; i < speciesList.length; i++) {
             const species = speciesList[i];
-            
+
             try {
                 console.log(`🌊 WoRMS - Processing ${species} (${i + 1}/${total})...`);
-                
+
                 const result = await this.searchSpecies(species);
                 results.push(result);
 
@@ -696,7 +708,7 @@ class WormsAPI {
 
             } catch (error) {
                 console.error(`🌊 WoRMS - Error processing ${species}:`, error);
-                
+
                 const errorResult = this.createErrorResult(species, error.message);
                 results.push(errorResult);
 

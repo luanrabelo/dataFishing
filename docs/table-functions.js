@@ -1,11 +1,64 @@
 // Funções de Tabela e Filtros
 
+/**
+ * Calculate the sticky top offset for table headers (below page header + tip container)
+ */
+function getStickyTop() {
+    const header = document.querySelector('header.bg-gray-800');
+    const tipContainer = document.querySelector('.tip-container');
+    let top = 0;
+    if (header) top += header.offsetHeight;
+    if (tipContainer && tipContainer.style.display !== 'none') top += tipContainer.offsetHeight;
+    return top;
+}
+
+/**
+ * Update sticky header positioning for all tables
+ */
+function updateStickyHeaders() {
+    const stickyTop = getStickyTop();
+    const allTableHeads = document.querySelectorAll('thead[data-sticky="true"]');
+    allTableHeads.forEach(thead => {
+        thead.style.top = stickyTop + 'px';
+    });
+}
+
+// Initialize sticky header updates when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Initial update
+    setTimeout(() => updateStickyHeaders(), 100);
+
+    // Watch for resize and update offsets
+    window.addEventListener('resize', updateStickyHeaders);
+
+    // Also update when tip container visibility changes
+    const tipContainer = document.querySelector('.tip-container');
+    if (tipContainer) {
+        const observer = new MutationObserver(updateStickyHeaders);
+        observer.observe(tipContainer, { attributes: true, subtree: true });
+    }
+
+    // Watch for new tables added to Results container
+    const resultsContainer = document.getElementById('Results');
+    if (resultsContainer) {
+        const observer = new MutationObserver(() => {
+            // Update sticky headers when new tables are added
+            setTimeout(() => updateStickyHeaders(), 50);
+        });
+        observer.observe(resultsContainer, { childList: true, subtree: true });
+    }
+
+    // Update sticky headers when scrolling (for header visibility)
+    document.addEventListener('scroll', updateStickyHeaders, true);
+});
+
+
 function createSearchInput(tableId, cardBody) {
     const searchContainer = document.createElement('div');
     searchContainer.className = 'mt-6 mb-6';
     searchContainer.innerHTML = `
         <div class="w-full mx-auto">
-            <label for="table-search" class="text-lg font-semibold text-gray-800 mb-2 block">
+            <label for="table-search" class="text-base font-semibold text-gray-800 mb-2 block">
                 <i class="fas fa-search mr-2"></i>Search in Table Results
             </label>
             <div class="relative">
@@ -80,7 +133,7 @@ function createColumnFilters(tableId, filterContainerId) {
 
     Array.from(headerRow.cells).forEach((cell, index) => {
         const filterItem = document.createElement('div');
-        filterItem.className = 'flex items-start space-x-3 my-2 w-full';
+        filterItem.className = 'flex items-center space-x-2';
 
         const label = document.createElement('label');
         label.className = 'relative inline-flex items-center cursor-pointer w-12 h-8 rounded-full transition duration-300';
@@ -150,7 +203,15 @@ function filterAndHighlightTable(tableId, searchTerm) {
     const tbody = table.querySelector('tbody');
     const rows = tbody.querySelectorAll('tr');
 
-    removeHighlights(table);
+    // Restore original content from any previous highlighting
+    rows.forEach(row => {
+        Array.from(row.cells).forEach(cell => {
+            if (cell.dataset.originalHtml !== undefined) {
+                cell.innerHTML = cell.dataset.originalHtml;
+                delete cell.dataset.originalHtml;
+            }
+        });
+    });
 
     if (!searchTerm) {
         rows.forEach(row => {
@@ -166,7 +227,7 @@ function filterAndHighlightTable(tableId, searchTerm) {
         const cells = row.querySelectorAll('td');
         let rowMatches = false;
 
-        cells.forEach((cell, cellIndex) => {
+        cells.forEach(cell => {
             const isColumnVisible = cell.style.display !== 'none';
 
             if (isColumnVisible) {
@@ -174,6 +235,8 @@ function filterAndHighlightTable(tableId, searchTerm) {
 
                 if (cellText.includes(searchTerm)) {
                     rowMatches = true;
+                    // Save original HTML before modifying (preserves links, italics, etc.)
+                    cell.dataset.originalHtml = cell.innerHTML;
                     highlightText(cell, searchTerm);
                 }
             }
@@ -216,9 +279,12 @@ function updateSearchResultsCounter(searchTerm, count) {
     if (!counter) {
         counter = document.createElement('div');
         counter.id = 'search-results-counter';
-        counter.className = 'text-center mt-2 text-sm text-gray-600';
+        counter.className = 'text-center mt-2 text-base text-gray-600';
 
-        const searchContainer = document.querySelector('#table-search').closest('.w-full');
+        const searchEl = document.querySelector('#table-search');
+        if (!searchEl) return;
+        const searchContainer = searchEl.closest('.w-full');
+        if (!searchContainer) return;
         searchContainer.appendChild(counter);
     }
 
@@ -279,23 +345,44 @@ async function exportTableToExcel(tableId) {
     const table = document.getElementById(tableId);
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet(tableId);
-    const data = Array.from(table.rows).map(r => Array.from(r.cells).map(c => c.innerText.replace(/<p>/g, '\n').replace(/<sup>/g, ' ')));
+    const rows = Array.from(table.rows);
 
-    data.forEach((row, rowIndex) => {
-        row.forEach((cell, cellIndex) => {
-            if (cellIndex !== 10) {
-                let excelCell = worksheet.getCell(rowIndex + 1, cellIndex < 3 ? cellIndex + 1 : cellIndex);
-                excelCell.value = cell;
-                excelCell.alignment = { vertical: 'middle', wrapText: true };
+    // Filter only visible rows
+    const visibleRows = rows.filter(row => row.style.display !== 'none');
+
+    visibleRows.forEach((row, rowIndex) => {
+        // Filter only visible cells
+        const visibleCells = Array.from(row.cells).filter(cell => cell.style.display !== 'none');
+
+        visibleCells.forEach((cell, cellIndex) => {
+            const excelCell = worksheet.getCell(rowIndex + 1, cellIndex + 1);
+            excelCell.value = cell.textContent.trim();
+            excelCell.alignment = { vertical: 'middle', wrapText: true };
+
+            // Header row: bold
+            if (rowIndex === 0) {
+                excelCell.font = { bold: true };
+            } else {
+                // Check if cell contains italic text (<i> without Font Awesome classes)
+                const iElements = cell.querySelectorAll('i');
+                let hasItalic = false;
+                for (const el of iElements) {
+                    if (!el.className || !el.className.match(/\bfa[srlb]?\b/)) {
+                        hasItalic = true;
+                        break;
+                    }
+                }
+                if (hasItalic) {
+                    excelCell.font = { italic: true };
+                }
             }
         });
     });
 
-    worksheet.getRow(1).font = { bold: true };
     worksheet.columns.forEach(column => {
         let maxColumnLength = 0;
         column.eachCell({ includeEmpty: true }, cell => {
-            let columnLength = cell.text.length;
+            let columnLength = cell.text ? cell.text.length : 0;
             if (columnLength > maxColumnLength) {
                 maxColumnLength = columnLength;
             }
@@ -310,17 +397,18 @@ async function exportTableToExcel(tableId) {
     a.href = url;
     a.download = 'dataFishing_' + tableId + '.xlsx';
     a.click();
+    URL.revokeObjectURL(url);
 }
 
 async function exportTableToCSV(tableId) {
     const table = document.getElementById(tableId);
     const rows = Array.from(table.rows);
-    
+
     // Filter only visible rows and cells
     const visibleRows = rows.filter(row => row.style.display !== 'none');
-    
+
     let csvContent = '';
-    
+
     visibleRows.forEach((row, rowIndex) => {
         const visibleCells = Array.from(row.cells).filter(cell => cell.style.display !== 'none');
         const rowData = visibleCells.map(cell => {
@@ -332,10 +420,10 @@ async function exportTableToCSV(tableId) {
             }
             return content;
         });
-        
+
         csvContent += rowData.join(',') + '\n';
     });
-    
+
     // Create and download file
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -349,12 +437,12 @@ async function exportTableToCSV(tableId) {
 async function exportTableToTSV(tableId) {
     const table = document.getElementById(tableId);
     const rows = Array.from(table.rows);
-    
+
     // Filter only visible rows and cells
     const visibleRows = rows.filter(row => row.style.display !== 'none');
-    
+
     let tsvContent = '';
-    
+
     visibleRows.forEach((row, rowIndex) => {
         const visibleCells = Array.from(row.cells).filter(cell => cell.style.display !== 'none');
         const rowData = visibleCells.map(cell => {
@@ -366,10 +454,10 @@ async function exportTableToTSV(tableId) {
             }
             return content;
         });
-        
+
         tsvContent += rowData.join('\t') + '\n';
     });
-    
+
     // Create and download file
     const blob = new Blob([tsvContent], { type: 'text/tab-separated-values;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -385,15 +473,104 @@ function updateDataResults() {
     dataResults.innerHTML = '';
 
     const resultsCard = document.createElement('div');
-    resultsCard.className = 'bg-white rounded mb-4 mx-1';
+    resultsCard.className = 'bg-white rounded mb-4';
 
     const cardHeader = document.createElement('div');
     cardHeader.className = 'bg-gray-800 flex items-center text-white py-2 px-2 rounded my-1';
     cardHeader.innerHTML = `
-        <div class="flex items-center justify-center h-12 w-12 rounded-full bg-gray-200 text-black mr-3 font-bold text-xl">4</div>
-        <div class="text-2xl font-semibold">Visualize and export the results</div>
+        <div class="flex items-center justify-center h-12 w-12 rounded-full bg-gray-200 text-black mr-3 font-bold text-base">4</div>
+        <div class="text-base font-semibold">Visualize and export the results</div>
     `;
     resultsCard.appendChild(cardHeader);
 
     dataResults.appendChild(resultsCard);
+}
+
+// Tab management functions
+
+function createResultTabs(selectedApis) {
+    const resultsContainer = document.getElementById('Results');
+    resultsContainer.innerHTML = '';
+
+    // Display names for each API
+    const tabNames = {
+        'eschmeyer': "Eschmeyer's Catalog",
+        'worms': 'WoRMS',
+        'gbif': 'GBIF',
+        'bold': 'BOLD Systems',
+        'iucn': 'IUCN Red List',
+        'ncbi': 'NCBI'
+    };
+
+    // If only one API selected, just create the panel without tab buttons
+    if (selectedApis.length === 1) {
+        const panel = document.createElement('div');
+        panel.id = 'tabPanel-' + selectedApis[0];
+        panel.className = 'tab-panel';
+        resultsContainer.appendChild(panel);
+        return;
+    }
+
+    // Create tab buttons container
+    const tabBar = document.createElement('div');
+    tabBar.id = 'tabButtons';
+    tabBar.className = 'flex flex-wrap gap-1 bg-gray-200 p-1 rounded-lg mb-4';
+
+    selectedApis.forEach((apiKey, index) => {
+        const btn = document.createElement('button');
+        btn.id = 'tabBtn-' + apiKey;
+        btn.className = 'px-4 py-3 text-base font-semibold rounded-lg transition-all duration-200 ' +
+            (index === 0 ? 'bg-gray-800 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100');
+        btn.textContent = tabNames[apiKey] || apiKey;
+        btn.addEventListener('click', function () {
+            switchTab(apiKey);
+        });
+        tabBar.appendChild(btn);
+    });
+
+    resultsContainer.appendChild(tabBar);
+
+    // Create tab panels
+    const panelsContainer = document.createElement('div');
+    panelsContainer.id = 'tabPanels';
+
+    selectedApis.forEach((apiKey, index) => {
+        const panel = document.createElement('div');
+        panel.id = 'tabPanel-' + apiKey;
+        panel.className = 'tab-panel';
+        if (index !== 0) {
+            panel.style.display = 'none';
+        }
+        panelsContainer.appendChild(panel);
+    });
+
+    resultsContainer.appendChild(panelsContainer);
+}
+
+function switchTab(apiKey) {
+    // Update tab buttons
+    const tabBar = document.getElementById('tabButtons');
+    if (tabBar) {
+        const buttons = tabBar.querySelectorAll('button');
+        buttons.forEach(btn => {
+            if (btn.id === 'tabBtn-' + apiKey) {
+                btn.className = 'px-4 py-3 text-base font-semibold rounded-lg transition-all duration-200 bg-gray-800 text-white shadow-md';
+            } else {
+                btn.className = 'px-4 py-3 text-base font-semibold rounded-lg transition-all duration-200 bg-white text-gray-600 hover:bg-gray-100';
+            }
+        });
+    }
+
+    // Show/hide panels
+    const panelsContainer = document.getElementById('tabPanels');
+    if (panelsContainer) {
+        const panels = panelsContainer.querySelectorAll('.tab-panel');
+        panels.forEach(panel => {
+            if (panel.id === 'tabPanel-' + apiKey) {
+                panel.style.display = '';
+            } else {
+                panel.style.display = 'none';
+            }
+        });
+    }
 }

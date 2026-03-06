@@ -2,7 +2,10 @@
 *egg-info
 dataFishing/__pycache__
 dataFishing/apis/__pycache__
+SynGenes/
 saida_teste
 *Log.txt
 .env
 apikeys.env
+doc_apis/
+tmpclaude*-cwd

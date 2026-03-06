@@ -36,7 +36,7 @@ class BoldAPI {
         try {
             const apiUrl = `${this.sequenceURL}?taxon=${encodeURIComponent(speciesName)}&format=json`;
             const proxyUrl = `https://corsproxy.io/?${apiUrl}`;
-            
+
             const response = await fetch(proxyUrl, {
                 method: 'GET',
                 headers: {
@@ -47,7 +47,7 @@ class BoldAPI {
 
             if (response.ok) {
                 const textContent = await response.text();
-                
+
                 if (!textContent || textContent === "[]" || textContent.trim() === "") {
                     return 0;
                 }
@@ -84,11 +84,11 @@ class BoldAPI {
         try {
             const apiUrl = `${this.sequenceURL}?taxon=${encodeURIComponent(speciesName)}&format=json`;
             const proxyUrl = `https://corsproxy.io/?${apiUrl}`;
-            
+
             const response = await fetch(proxyUrl);
             if (response.ok) {
                 const textContent = await response.text();
-                
+
                 if (!textContent || textContent === "[]" || textContent.trim() === "") {
                     throw new Error('No sequences available for download');
                 }
@@ -101,13 +101,13 @@ class BoldAPI {
                         // Converter JSON para FASTA
                         let fastaContent = '';
                         const sequencesByMarker = {};
-                        
+
                         data.forEach(record => {
                             const marker = record.markercode || 'Unknown';
                             if (!sequencesByMarker[marker]) {
                                 sequencesByMarker[marker] = [];
                             }
-                            
+
                             if (record.nucleotides) {
                                 const header = `>${record.processid || 'Unknown'}|${record.sampleid || 'Unknown'}|${speciesName}|${marker}|${record.country || 'Unknown'}`;
                                 sequencesByMarker[marker].push(`${header}\n${record.nucleotides}`);
@@ -163,11 +163,11 @@ class BoldAPI {
     async searchSpecies(speciesName) {
         const apiUrl = `${this.baseURL}?taxName=${encodeURIComponent(speciesName)}`;
         const proxyUrl = `https://corsproxy.io/?${apiUrl}`;
-        
+
         for (let attempt = 0; attempt < this.maxRetries; attempt++) {
             try {
                 console.log(`🧬 BOLD - ${speciesName} Attempting request via proxy (attempt ${attempt + 1}/${this.maxRetries})...`);
-                
+
                 const response = await fetch(proxyUrl, {
                     method: 'GET',
                     headers: {
@@ -178,7 +178,7 @@ class BoldAPI {
 
                 if (response.ok) {
                     const data = await response.json();
-                    
+
                     if (data && Object.keys(data).length > 0) {
                         // Extrair o taxid da resposta
                         let taxid = null;
@@ -188,14 +188,14 @@ class BoldAPI {
                                 break;
                             }
                         }
-                        
+
                         if (taxid) {
                             // Buscar dados detalhados da taxonomia usando a função que funcionava
                             const taxonomyData = await this.get_BOLD_Systems_data(taxid);
-                            
+
                             // Buscar contagem de sequências
                             const sequenceCount = await this.getSequenceCount(speciesName);
-                            
+
                             const result = {
                                 speciesName: speciesName,
                                 taxID: taxid,
@@ -278,10 +278,10 @@ class BoldAPI {
 
         for (let i = 0; i < speciesList.length; i++) {
             const species = speciesList[i];
-            
+
             try {
                 console.log(`🧬 BOLD - Processing ${species} (${i + 1}/${total})...`);
-                
+
                 const result = await this.searchSpecies(species);
                 results.push(result);
 
@@ -300,7 +300,7 @@ class BoldAPI {
 
             } catch (error) {
                 console.error(`🧬 BOLD - Error processing ${species}:`, error);
-                
+
                 const errorResult = this.createErrorResult(species, error.message);
                 results.push(errorResult);
 
@@ -318,13 +318,13 @@ class BoldAPI {
     }
 }
 
-async function getBOLD() {
-    console.log('getBOLD called');
-    
+async function getBOLD(apiKey = 'bold') {
+    console.log(`getBOLD called with apiKey: ${apiKey}`);
+
     // Verificar se o boldAPI está disponível
     if (typeof window.boldAPI === 'undefined' || !window.boldAPI) {
         console.error('❌ boldAPI is not available. Attempting to initialize...');
-        
+
         if (typeof BoldAPI !== 'undefined') {
             window.boldAPI = new BoldAPI();
             console.log('✅ boldAPI initialized successfully');
@@ -338,17 +338,17 @@ async function getBOLD() {
     const progressModal = document.getElementById('progressModal');
     const progressBar = document.getElementById('progressBar');
     const progressText = document.getElementById('progressText');
-    
+
     if (!progressModal) {
         console.error('Progress modal not found');
         return;
     }
-    
+
     progressModal.classList.remove('hidden');
 
     let progress = 0;
     const speciesNames = document.getElementById('speciesNames').value.split('\n').filter(name => name.trim());
-    
+
     if (speciesNames.length === 0) {
         alert('Please enter at least one species name.');
         progressModal.classList.add('hidden');
@@ -359,7 +359,7 @@ async function getBOLD() {
 
     // Criar tabela do BOLD
     const _boldTable = document.createElement('table');
-    _boldTable.id = 'TableResults';
+    _boldTable.id = 'BoldTable';
     _boldTable.classList.add(
         "text-base",
         "text-blue-800",
@@ -369,33 +369,33 @@ async function getBOLD() {
     );
 
     let headerHTML = `
-    <thead class="text-base text-white bg-gray-800 text-left whitespace-nowrap">
+    <thead class="text-base text-white bg-gray-800 text-left whitespace-nowrap" data-sticky="true" style="position: sticky; z-index: 20;">
         <tr>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 0)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('BoldTable', 0)">
                 TaxID <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 1)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('BoldTable', 1)">
                 Kingdom <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 2)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('BoldTable', 2)">
                 Phylum <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 3)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('BoldTable', 3)">
                 Class <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 4)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('BoldTable', 4)">
                 Order <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 5)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('BoldTable', 5)">
                 Family <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 6)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('BoldTable', 6)">
                 Genus <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 7)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('BoldTable', 7)">
                 Species Name <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 8)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('BoldTable', 8)">
                 Sequences Count <i class="fas fa-sort ml-2"></i>
             </th>
             <th scope="col" class="py-5 px-5">Download Sequences</th>
@@ -410,27 +410,30 @@ async function getBOLD() {
     _boldTableBody.classList.add("text-left", 'divide-y-1', 'divide-blue-800', 'divide-dashed');
 
     const _boldTableWrapper = document.createElement('div');
-    _boldTableWrapper.classList.add(
-        "w-full",
-        "overflow-x-auto",
-        "overflow-y-auto",
-        "mx-auto"
-    );
+    _boldTableWrapper.classList.add("w-full", "table-wrapper");
     _boldTableWrapper.appendChild(_boldTable);
 
-    const boldResults = document.getElementById('Results');
-    boldResults.innerHTML = '';
+    const boldResults = document.getElementById('tabPanel-bold');
     boldResults.appendChild(_boldTableWrapper);
 
     try {
         console.log('🧬 Using boldAPI.searchBatch...');
-        
+
         const results = await window.boldAPI.searchBatch(
             speciesNames,
             (current, total) => {
                 progress = (current / total) * 100;
-                progressBar.style.width = progress + '%';
-                progressText.textContent = Math.round(progress) + '%';
+
+                // Update per-API progress bar only (not main progress bar)
+                const apiProgressBar = document.getElementById(`progressBar-${apiKey}`);
+                const apiProgressText = document.getElementById(`progressText-${apiKey}`);
+                if (apiProgressBar) apiProgressBar.style.width = progress + '%';
+                if (apiProgressText) apiProgressText.textContent = Math.round(progress) + '%';
+
+                // Also update global progress tracker
+                if (typeof window.globalProgressTracker !== 'undefined') {
+                    window.globalProgressTracker.updateApiProgress(apiKey, progress);
+                }
             },
             (result, current, total) => {
                 console.log(`🧬 BOLD - Completed ${current}/${total}: ${result.speciesName}`);
@@ -454,7 +457,7 @@ async function getBOLD() {
                 'even:bg-white',
                 'whitespace-nowrap'
             );
-            
+
             let cellIndex = 0;
 
             // TaxID
@@ -604,7 +607,7 @@ async function getBOLD() {
             <!-- Search Input -->
             <div class="mt-6 mb-6 px-4">
                 <div class="w-full mx-auto">
-                    <label for="bold-table-search" class="text-lg font-semibold text-gray-800 mb-2 block">
+                    <label for="bold-table-search" class="text-base font-semibold text-gray-800 mb-2 block">
                         <i class="fas fa-search mr-2"></i>Search in BOLD Results
                     </label>
                     <div class="relative">
@@ -631,7 +634,7 @@ async function getBOLD() {
 
             <!-- Column Filters -->
             <div class="px-4 py-4">
-                <h4 class="text-lg font-semibold text-gray-800 mb-3">
+                <h4 class="text-base font-semibold text-gray-800 mb-3">
                     <i class="fas fa-columns mr-2"></i>Toggle Column Visibility
                 </h4>
                 <div id="bold-column-filters" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-items-start"></div>
@@ -639,7 +642,7 @@ async function getBOLD() {
 
             <!-- Export Section -->
             <div class="px-4 py-4 border-t">
-                <h4 class="text-lg font-semibold text-gray-800 mb-3">
+                <h4 class="text-base font-semibold text-gray-800 mb-3">
                     <i class="fas fa-download mr-2"></i>Export Results
                 </h4>
                 <div class="flex flex-wrap gap-3">
@@ -652,7 +655,7 @@ async function getBOLD() {
                         Export to TSV
                     </button>
                 </div>
-                <p class="text-sm text-gray-600 mt-3">
+                <p class="text-base text-gray-600 mt-3">
                     <i class="fas fa-info-circle mr-1"></i>
                     Export will include only the currently visible columns and filtered results. Use individual download buttons for sequences.
                 </p>
@@ -663,7 +666,7 @@ async function getBOLD() {
         boldResults.insertBefore(controlsContainer, _boldTableWrapper);
 
         // Configurar funcionalidades dos controles
-        createColumnFilters('TableResults', 'bold-column-filters');
+        createColumnFilters('BoldTable', 'bold-column-filters');
 
         const searchInput = document.getElementById('bold-table-search');
         const clearButton = document.getElementById('bold-search-clear');
@@ -678,14 +681,14 @@ async function getBOLD() {
             }
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
-                filterAndHighlightTable('TableResults', searchTerm);
+                filterAndHighlightTable('BoldTable', searchTerm);
             }, 300);
         });
 
         clearButton.addEventListener('click', function () {
             searchInput.value = '';
             clearButton.classList.add('hidden');
-            filterAndHighlightTable('TableResults', '');
+            filterAndHighlightTable('BoldTable', '');
             updateSearchResultsCounter('', 0);
             searchInput.focus();
         });
@@ -694,22 +697,18 @@ async function getBOLD() {
             if (e.key === 'Escape') {
                 this.value = '';
                 clearButton.classList.add('hidden');
-                filterAndHighlightTable('TableResults', '');
+                filterAndHighlightTable('BoldTable', '');
                 updateSearchResultsCounter('', 0);
             }
         });
 
-        document.getElementById('bold-export-excel').addEventListener('click', function() {
-            exportTableToExcel('TableResults');
+        document.getElementById('bold-export-excel').addEventListener('click', function () {
+            exportTableToExcel('BoldTable');
         });
 
-        document.getElementById('bold-export-tsv').addEventListener('click', function() {
-            exportTableToTSV('TableResults');
+        document.getElementById('bold-export-tsv').addEventListener('click', function () {
+            exportTableToTSV('BoldTable');
         });
-
-        setTimeout(() => {
-            progressModal.classList.add('hidden');
-        }, 1000);
 
         updateDataResults();
 
@@ -734,7 +733,7 @@ if (typeof window !== 'undefined') {
 }
 
 // Função global para download de sequências
-window.downloadBoldSequences = async function(speciesName) {
+window.downloadBoldSequences = async function (speciesName) {
     if (window.boldAPI) {
         await window.boldAPI.downloadSequences(speciesName);
     } else {

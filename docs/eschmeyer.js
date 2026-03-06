@@ -12,7 +12,7 @@ class EschmeyerAPI {
 
     parseResultText(text) {
         text = text.replace(/\s+/g, ' ').trim();
-        
+
         const data = {
             originalEpithet: '-',
             originalGenus: '-',
@@ -39,7 +39,7 @@ class EschmeyerAPI {
             const statusMatch = text.match(/Current status:\s*(.*?)\./);
             if (statusMatch) {
                 const statusFull = statusMatch[1].trim();
-                
+
                 if (statusFull.includes('Synonym of')) {
                     data.status = 'Synonym';
                     const acceptedMatch = statusFull.match(/Synonym of\s+([A-Z][a-z]+\s+[a-z]+)\s+(\(.*?\d{4}\))/);
@@ -118,7 +118,7 @@ class EschmeyerAPI {
             if (attempt === 0) {
                 try {
                     console.log(`🐟 Eschmeyer - ${speciesName} Trying direct request (attempt ${attempt + 1}/${this.maxRetries})...`);
-                    
+
                     const response = await fetch(targetUrl, {
                         method: 'GET',
                         mode: 'cors',
@@ -140,7 +140,7 @@ class EschmeyerAPI {
             for (const proxy of proxies) {
                 try {
                     console.log(`🐟 Eschmeyer - ${speciesName} Trying proxy: ${proxy.includes('allorigins') ? 'AllOrigins' : proxy.includes('corsproxy') ? 'CORSProxy' : proxy.includes('fringe') ? 'Fringe' : 'CORS.sh'} (attempt ${attempt + 1}/${this.maxRetries})...`);
-                    
+
                     let proxyUrl;
                     let fetchOptions = {
                         method: 'GET',
@@ -161,7 +161,7 @@ class EschmeyerAPI {
 
                     if (response.ok) {
                         let htmlContent;
-                        
+
                         if (proxy.includes('allorigins')) {
                             // Para AllOrigins, extrair conteúdo do JSON
                             const jsonResponse = await response.json();
@@ -303,10 +303,10 @@ class EschmeyerAPI {
 
         for (let i = 0; i < speciesList.length; i++) {
             const species = speciesList[i];
-            
+
             try {
                 console.log(`🐟 Eschmeyer - Processing ${species} (${i + 1}/${total})...`);
-                
+
                 const result = await this.searchSpecies(species);
                 results.push(result);
 
@@ -325,7 +325,7 @@ class EschmeyerAPI {
 
             } catch (error) {
                 console.error(`🐟 Eschmeyer - Error processing ${species}:`, error);
-                
+
                 results.push({
                     speciesName: species,
                     status: 'Error',
@@ -362,7 +362,7 @@ if (typeof window !== 'undefined') {
     // Criar instância global imediatamente
     window.eschmeyerAPI = new EschmeyerAPI();
     console.log('🐟 Eschmeyer API loaded and instance created successfully');
-    
+
     // Também disponibilizar a classe globalmente para compatibilidade
     window.EschmeyerAPI = EschmeyerAPI;
 } else {
@@ -434,7 +434,7 @@ function displayEschmeyerNotice(results, successCount, container, tableWrapper) 
                         <i class="fas fa-2x fa-check-circle text-black"></i>
                     </div>
                     <div class="ml-5">
-                        <p class="text-lg font-semibold text-black mb-1">
+                        <p class="text-base font-semibold text-black mb-1">
                             <strong>Success:</strong> Successfully accessed Eschmeyer's Catalog of Fishes.
                         </p>
                         <p class="text-black text-base leading-relaxed">
@@ -453,8 +453,8 @@ function displayEschmeyerNotice(results, successCount, container, tableWrapper) 
                         <i class="fas fa-2x fa-exclamation-triangle text-black"></i>
                     </div>
                     <div class="ml-5">
-                        <p class="text-lg font-semibold text-black mb-1">
-                            <strong>Notice:</strong> ${errorCount} of ${results.length} requests had issues. 
+                        <p class="text-base font-semibold text-black mb-1">
+                            <strong>Notice:</strong> ${errorCount} of ${results.length} requests had issues.
                         </p>
                         <p class="text-black text-base leading-relaxed">
                             Successfully processed: ${successCount}/${results.length} species
@@ -499,13 +499,13 @@ async function handleEschmeyerSearch() {
 }
 
 
-async function getEschmeyer() {
-    console.log('getEschmeyer called');
-    
+async function getEschmeyer(apiKey = 'eschmeyer') {
+    console.log(`getEschmeyer called with apiKey: ${apiKey}`);
+
     // Verificar se o eschmeyerAPI está disponível
     if (typeof window.eschmeyerAPI === 'undefined' || !window.eschmeyerAPI) {
         console.error('❌ eschmeyerAPI is not available. Attempting to initialize...');
-        
+
         if (typeof EschmeyerAPI !== 'undefined') {
             window.eschmeyerAPI = new EschmeyerAPI();
             console.log('✅ eschmeyerAPI initialized successfully');
@@ -526,17 +526,17 @@ async function getEschmeyer() {
     const progressModal = document.getElementById('progressModal');
     const progressBar = document.getElementById('progressBar');
     const progressText = document.getElementById('progressText');
-    
+
     if (!progressModal) {
         console.error('Progress modal not found');
         return;
     }
-    
+
     progressModal.classList.remove('hidden');
 
     let progress = 0;
     const speciesNames = document.getElementById('speciesNames').value.split('\n').filter(name => name.trim());
-    
+
     if (speciesNames.length === 0) {
         alert('Please enter at least one species name.');
         progressModal.classList.add('hidden');
@@ -553,7 +553,7 @@ async function getEschmeyer() {
     const eschmeyerSynonymsOpt = document.getElementById('synonymsopt')?.checked ?? true;
 
     const _eschmeyerTable = document.createElement('table');
-    _eschmeyerTable.id = 'TableResults';
+    _eschmeyerTable.id = 'EschmeyerTable';
     _eschmeyerTable.classList.add(
         "text-base",
         "text-blue-800",
@@ -563,21 +563,21 @@ async function getEschmeyer() {
     );
 
     let headerHTML = `
-    <thead class="text-base text-white bg-gray-800 text-left whitespace-nowrap">
+    <thead class="text-base text-white bg-gray-800 text-left whitespace-nowrap" data-sticky="true" style="position: sticky; z-index: 20;">
         <tr>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 0)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('EschmeyerTable', 0)">
                 Species Name <i class="fas fa-sort ml-2"></i>
             </th>
-            ${eschmeyerStatusOpt ? `<th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', ${1})">Status <i class="fas fa-sort ml-2"></i></th>` : ''}
-            ${eschmeyerAcceptedNameOpt ? `<th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', ${1 + (eschmeyerStatusOpt ? 1 : 0)})">Accepted Name <i class="fas fa-sort ml-2"></i></th>` : ''}
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', ${1 + (eschmeyerStatusOpt ? 1 : 0) + (eschmeyerAcceptedNameOpt ? 1 : 0)})">
+            ${eschmeyerStatusOpt ? `<th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('EschmeyerTable', ${1})">Status <i class="fas fa-sort ml-2"></i></th>` : ''}
+            ${eschmeyerAcceptedNameOpt ? `<th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('EschmeyerTable', ${1 + (eschmeyerStatusOpt ? 1 : 0)})">Accepted Name <i class="fas fa-sort ml-2"></i></th>` : ''}
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('EschmeyerTable', ${1 + (eschmeyerStatusOpt ? 1 : 0) + (eschmeyerAcceptedNameOpt ? 1 : 0)})">
                 Authority <i class="fas fa-sort ml-2"></i>
             </th>
-            ${eschmeyerFamilyOpt ? `<th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', ${2 + (eschmeyerStatusOpt ? 1 : 0) + (eschmeyerAcceptedNameOpt ? 1 : 0)})">Family <i class="fas fa-sort ml-2"></i></th>` : ''}
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', ${2 + (eschmeyerStatusOpt ? 1 : 0) + (eschmeyerAcceptedNameOpt ? 1 : 0) + (eschmeyerFamilyOpt ? 1 : 0)})">
+            ${eschmeyerFamilyOpt ? `<th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('EschmeyerTable', ${2 + (eschmeyerStatusOpt ? 1 : 0) + (eschmeyerAcceptedNameOpt ? 1 : 0)})">Family <i class="fas fa-sort ml-2"></i></th>` : ''}
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('EschmeyerTable', ${2 + (eschmeyerStatusOpt ? 1 : 0) + (eschmeyerAcceptedNameOpt ? 1 : 0) + (eschmeyerFamilyOpt ? 1 : 0)})">
                 Habitat <i class="fas fa-sort ml-2"></i>
             </th>
-            ${eschmeyerSynonymsOpt ? `<th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', ${3 + (eschmeyerStatusOpt ? 1 : 0) + (eschmeyerAcceptedNameOpt ? 1 : 0) + (eschmeyerFamilyOpt ? 1 : 0)})">Synonyms Count <i class="fas fa-sort ml-2"></i></th>` : ''}
+            ${eschmeyerSynonymsOpt ? `<th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('EschmeyerTable', ${3 + (eschmeyerStatusOpt ? 1 : 0) + (eschmeyerAcceptedNameOpt ? 1 : 0) + (eschmeyerFamilyOpt ? 1 : 0)})">Synonyms Count <i class="fas fa-sort ml-2"></i></th>` : ''}
             <th scope="col" class="py-5 px-5">Link</th>
         </tr>
     </thead>
@@ -589,27 +589,30 @@ async function getEschmeyer() {
     _eschmeyerTableBody.classList.add("text-left", 'divide-y-1', 'divide-blue-800', 'divide-dashed');
 
     const _eschmeyerTableWrapper = document.createElement('div');
-    _eschmeyerTableWrapper.classList.add(
-        "w-full",
-        "overflow-x-auto",
-        "overflow-y-auto",
-        "mx-auto"
-    );
+    _eschmeyerTableWrapper.classList.add("w-full", "table-wrapper");
     _eschmeyerTableWrapper.appendChild(_eschmeyerTable);
 
-    const eschmeyerResults = document.getElementById('Results');
-    eschmeyerResults.innerHTML = '';
+    const eschmeyerResults = document.getElementById('tabPanel-eschmeyer');
     eschmeyerResults.appendChild(_eschmeyerTableWrapper);
 
     try {
         console.log('🐟 Using eschmeyerAPI.searchBatch...');
-        
+
         const results = await window.eschmeyerAPI.searchBatch(
             speciesNames,
             (current, total) => {
                 progress = (current / total) * 100;
-                progressBar.style.width = progress + '%';
-                progressText.textContent = Math.round(progress) + '%';
+
+                // Update per-API progress bar only (not main progress bar)
+                const apiProgressBar = document.getElementById(`progressBar-${apiKey}`);
+                const apiProgressText = document.getElementById(`progressText-${apiKey}`);
+                if (apiProgressBar) apiProgressBar.style.width = progress + '%';
+                if (apiProgressText) apiProgressText.textContent = Math.round(progress) + '%';
+
+                // Also update global progress tracker
+                if (typeof window.globalProgressTracker !== 'undefined') {
+                    window.globalProgressTracker.updateApiProgress(apiKey, progress);
+                }
             },
             (result, current, total) => {
                 console.log(`🐟 Eschmeyer - Completed ${current}/${total}: ${result.speciesName} (${result.status})`);
@@ -632,7 +635,7 @@ async function getEschmeyer() {
                 'even:bg-white',
                 'whitespace-nowrap'
             );
-            
+
             let cellIndex = 0;
 
             // Species Name
@@ -643,9 +646,9 @@ async function getEschmeyer() {
             // Status (if enabled)
             if (eschmeyerStatusOpt) {
                 const statusCell = row.insertCell(cellIndex++);
-                const statusColor = result.status === 'Valid' ? '#BACD92' : 
-                                   result.status === 'Synonym' ? '#FFE066' : 
-                                   result.status === 'Error' ? '#FA7070' : '#D1D1C7';
+                const statusColor = result.status === 'Valid' ? '#BACD92' :
+                    result.status === 'Synonym' ? '#FFE066' :
+                        result.status === 'Error' ? '#FA7070' : '#D1D1C7';
                 statusCell.innerHTML = result.status;
                 statusCell.className = "py-5 px-5 font-bold";
                 statusCell.style.backgroundColor = statusColor;
@@ -716,7 +719,7 @@ async function getEschmeyer() {
                             <strong>Browser Notice:</strong> ${errorCount} of ${results.length} requests failed. 
                             The Eschmeyer database requires special CORS proxy servers for browser access.
                         </p>
-                        <p class="text-lg font-semibold text-black mb-1">
+                        <p class="text-base font-semibold text-black mb-1">
                             Successfully processed: ${successCount}/${results.length} species
                         </p>
                         <p class="text-black text-base leading-relaxed">
@@ -737,7 +740,7 @@ async function getEschmeyer() {
                         <i class="fas fa-2x fa-check-circle text-black"></i>
                     </div>
                     <div class="ml-5">
-                        <p class="text-lg font-semibold text-black mb-1">
+                        <p class="text-base font-semibold text-black mb-1">
                             <strong>Success:</strong> Successfully accessed Eschmeyer database using CORS proxy servers.
                         </p>
                         <p class="text-black text-base leading-relaxed">
@@ -756,7 +759,7 @@ async function getEschmeyer() {
             <!-- Search Input -->
             <div class="mt-6 mb-6 px-4">
                 <div class="w-full mx-auto">
-                    <label for="eschmeyer-table-search" class="text-lg font-semibold text-gray-800 mb-2 block">
+                    <label for="eschmeyer-table-search" class="text-base font-semibold text-gray-800 mb-2 block">
                         <i class="fas fa-search mr-2"></i>Search in Eschmeyer Results
                     </label>
                     <div class="relative">
@@ -783,7 +786,7 @@ async function getEschmeyer() {
 
             <!-- Column Filters -->
             <div class="px-4 py-4">
-                <h4 class="text-lg font-semibold text-gray-800 mb-3">
+                <h4 class="text-base font-semibold text-gray-800 mb-3">
                     <i class="fas fa-columns mr-2"></i>Toggle Column Visibility
                 </h4>
                 <div id="eschmeyer-column-filters" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-items-start"></div>
@@ -791,7 +794,7 @@ async function getEschmeyer() {
 
             <!-- Export Section -->
             <div class="px-4 py-4 border-t">
-                <h4 class="text-lg font-semibold text-gray-800 mb-3">
+                <h4 class="text-base font-semibold text-gray-800 mb-3">
                     <i class="fas fa-download mr-2"></i>Export Results
                 </h4>
                 <div class="flex flex-wrap gap-3">
@@ -804,7 +807,7 @@ async function getEschmeyer() {
                         Export to TSV
                     </button>
                 </div>
-                <p class="text-sm text-gray-600 mt-3">
+                <p class="text-base text-gray-600 mt-3">
                     <i class="fas fa-info-circle mr-1"></i>
                     Export will include only the currently visible columns and filtered results.
                 </p>
@@ -817,7 +820,7 @@ async function getEschmeyer() {
         // Configurar funcionalidades dos controles
 
         // 1. Criar filtros de coluna
-        createColumnFilters('TableResults', 'eschmeyer-column-filters');
+        createColumnFilters('EschmeyerTable', 'eschmeyer-column-filters');
 
         // 2. Configurar busca na tabela
         const searchInput = document.getElementById('eschmeyer-table-search');
@@ -835,14 +838,14 @@ async function getEschmeyer() {
 
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
-                filterAndHighlightTable('TableResults', searchTerm);
+                filterAndHighlightTable('EschmeyerTable', searchTerm);
             }, 300);
         });
 
         clearButton.addEventListener('click', function () {
             searchInput.value = '';
             clearButton.classList.add('hidden');
-            filterAndHighlightTable('TableResults', '');
+            filterAndHighlightTable('EschmeyerTable', '');
             updateSearchResultsCounter('', 0);
             searchInput.focus();
         });
@@ -851,23 +854,19 @@ async function getEschmeyer() {
             if (e.key === 'Escape') {
                 this.value = '';
                 clearButton.classList.add('hidden');
-                filterAndHighlightTable('TableResults', '');
+                filterAndHighlightTable('EschmeyerTable', '');
                 updateSearchResultsCounter('', 0);
             }
         });
 
         // 3. Configurar botões de exportação
-        document.getElementById('eschmeyer-export-excel').addEventListener('click', function() {
-            exportTableToExcel('TableResults');
+        document.getElementById('eschmeyer-export-excel').addEventListener('click', function () {
+            exportTableToExcel('EschmeyerTable');
         });
 
-        document.getElementById('eschmeyer-export-tsv').addEventListener('click', function() {
-            exportTableToTSV('TableResults');
+        document.getElementById('eschmeyer-export-tsv').addEventListener('click', function () {
+            exportTableToTSV('EschmeyerTable');
         });
-
-        setTimeout(() => {
-            progressModal.classList.add('hidden');
-        }, 1000);
 
         updateDataResults();
 

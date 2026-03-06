@@ -12,11 +12,11 @@ class GbifAPI {
 
     async searchSpecies(speciesName) {
         const url = `${this.baseURL}?name=${encodeURIComponent(speciesName)}`;
-        
+
         for (let attempt = 0; attempt < this.maxRetries; attempt++) {
             try {
                 console.log(`🌍 GBIF - ${speciesName} Attempting request (attempt ${attempt + 1}/${this.maxRetries})...`);
-                
+
                 const response = await fetch(url, {
                     method: 'GET',
                     headers: {
@@ -27,14 +27,14 @@ class GbifAPI {
 
                 if (response.ok) {
                     const data = await response.json();
-                    
+
                     if (data && data.results && data.results.length > 0) {
                         // Procurar primeiro um registro aceito
                         let acceptedRecord = data.results.find(record => record.taxonomicStatus === 'ACCEPTED');
-                        
+
                         // Se não encontrar aceito, usar o primeiro registro
                         const record = acceptedRecord || data.results[0];
-                        
+
                         const result = {
                             speciesName: speciesName,
                             key: record.key || '-',
@@ -133,10 +133,10 @@ class GbifAPI {
 
         for (let i = 0; i < speciesList.length; i++) {
             const species = speciesList[i];
-            
+
             try {
                 console.log(`🌍 GBIF - Processing ${species} (${i + 1}/${total})...`);
-                
+
                 const result = await this.searchSpecies(species);
                 results.push(result);
 
@@ -155,7 +155,7 @@ class GbifAPI {
 
             } catch (error) {
                 console.error(`🌍 GBIF - Error processing ${species}:`, error);
-                
+
                 const errorResult = this.createErrorResult(species, error.message);
                 results.push(errorResult);
 
@@ -173,13 +173,13 @@ class GbifAPI {
     }
 }
 
-async function getGBIF() {
-    console.log('getGBIF called');
-    
+async function getGBIF(apiKey = 'gbif') {
+    console.log(`getGBIF called with apiKey: ${apiKey}`);
+
     // Verificar se o gbifAPI está disponível
     if (typeof window.gbifAPI === 'undefined' || !window.gbifAPI) {
         console.error('❌ gbifAPI is not available. Attempting to initialize...');
-        
+
         if (typeof GbifAPI !== 'undefined') {
             window.gbifAPI = new GbifAPI();
             console.log('✅ gbifAPI initialized successfully');
@@ -201,17 +201,17 @@ async function getGBIF() {
     const progressModal = document.getElementById('progressModal');
     const progressBar = document.getElementById('progressBar');
     const progressText = document.getElementById('progressText');
-    
+
     if (!progressModal) {
         console.error('Progress modal not found');
         return;
     }
-    
+
     progressModal.classList.remove('hidden');
 
     let progress = 0;
     const speciesNames = document.getElementById('speciesNames').value.split('\n').filter(name => name.trim());
-    
+
     if (speciesNames.length === 0) {
         alert('Please enter at least one species name.');
         progressModal.classList.add('hidden');
@@ -227,7 +227,7 @@ async function getGBIF() {
 
     // Criar tabela do GBIF similar às outras APIs
     const _gbifTable = document.createElement('table');
-    _gbifTable.id = 'TableResults';
+    _gbifTable.id = 'GbifTable';
     _gbifTable.classList.add(
         "text-base",
         "text-blue-800",
@@ -237,42 +237,42 @@ async function getGBIF() {
     );
 
     let headerHTML = `
-    <thead class="text-base text-white bg-gray-800 text-left whitespace-nowrap">
+    <thead class="text-base text-white bg-gray-800 text-left whitespace-nowrap" data-sticky="true" style="position: sticky; z-index: 20;">
         <tr>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 0)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('GbifTable', 0)">
                 Key <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 1)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('GbifTable', 1)">
                 Kingdom <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 2)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('GbifTable', 2)">
                 Phylum <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 3)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('GbifTable', 3)">
                 Class <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 4)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('GbifTable', 4)">
                 Order <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 5)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('GbifTable', 5)">
                 Family <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 6)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('GbifTable', 6)">
                 Genus <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 7)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('GbifTable', 7)">
                 Species Name <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 8)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('GbifTable', 8)">
                 Scientific Name <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 9)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('GbifTable', 9)">
                 Canonical Name <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 10)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('GbifTable', 10)">
                 Authorship <i class="fas fa-sort ml-2"></i>
             </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('TableResults', 11)">
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('GbifTable', 11)">
                 Taxonomic Status <i class="fas fa-sort ml-2"></i>
             </th>
             <th scope="col" class="py-5 px-5">Link</th>
@@ -286,27 +286,30 @@ async function getGBIF() {
     _gbifTableBody.classList.add("text-left", 'divide-y-1', 'divide-blue-800', 'divide-dashed');
 
     const _gbifTableWrapper = document.createElement('div');
-    _gbifTableWrapper.classList.add(
-        "w-full",
-        "overflow-x-auto",
-        "overflow-y-auto",
-        "mx-auto"
-    );
+    _gbifTableWrapper.classList.add("w-full", "table-wrapper");
     _gbifTableWrapper.appendChild(_gbifTable);
 
-    const gbifResults = document.getElementById('Results');
-    gbifResults.innerHTML = '';
+    const gbifResults = document.getElementById('tabPanel-gbif');
     gbifResults.appendChild(_gbifTableWrapper);
 
     try {
         console.log('🌍 Using gbifAPI.searchBatch...');
-        
+
         const results = await window.gbifAPI.searchBatch(
             speciesNames,
             (current, total) => {
                 progress = (current / total) * 100;
-                progressBar.style.width = progress + '%';
-                progressText.textContent = Math.round(progress) + '%';
+
+                // Update per-API progress bar only (not main progress bar)
+                const apiProgressBar = document.getElementById(`progressBar-${apiKey}`);
+                const apiProgressText = document.getElementById(`progressText-${apiKey}`);
+                if (apiProgressBar) apiProgressBar.style.width = progress + '%';
+                if (apiProgressText) apiProgressText.textContent = Math.round(progress) + '%';
+
+                // Also update global progress tracker
+                if (typeof window.globalProgressTracker !== 'undefined') {
+                    window.globalProgressTracker.updateApiProgress(apiKey, progress);
+                }
             },
             (result, current, total) => {
                 console.log(`🌍 GBIF - Completed ${current}/${total}: ${result.speciesName} (${result.taxonomicStatus})`);
@@ -329,7 +332,7 @@ async function getGBIF() {
                 'even:bg-white',
                 'whitespace-nowrap'
             );
-            
+
             let cellIndex = 0;
 
             // Key
@@ -389,10 +392,10 @@ async function getGBIF() {
 
             // Taxonomic Status
             const statusCell = row.insertCell(cellIndex++);
-            const statusColor = result.taxonomicStatus === 'ACCEPTED' ? '#BACD92' : 
-                               result.taxonomicStatus === 'SYNONYM' ? '#FFE066' : 
-                               result.taxonomicStatus === 'DOUBTFUL' ? '#FFE066' : 
-                               result.taxonomicStatus === 'Error' ? '#FA7070' : '#D1D1C7';
+            const statusColor = result.taxonomicStatus === 'ACCEPTED' ? '#BACD92' :
+                result.taxonomicStatus === 'SYNONYM' ? '#FFE066' :
+                    result.taxonomicStatus === 'DOUBTFUL' ? '#FFE066' :
+                        result.taxonomicStatus === 'Error' ? '#FA7070' : '#D1D1C7';
             statusCell.innerHTML = result.taxonomicStatus;
             statusCell.className = "py-5 px-5 font-bold";
             statusCell.style.backgroundColor = statusColor;
@@ -431,7 +434,7 @@ async function getGBIF() {
                         <i class="fas fa-2x fa-check-circle text-black"></i>
                     </div>
                     <div class="ml-5">
-                        <p class="text-lg font-semibold text-black mb-1">
+                        <p class="text-base font-semibold text-black mb-1">
                             <strong>Success:</strong> Successfully accessed Global Biodiversity Information Facility database.
                         </p>
                         <p class="text-black text-base leading-relaxed">
@@ -450,8 +453,8 @@ async function getGBIF() {
                         <i class="fas fa-2x fa-exclamation-triangle text-black"></i>
                     </div>
                     <div class="ml-5">
-                        <p class="text-lg font-semibold text-black mb-1">
-                            <strong>Notice:</strong> ${errorCount} of ${results.length} requests had issues. 
+                        <p class="text-base font-semibold text-black mb-1">
+                            <strong>Notice:</strong> ${errorCount} of ${results.length} requests had issues.
                         </p>
                         <p class="text-black text-base leading-relaxed">
                             Successfully processed: ${successCount}/${results.length} species
@@ -469,7 +472,7 @@ async function getGBIF() {
             <!-- Search Input -->
             <div class="mt-6 mb-6 px-4">
                 <div class="w-full mx-auto">
-                    <label for="gbif-table-search" class="text-lg font-semibold text-gray-800 mb-2 block">
+                    <label for="gbif-table-search" class="text-base font-semibold text-gray-800 mb-2 block">
                         <i class="fas fa-search mr-2"></i>Search in Global Biodiversity Information Facility Results
                     </label>
                     <div class="relative">
@@ -496,7 +499,7 @@ async function getGBIF() {
 
             <!-- Column Filters -->
             <div class="px-4 py-4">
-                <h4 class="text-lg font-semibold text-gray-800 mb-3">
+                <h4 class="text-base font-semibold text-gray-800 mb-3">
                     <i class="fas fa-columns mr-2"></i>Toggle Column Visibility
                 </h4>
                 <div id="gbif-column-filters" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-items-start"></div>
@@ -504,7 +507,7 @@ async function getGBIF() {
 
             <!-- Export Section -->
             <div class="px-4 py-4 border-t">
-                <h4 class="text-lg font-semibold text-gray-800 mb-3">
+                <h4 class="text-base font-semibold text-gray-800 mb-3">
                     <i class="fas fa-download mr-2"></i>Export Results
                 </h4>
                 <div class="flex flex-wrap gap-3">
@@ -517,7 +520,7 @@ async function getGBIF() {
                         Export to TSV
                     </button>
                 </div>
-                <p class="text-sm text-gray-600 mt-3">
+                <p class="text-base text-gray-600 mt-3">
                     <i class="fas fa-info-circle mr-1"></i>
                     Export will include only the currently visible columns and filtered results.
                 </p>
@@ -528,7 +531,7 @@ async function getGBIF() {
         gbifResults.insertBefore(controlsContainer, _gbifTableWrapper);
 
         // Configurar funcionalidades dos controles
-        createColumnFilters('TableResults', 'gbif-column-filters');
+        createColumnFilters('GbifTable', 'gbif-column-filters');
 
         const searchInput = document.getElementById('gbif-table-search');
         const clearButton = document.getElementById('gbif-search-clear');
@@ -543,14 +546,14 @@ async function getGBIF() {
             }
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
-                filterAndHighlightTable('TableResults', searchTerm);
+                filterAndHighlightTable('GbifTable', searchTerm);
             }, 300);
         });
 
         clearButton.addEventListener('click', function () {
             searchInput.value = '';
             clearButton.classList.add('hidden');
-            filterAndHighlightTable('TableResults', '');
+            filterAndHighlightTable('GbifTable', '');
             updateSearchResultsCounter('', 0);
             searchInput.focus();
         });
@@ -559,22 +562,18 @@ async function getGBIF() {
             if (e.key === 'Escape') {
                 this.value = '';
                 clearButton.classList.add('hidden');
-                filterAndHighlightTable('TableResults', '');
+                filterAndHighlightTable('GbifTable', '');
                 updateSearchResultsCounter('', 0);
             }
         });
 
-        document.getElementById('gbif-export-excel').addEventListener('click', function() {
-            exportTableToExcel('TableResults');
+        document.getElementById('gbif-export-excel').addEventListener('click', function () {
+            exportTableToExcel('GbifTable');
         });
 
-        document.getElementById('gbif-export-tsv').addEventListener('click', function() {
-            exportTableToTSV('TableResults');
+        document.getElementById('gbif-export-tsv').addEventListener('click', function () {
+            exportTableToTSV('GbifTable');
         });
-
-        setTimeout(() => {
-            progressModal.classList.add('hidden');
-        }, 1000);
 
         updateDataResults();
 
