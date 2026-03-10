@@ -4,6 +4,11 @@
 async function getWoRMS(apiKey = 'worms') {
     console.log(`getWoRMS called with apiKey: ${apiKey}`);
 
+    // Ativar debug na primeira chamada
+    if (typeof window !== 'undefined') {
+        window.wormsDebugFirstCall = true;
+    }
+
     // Verificar se o wormsAPI está disponível
     if (typeof window.wormsAPI === 'undefined' || !window.wormsAPI) {
         console.error('❌ wormsAPI is not available. Attempting to initialize...');
@@ -86,58 +91,73 @@ async function getWoRMS(apiKey = 'worms') {
                 AphiaID <i class="fas fa-sort ml-2"></i>
             </th>
             <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 1)">
-                Kingdom <i class="fas fa-sort ml-2"></i>
+                Scientific Name <i class="fas fa-sort ml-2"></i>
             </th>
             <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 2)">
-                Phylum <i class="fas fa-sort ml-2"></i>
+                Rank <i class="fas fa-sort ml-2"></i>
             </th>
             <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 3)">
-                Class <i class="fas fa-sort ml-2"></i>
+                Kingdom <i class="fas fa-sort ml-2"></i>
             </th>
             <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 4)">
-                Order <i class="fas fa-sort ml-2"></i>
+                Phylum <i class="fas fa-sort ml-2"></i>
             </th>
             <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 5)">
-                Family <i class="fas fa-sort ml-2"></i>
+                Class <i class="fas fa-sort ml-2"></i>
             </th>
             <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 6)">
-                Genus <i class="fas fa-sort ml-2"></i>
+                Order <i class="fas fa-sort ml-2"></i>
             </th>
             <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 7)">
-                Species Name <i class="fas fa-sort ml-2"></i>
+                Family <i class="fas fa-sort ml-2"></i>
             </th>
             <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 8)">
-                Authority <i class="fas fa-sort ml-2"></i>
+                Genus <i class="fas fa-sort ml-2"></i>
             </th>
             <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 9)">
-                Valid Species Name <i class="fas fa-sort ml-2"></i>
+                Species Name <i class="fas fa-sort ml-2"></i>
             </th>
             <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 10)">
-                Valid Authority <i class="fas fa-sort ml-2"></i>
+                Authority <i class="fas fa-sort ml-2"></i>
             </th>
             <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 11)">
-                Status <i class="fas fa-sort ml-2"></i>
+                Valid Species Name <i class="fas fa-sort ml-2"></i>
             </th>
             <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 12)">
-                Marine <i class="fas fa-sort ml-2"></i>
+                Valid Authority <i class="fas fa-sort ml-2"></i>
             </th>
             <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 13)">
-                Brackish <i class="fas fa-sort ml-2"></i>
+                Valid AphiaID <i class="fas fa-sort ml-2"></i>
             </th>
             <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 14)">
-                Freshwater <i class="fas fa-sort ml-2"></i>
+                Status <i class="fas fa-sort ml-2"></i>
             </th>
             <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 15)">
-                Terrestrial <i class="fas fa-sort ml-2"></i>
+                Unaccept Reason <i class="fas fa-sort ml-2"></i>
             </th>
             <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 16)">
-                Extinct <i class="fas fa-sort ml-2"></i>
+                Marine <i class="fas fa-sort ml-2"></i>
             </th>
             <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 17)">
-                Match Type <i class="fas fa-sort ml-2"></i>
+                Brackish <i class="fas fa-sort ml-2"></i>
             </th>
             <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 18)">
+                Freshwater <i class="fas fa-sort ml-2"></i>
+            </th>
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 19)">
+                Terrestrial <i class="fas fa-sort ml-2"></i>
+            </th>
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 20)">
+                Extinct <i class="fas fa-sort ml-2"></i>
+            </th>
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 21)">
+                Match Type <i class="fas fa-sort ml-2"></i>
+            </th>
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 22)">
                 Modified <i class="fas fa-sort ml-2"></i>
+            </th>
+            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('WormsTable', 23)">
+                LSID <i class="fas fa-sort ml-2"></i>
             </th>
             <th scope="col" class="py-5 px-5">Link</th>
         </tr>
@@ -182,11 +202,15 @@ async function getWoRMS(apiKey = 'worms') {
 
         console.log(`🌊 WoRMS search completed. Processing ${results.length} results...`);
 
+        // Armazenar resultados globalmente para uso em modais
+        window._wormsResults = results;
+
         // Contar resultados com sucesso e erros
         let successCount = 0;
         let errorCount = 0;
 
-        for (const result of results) {
+        for (let i = 0; i < results.length; i++) {
+            const result = results[i];
             const row = _wormsTableBody.insertRow();
             row.classList.add(
                 'bg-gray-50',
@@ -203,6 +227,16 @@ async function getWoRMS(apiKey = 'worms') {
             const aphiaIdCell = row.insertCell(cellIndex++);
             aphiaIdCell.innerHTML = result.aphiaID || '-';
             aphiaIdCell.className = "py-5 px-5";
+
+            // Scientific Name
+            const scientificNameCell = row.insertCell(cellIndex++);
+            scientificNameCell.innerHTML = `<i>${result.scientificName || '-'}</i>`;
+            scientificNameCell.className = "py-5 px-5";
+
+            // Rank
+            const rankCell = row.insertCell(cellIndex++);
+            rankCell.innerHTML = result.rank || '-';
+            rankCell.className = "py-5 px-5";
 
             // Kingdom
             const kingdomCell = row.insertCell(cellIndex++);
@@ -254,6 +288,11 @@ async function getWoRMS(apiKey = 'worms') {
             validAuthorityCell.innerHTML = result.validAuthority || '-';
             validAuthorityCell.className = "py-5 px-5";
 
+            // Valid AphiaID
+            const validAphiaIdCell = row.insertCell(cellIndex++);
+            validAphiaIdCell.innerHTML = result.validAphiaID || '-';
+            validAphiaIdCell.className = "py-5 px-5";
+
             // Status
             const statusCell = row.insertCell(cellIndex++);
             const statusColor = result.status === 'accepted' ? '#BACD92' :
@@ -264,9 +303,14 @@ async function getWoRMS(apiKey = 'worms') {
             statusCell.className = "py-5 px-5 font-bold";
             statusCell.style.backgroundColor = statusColor;
 
+            // Unaccept Reason
+            const unacceptReasonCell = row.insertCell(cellIndex++);
+            unacceptReasonCell.innerHTML = result.unacceptReason || '-';
+            unacceptReasonCell.className = "py-5 px-5";
+
             // Marine
             const marineCell = row.insertCell(cellIndex++);
-            const marineValue = result.isMarine === '1' ? 'Yes' : result.isMarine === '0' ? 'No' : '-';
+            const marineValue = result.isMarine === 'Yes' ? 'Yes' : result.isMarine === 'No' ? 'No' : result.isMarine === '1' ? 'Yes' : result.isMarine === '0' ? 'No' : '-';
             const marineColor = marineValue === 'Yes' ? '#5FC65A' : marineValue === 'No' ? '#FA7070' : '#D1D1C7';
             marineCell.innerHTML = marineValue;
             marineCell.className = "py-5 px-5 font-bold text-center";
@@ -274,7 +318,7 @@ async function getWoRMS(apiKey = 'worms') {
 
             // Brackish
             const brackishCell = row.insertCell(cellIndex++);
-            const brackishValue = result.isBrackish === '1' ? 'Yes' : result.isBrackish === '0' ? 'No' : '-';
+            const brackishValue = result.isBrackish === 'Yes' ? 'Yes' : result.isBrackish === 'No' ? 'No' : result.isBrackish === '1' ? 'Yes' : result.isBrackish === '0' ? 'No' : '-';
             const brackishColor = brackishValue === 'Yes' ? '#5FC65A' : brackishValue === 'No' ? '#FA7070' : '#D1D1C7';
             brackishCell.innerHTML = brackishValue;
             brackishCell.className = "py-5 px-5 font-bold text-center";
@@ -282,7 +326,7 @@ async function getWoRMS(apiKey = 'worms') {
 
             // Freshwater
             const freshwaterCell = row.insertCell(cellIndex++);
-            const freshwaterValue = result.isFreshwater === '1' ? 'Yes' : result.isFreshwater === '0' ? 'No' : '-';
+            const freshwaterValue = result.isFreshwater === 'Yes' ? 'Yes' : result.isFreshwater === 'No' ? 'No' : result.isFreshwater === '1' ? 'Yes' : result.isFreshwater === '0' ? 'No' : '-';
             const freshwaterColor = freshwaterValue === 'Yes' ? '#5FC65A' : freshwaterValue === 'No' ? '#FA7070' : '#D1D1C7';
             freshwaterCell.innerHTML = freshwaterValue;
             freshwaterCell.className = "py-5 px-5 font-bold text-center";
@@ -290,7 +334,7 @@ async function getWoRMS(apiKey = 'worms') {
 
             // Terrestrial
             const terrestrialCell = row.insertCell(cellIndex++);
-            const terrestrialValue = result.isTerrestrial === '1' ? 'Yes' : result.isTerrestrial === '0' ? 'No' : '-';
+            const terrestrialValue = result.isTerrestrial === 'Yes' ? 'Yes' : result.isTerrestrial === 'No' ? 'No' : result.isTerrestrial === '1' ? 'Yes' : result.isTerrestrial === '0' ? 'No' : '-';
             const terrestrialColor = terrestrialValue === 'Yes' ? '#5FC65A' : terrestrialValue === 'No' ? '#FA7070' : '#D1D1C7';
             terrestrialCell.innerHTML = terrestrialValue;
             terrestrialCell.className = "py-5 px-5 font-bold text-center";
@@ -298,8 +342,8 @@ async function getWoRMS(apiKey = 'worms') {
 
             // Extinct
             const extinctCell = row.insertCell(cellIndex++);
-            const extinctValue = result.isExtinct === '1' ? 'Yes' : result.isExtinct === '0' ? 'No' : '-';
-            const extinctColor = extinctValue === 'Yes' ? '#FA7070' : extinctValue === 'No' ? '#5FC65A' : '#D1D1C7';
+            const extinctValue = result.isExtinct === 'Yes' ? 'Yes' : result.isExtinct === 'No' ? 'No' : result.isExtinct === '1' ? 'Yes' : result.isExtinct === '0' ? 'No' : '-';
+            const extinctColor = extinctValue === 'Yes' ? '#FA7070' : extinctValue === 'No' ? '#FA7070' : '#D1D1C7';
             extinctCell.innerHTML = extinctValue;
             extinctCell.className = "py-5 px-5 font-bold text-center";
             extinctCell.style.backgroundColor = extinctColor;
@@ -314,12 +358,17 @@ async function getWoRMS(apiKey = 'worms') {
             modifiedCell.innerHTML = result.modified || '-';
             modifiedCell.className = "py-5 px-5";
 
+            // LSID
+            const lsidCell = row.insertCell(cellIndex++);
+            lsidCell.innerHTML = result.lsid || '-';
+            lsidCell.className = "py-5 px-5";
+
             // Link
             const linkCell = row.insertCell(cellIndex++);
             if (result.aphiaID && result.aphiaID !== '-') {
                 linkCell.innerHTML = `
-                    <a class="inline-flex items-center px-4 py-2 border border-gray-800 text-base font-medium rounded-lg text-gray-800 bg-white hover:bg-gray-50 transition-colors duration-200 shadow-sm hover:shadow-md" 
-                       href="https://www.marinespecies.org/aphia.php?p=taxdetails&id=${result.aphiaID}" 
+                    <a class="inline-flex items-center px-4 py-2 border border-gray-800 text-base font-medium rounded-lg text-gray-800 bg-white hover:bg-gray-50 transition-colors duration-200 shadow-sm hover:shadow-md"
+                       href="https://www.marinespecies.org/aphia.php?p=taxdetails&id=${result.aphiaID}"
                        target="_blank">
                         <i class="fa-solid fa-arrow-up-right-from-square mr-2 text-lg"></i>
                         View
@@ -416,7 +465,7 @@ async function getWoRMS(apiKey = 'worms') {
                 <h4 class="text-base font-semibold text-gray-800 mb-3">
                     <i class="fas fa-columns mr-2"></i>Toggle Column Visibility
                 </h4>
-                <div id="worms-column-filters" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-items-start"></div>
+                <div id="worms-column-filters" class="flex flex-wrap gap-x-6 gap-y-2"></div>
             </div>
 
             <!-- Export Section -->
@@ -545,11 +594,23 @@ class WormsAPI {
                     }
 
                     if (data && data.length > 0) {
+                        // Log completo do JSON retornado
+                        console.log(`🌊 WoRMS - ${speciesName} RAW API RESPONSE:`, JSON.parse(JSON.stringify(data)));
+
+                        // Mostrar todos os campos disponíveis (apenas na primeira busca)
+                        if (typeof window !== 'undefined' && window.wormsDebugFirstCall) {
+                            debugWormsFields(data);
+                            window.wormsDebugFirstCall = false;
+                        }
+
                         // Procurar primeiro um registro aceito
                         let acceptedRecord = data.find(record => record.status === 'accepted');
 
                         // Se não encontrar aceito, usar o primeiro registro
                         const record = acceptedRecord || data[0];
+
+                        // Log do registro selecionado
+                        console.log(`🌊 WoRMS - ${speciesName} SELECTED RECORD (${acceptedRecord ? 'Accepted' : 'First'}):`, record);
 
                         const result = {
                             speciesName: speciesName,
@@ -583,6 +644,7 @@ class WormsAPI {
                         };
 
                         console.log(`🌊 WoRMS - ${speciesName} Successfully found: AphiaID=${result.aphiaID}, Status=${result.status}, Family=${result.family}`);
+                        console.log(`🌊 WoRMS - ${speciesName} PROCESSED RESULT:`, result);
                         return result;
                     } else {
                         console.warn(`🌊 WoRMS - ${speciesName} No results found in WoRMS database`);
@@ -723,6 +785,56 @@ class WormsAPI {
         }
 
         return results;
+    }
+}
+
+/**
+ * Debug utility to display available fields from WoRMS API response
+ * Use this to see all available fields in the API response
+ */
+function debugWormsFields(data) {
+    if (!data || !Array.isArray(data) || data.length === 0) {
+        console.log('❌ No data to debug');
+        return;
+    }
+
+    const record = data[0];
+    console.log('🔍 WORMS API - Available fields in response:');
+    console.log('═══════════════════════════════════════════════════');
+
+    Object.keys(record).forEach(key => {
+        const value = record[key];
+        const valueType = typeof value;
+        const valueDisplay = value === null ? 'null' :
+                            value === undefined ? 'undefined' :
+                            valueType !== 'object' ? value : JSON.stringify(value);
+        console.log(`  ✓ ${key}: ${valueDisplay} (${valueType})`);
+    });
+
+    console.log('═══════════════════════════════════════════════════');
+    console.log('📋 Full record object:', record);
+}
+
+/**
+ * Display WoRMS details in a modal window
+ */
+function showWormsDetail(index, field, title) {
+    const result = window._wormsResults && window._wormsResults[index];
+    if (!result) return showCellModal(title, '-');
+
+    const text = result[field] || '-';
+
+    if (field === 'citation') {
+        // Clean up citation text - only remove line breaks, keep everything else including semicolons
+        const cleanedText = text.replace(/\n/g, ' ').replace(/\s{2,}/g, ' ');
+        // Escape HTML special characters to prevent breaking on & and other symbols
+        const escapedText = cleanedText
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+        showCellModal(title, escapedText);
+    } else {
+        showCellModal(title, text);
     }
 }
 

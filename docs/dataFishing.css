@@ -16,9 +16,9 @@ body {
 }
 
 /* Ensure sticky headers work properly */
+/* Note: CSS position:sticky does NOT work on thead inside overflow-x:auto containers.
+   Sticky table headers are handled by JS cloning in table-functions.js */
 thead[data-sticky="true"] {
-    position: sticky;
-    top: 0;
     z-index: 20;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     background-color: #1f2937;

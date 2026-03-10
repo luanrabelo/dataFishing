@@ -1,17 +1,167 @@
 /**
  * GBIF (Global Biodiversity Information Facility) API Integration
+ * Enhanced with additional endpoints for vernacular names, occurrences, and distributions
  */
 
 class GbifAPI {
     constructor() {
-        this.baseURL = 'https://api.gbif.org/v1/species';
+        this.baseURL = 'https://api.gbif.org/v1';
         this.maxRetries = 3;
         this.retryDelay = 2000;
         console.log('🌍 GBIF API instance created');
     }
 
-    async searchSpecies(speciesName) {
-        const url = `${this.baseURL}?name=${encodeURIComponent(speciesName)}`;
+    /**
+     * Use the /species/match endpoint for better species name matching
+     */
+    async matchSpecies(speciesName) {
+        const url = `${this.baseURL}/species/match?name=${encodeURIComponent(speciesName)}&verbose=true`;
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' }
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        return response.json();
+    }
+
+    /**
+     * Fetch full species details by usageKey
+     */
+    async fetchSpeciesDetail(key) {
+        try {
+            const url = `${this.baseURL}/species/${key}`;
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
+            });
+            if (!response.ok) return null;
+            return response.json();
+        } catch (e) {
+            console.warn(`🌍 GBIF - fetchSpeciesDetail error: ${e.message}`);
+            return null;
+        }
+    }
+
+    /**
+     * Fetch vernacular (common) names for a species key
+     */
+    async fetchVernacularNames(key) {
+        try {
+            const url = `${this.baseURL}/species/${key}/vernacularNames?limit=20`;
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
+            });
+            if (!response.ok) return '-';
+            const data = await response.json();
+            if (data.results && data.results.length > 0) {
+                // Deduplicate and prioritize English names
+                const seen = new Set();
+                const names = [];
+                // English first
+                for (const r of data.results) {
+                    if (r.vernacularName && r.language === 'eng' && !seen.has(r.vernacularName.toLowerCase())) {
+                        seen.add(r.vernacularName.toLowerCase());
+                        names.push(r.vernacularName);
+                    }
+                }
+                // Then other languages
+                for (const r of data.results) {
+                    if (r.vernacularName && !seen.has(r.vernacularName.toLowerCase())) {
+                        seen.add(r.vernacularName.toLowerCase());
+                        names.push(r.vernacularName);
+                    }
+                }
+                return names.slice(0, 10).join('; ') || '-';
+            }
+            return '-';
+        } catch (e) {
+            console.warn(`🌍 GBIF - fetchVernacularNames error: ${e.message}`);
+            return '-';
+        }
+    }
+
+    /**
+     * Fetch occurrence count for a taxon key
+     */
+    async fetchOccurrenceCount(key) {
+        try {
+            const url = `${this.baseURL}/occurrence/count?taxonKey=${key}`;
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
+            });
+            if (!response.ok) return '-';
+            const count = await response.json();
+            return typeof count === 'number' ? count.toLocaleString() : '-';
+        } catch (e) {
+            console.warn(`🌍 GBIF - fetchOccurrenceCount error: ${e.message}`);
+            return '-';
+        }
+    }
+
+    /**
+     * Fetch distributions for a species key
+     */
+    async fetchDistributions(key) {
+        try {
+            const url = `${this.baseURL}/species/${key}/distributions?limit=50`;
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
+            });
+            if (!response.ok) return '-';
+            const data = await response.json();
+            if (data.results && data.results.length > 0) {
+                const seen = new Set();
+                const locations = [];
+                for (const d of data.results) {
+                    const loc = d.locality || d.country || d.area || '';
+                    if (loc && !seen.has(loc.toLowerCase())) {
+                        seen.add(loc.toLowerCase());
+                        locations.push(loc);
+                    }
+                }
+                return locations.join('; ') || '-';
+            }
+            return '-';
+        } catch (e) {
+            console.warn(`🌍 GBIF - fetchDistributions error: ${e.message}`);
+            return '-';
+        }
+    }
+
+    /**
+     * Fetch descriptions for a species key
+     */
+    async fetchDescriptions(key) {
+        try {
+            const url = `${this.baseURL}/species/${key}/descriptions?limit=5`;
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
+            });
+            if (!response.ok) return '-';
+            const data = await response.json();
+            if (data.results && data.results.length > 0) {
+                // Get the first non-empty description, prefer English
+                let desc = data.results.find(d => d.description && d.language === 'eng');
+                if (!desc) desc = data.results.find(d => d.description);
+                if (desc && desc.description) {
+                    // Strip HTML tags and truncate
+                    const text = desc.description.replace(/<[^>]*>/g, '').trim();
+                    return text.length > 300 ? text.substring(0, 300) + '...' : text;
+                }
+            }
+            return '-';
+        } catch (e) {
+            console.warn(`🌍 GBIF - fetchDescriptions error: ${e.message}`);
+            return '-';
+        }
+    }
+
+    async searchSpecies(speciesName, options = {}) {
+        const url = `${this.baseURL}/species?name=${encodeURIComponent(speciesName)}`;
 
         for (let attempt = 0; attempt < this.maxRetries; attempt++) {
             try {
@@ -29,15 +179,13 @@ class GbifAPI {
                     const data = await response.json();
 
                     if (data && data.results && data.results.length > 0) {
-                        // Procurar primeiro um registro aceito
                         let acceptedRecord = data.results.find(record => record.taxonomicStatus === 'ACCEPTED');
-
-                        // Se não encontrar aceito, usar o primeiro registro
                         const record = acceptedRecord || data.results[0];
 
                         const result = {
                             speciesName: speciesName,
                             key: record.key || '-',
+                            nubKey: record.nubKey || record.key || '-',
                             kingdom: record.kingdom || '-',
                             phylum: record.phylum || '-',
                             class: record.class || '-',
@@ -50,10 +198,64 @@ class GbifAPI {
                             authorship: record.authorship || '-',
                             taxonomicStatus: record.taxonomicStatus || '-',
                             taxonRank: record.rank || '-',
+                            publishedIn: record.publishedIn || '-',
                             synonym: record.synonym || false,
                             confidence: record.confidence || '-',
-                            matchType: record.matchType || '-'
+                            matchType: record.matchType || '-',
+                            vernacularNames: '-',
+                            occurrenceCount: '-',
+                            distributions: '-',
+                            descriptions: '-'
                         };
+
+                        // Fetch additional data in parallel if options enabled and key is valid
+                        if (result.key !== '-') {
+                            const extraPromises = [];
+
+                            if (options.vernacularNames) {
+                                extraPromises.push(
+                                    this.fetchVernacularNames(result.key)
+                                        .then(v => { result.vernacularNames = v; })
+                                );
+                            }
+                            if (options.occurrences) {
+                                extraPromises.push(
+                                    this.fetchOccurrenceCount(result.key)
+                                        .then(c => { result.occurrenceCount = c; })
+                                );
+                            }
+                            if (options.distributions) {
+                                extraPromises.push(
+                                    this.fetchDistributions(result.key)
+                                        .then(d => { result.distributions = d; })
+                                );
+                            }
+                            if (options.descriptions) {
+                                extraPromises.push(
+                                    this.fetchDescriptions(result.key)
+                                        .then(d => { result.descriptions = d; })
+                                );
+                            }
+
+                            // Fetch publishedIn from detail endpoint if not in search results
+                            if (result.publishedIn === '-') {
+                                extraPromises.push(
+                                    this.fetchSpeciesDetail(result.key)
+                                        .then(detail => {
+                                            if (detail) {
+                                                if (detail.publishedIn) result.publishedIn = detail.publishedIn;
+                                                if (!result.authorship || result.authorship === '-') {
+                                                    result.authorship = detail.authorship || '-';
+                                                }
+                                            }
+                                        })
+                                );
+                            }
+
+                            if (extraPromises.length > 0) {
+                                await Promise.all(extraPromises);
+                            }
+                        }
 
                         console.log(`🌍 GBIF - ${speciesName} Successfully found: Key=${result.key}, Status=${result.taxonomicStatus}, Family=${result.family}`);
                         return result;
@@ -80,6 +282,7 @@ class GbifAPI {
         return {
             speciesName: speciesName,
             key: '-',
+            nubKey: '-',
             kingdom: '-',
             phylum: '-',
             class: '-',
@@ -92,9 +295,14 @@ class GbifAPI {
             authorship: '-',
             taxonomicStatus: 'Not Found',
             taxonRank: '-',
+            publishedIn: '-',
             synonym: false,
             confidence: '-',
-            matchType: '-'
+            matchType: '-',
+            vernacularNames: '-',
+            occurrenceCount: '-',
+            distributions: '-',
+            descriptions: '-'
         };
     }
 
@@ -102,6 +310,7 @@ class GbifAPI {
         return {
             speciesName: speciesName,
             key: '-',
+            nubKey: '-',
             kingdom: '-',
             phylum: '-',
             class: '-',
@@ -114,9 +323,14 @@ class GbifAPI {
             authorship: '-',
             taxonomicStatus: 'Error',
             taxonRank: '-',
+            publishedIn: '-',
             synonym: false,
             confidence: '-',
-            matchType: errorMessage
+            matchType: errorMessage,
+            vernacularNames: '-',
+            occurrenceCount: '-',
+            distributions: '-',
+            descriptions: '-'
         };
     }
 
@@ -124,12 +338,11 @@ class GbifAPI {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    async searchBatch(speciesList, onProgress = null, onSpeciesComplete = null) {
+    async searchBatch(speciesList, onProgress = null, onSpeciesComplete = null, options = {}) {
         const results = [];
         const total = speciesList.length;
 
         console.log(`🌍 GBIF - Starting search for ${total} species...`);
-        console.log(`🌍 GBIF - Note: GBIF API allows direct access without CORS restrictions`);
 
         for (let i = 0; i < speciesList.length; i++) {
             const species = speciesList[i];
@@ -137,7 +350,7 @@ class GbifAPI {
             try {
                 console.log(`🌍 GBIF - Processing ${species} (${i + 1}/${total})...`);
 
-                const result = await this.searchSpecies(species);
+                const result = await this.searchSpecies(species, options);
                 results.push(result);
 
                 if (onSpeciesComplete) {
@@ -148,9 +361,8 @@ class GbifAPI {
                     onProgress(i + 1, total);
                 }
 
-                // Rate limiting respeitoso
                 if (i < speciesList.length - 1) {
-                    await this.delay(1000); // 1 segundo entre requests
+                    await this.delay(1000);
                 }
 
             } catch (error) {
@@ -176,32 +388,16 @@ class GbifAPI {
 async function getGBIF(apiKey = 'gbif') {
     console.log(`getGBIF called with apiKey: ${apiKey}`);
 
-    // Verificar se o gbifAPI está disponível
     if (typeof window.gbifAPI === 'undefined' || !window.gbifAPI) {
-        console.error('❌ gbifAPI is not available. Attempting to initialize...');
-
         if (typeof GbifAPI !== 'undefined') {
             window.gbifAPI = new GbifAPI();
-            console.log('✅ gbifAPI initialized successfully');
         } else {
-            console.error('❌ GbifAPI class not found. Please check if gbif.js is loaded.');
-            alert('Erro: API do GBIF não está carregada. Por favor, recarregue a página e tente novamente.');
+            alert('Error: GBIF API is not loaded. Please reload the page.');
             return;
         }
     }
 
-    const statusColor = {
-        'ACCEPTED': '#BACD92',
-        'SYNONYM': '#FFE066',
-        'DOUBTFUL': '#FFE066',
-        'Not Found': '#D1D1C7',
-        'Error': '#FA7070'
-    };
-
     const progressModal = document.getElementById('progressModal');
-    const progressBar = document.getElementById('progressBar');
-    const progressText = document.getElementById('progressText');
-
     if (!progressModal) {
         console.error('Progress modal not found');
         return;
@@ -218,69 +414,55 @@ async function getGBIF(apiKey = 'gbif') {
         return;
     }
 
-    console.log(`🌍 GBIF - Starting search for ${speciesNames.length} species...`);
+    // Read optional field checkboxes
+    const gbifOccurrencesOpt = document.getElementById('gbifoccurrencesopt')?.checked ?? false;
+    const gbifDistributionsOpt = document.getElementById('gbifdistributionsopt')?.checked ?? false;
+    const gbifDescriptionsOpt = document.getElementById('gbifdescriptionsopt')?.checked ?? false;
 
-    // Verificar quais campos opcionais estão selecionados
-    const gbifBasionymOpt = document.getElementById('basionymopt')?.checked ?? true;
-    const gbifVernacularOpt = document.getElementById('vernacular_nameopt')?.checked ?? true;
-    const gbifTaxonomicStatusOpt = document.getElementById('taxonomic_statusopt')?.checked ?? true;
+    const fetchOptions = {
+        vernacularNames: true,  // always fetch (mandatory field)
+        occurrences: gbifOccurrencesOpt,
+        distributions: gbifDistributionsOpt,
+        descriptions: gbifDescriptionsOpt
+    };
 
-    // Criar tabela do GBIF similar às outras APIs
+    // Build table header dynamically based on selected options
     const _gbifTable = document.createElement('table');
     _gbifTable.id = 'GbifTable';
-    _gbifTable.classList.add(
-        "text-base",
-        "text-blue-800",
-        "table-auto",
-        "border-collapse",
-        "w-full"
-    );
+    _gbifTable.classList.add("text-base", "text-blue-800", "table-auto", "border-collapse", "w-full");
 
-    let headerHTML = `
+    let colIdx = 0;
+    let headerCells = '';
+
+    const addHeader = (label) => {
+        const idx = colIdx++;
+        headerCells += `<th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('GbifTable', ${idx})">${label} <i class="fas fa-sort ml-2"></i></th>`;
+    };
+
+    addHeader('Key');
+    addHeader('Kingdom');
+    addHeader('Phylum');
+    addHeader('Class');
+    addHeader('Order');
+    addHeader('Family');
+    addHeader('Genus');
+    addHeader('Species Name');
+    addHeader('Scientific Name');
+    addHeader('Canonical Name');
+    addHeader('Authorship');
+    addHeader('Published In');
+    addHeader('Taxonomic Status');
+    addHeader('Vernacular Names');
+    if (gbifOccurrencesOpt) addHeader('Occurrences');
+    if (gbifDistributionsOpt) addHeader('Distributions');
+    if (gbifDescriptionsOpt) addHeader('Descriptions');
+    // Link column (no sort)
+    headerCells += `<th scope="col" class="py-5 px-5">Link</th>`;
+
+    _gbifTable.innerHTML = `
     <thead class="text-base text-white bg-gray-800 text-left whitespace-nowrap" data-sticky="true" style="position: sticky; z-index: 20;">
-        <tr>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('GbifTable', 0)">
-                Key <i class="fas fa-sort ml-2"></i>
-            </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('GbifTable', 1)">
-                Kingdom <i class="fas fa-sort ml-2"></i>
-            </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('GbifTable', 2)">
-                Phylum <i class="fas fa-sort ml-2"></i>
-            </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('GbifTable', 3)">
-                Class <i class="fas fa-sort ml-2"></i>
-            </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('GbifTable', 4)">
-                Order <i class="fas fa-sort ml-2"></i>
-            </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('GbifTable', 5)">
-                Family <i class="fas fa-sort ml-2"></i>
-            </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('GbifTable', 6)">
-                Genus <i class="fas fa-sort ml-2"></i>
-            </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('GbifTable', 7)">
-                Species Name <i class="fas fa-sort ml-2"></i>
-            </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('GbifTable', 8)">
-                Scientific Name <i class="fas fa-sort ml-2"></i>
-            </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('GbifTable', 9)">
-                Canonical Name <i class="fas fa-sort ml-2"></i>
-            </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('GbifTable', 10)">
-                Authorship <i class="fas fa-sort ml-2"></i>
-            </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('GbifTable', 11)">
-                Taxonomic Status <i class="fas fa-sort ml-2"></i>
-            </th>
-            <th scope="col" class="py-5 px-5">Link</th>
-        </tr>
-    </thead>
-    `;
-
-    _gbifTable.innerHTML = headerHTML;
+        <tr>${headerCells}</tr>
+    </thead>`;
 
     const _gbifTableBody = _gbifTable.createTBody();
     _gbifTableBody.classList.add("text-left", 'divide-y-1', 'divide-blue-800', 'divide-dashed');
@@ -293,130 +475,120 @@ async function getGBIF(apiKey = 'gbif') {
     gbifResults.appendChild(_gbifTableWrapper);
 
     try {
-        console.log('🌍 Using gbifAPI.searchBatch...');
-
         const results = await window.gbifAPI.searchBatch(
             speciesNames,
             (current, total) => {
                 progress = (current / total) * 100;
-
-                // Update per-API progress bar only (not main progress bar)
                 const apiProgressBar = document.getElementById(`progressBar-${apiKey}`);
                 const apiProgressText = document.getElementById(`progressText-${apiKey}`);
                 if (apiProgressBar) apiProgressBar.style.width = progress + '%';
                 if (apiProgressText) apiProgressText.textContent = Math.round(progress) + '%';
-
-                // Also update global progress tracker
                 if (typeof window.globalProgressTracker !== 'undefined') {
                     window.globalProgressTracker.updateApiProgress(apiKey, progress);
                 }
             },
             (result, current, total) => {
                 console.log(`🌍 GBIF - Completed ${current}/${total}: ${result.speciesName} (${result.taxonomicStatus})`);
-            }
+            },
+            fetchOptions
         );
 
-        console.log(`🌍 GBIF search completed. Processing ${results.length} results...`);
-
-        // Contar resultados com sucesso e erros
         let successCount = 0;
         let errorCount = 0;
 
-        for (const result of results) {
+        // Store results globally for modal access
+        window._gbifResults = results;
+
+        for (let i = 0; i < results.length; i++) {
+            const result = results[i];
             const row = _gbifTableBody.insertRow();
-            row.classList.add(
-                'bg-gray-50',
-                'hover:bg-gray-400',
-                'text-black',
-                'odd:bg-gray-200',
-                'even:bg-white',
-                'whitespace-nowrap'
-            );
+            row.classList.add('bg-gray-50', 'hover:bg-gray-400', 'text-black', 'odd:bg-gray-200', 'even:bg-white', 'whitespace-nowrap');
 
-            let cellIndex = 0;
+            let ci = 0;
+            const addCell = (html, cls = "py-5 px-5") => {
+                const cell = row.insertCell(ci++);
+                cell.innerHTML = html;
+                cell.className = cls;
+                return cell;
+            };
 
-            // Key
-            const keyCell = row.insertCell(cellIndex++);
-            keyCell.innerHTML = result.key;
-            keyCell.className = "py-5 px-5";
+            addCell(result.key);
+            addCell(result.kingdom);
+            addCell(result.phylum);
+            addCell(result.class);
+            addCell(result.order);
+            addCell(result.family);
+            addCell(`<i>${result.genus}</i>`);
+            addCell(`<i>${result.speciesName}</i>`);
 
-            // Kingdom
-            const kingdomCell = row.insertCell(cellIndex++);
-            kingdomCell.innerHTML = result.kingdom;
-            kingdomCell.className = "py-5 px-5";
+            // Scientific Name: species name italic, author normal
+            const fullSci = result.scientificName || '-';
+            const canon = result.canonicalName || '';
+            if (canon && canon !== '-' && fullSci.startsWith(canon)) {
+                const authorPart = fullSci.substring(canon.length).trim();
+                addCell(`<i>${canon}</i>${authorPart ? ' ' + authorPart : ''}`);
+            } else {
+                const parenIdx = fullSci.indexOf('(');
+                if (parenIdx > 0) {
+                    const namePart = fullSci.substring(0, parenIdx).trim();
+                    const authorPart = fullSci.substring(parenIdx);
+                    addCell(`<i>${namePart}</i> ${authorPart}`);
+                } else {
+                    addCell(`<i>${fullSci}</i>`);
+                }
+            }
 
-            // Phylum
-            const phylumCell = row.insertCell(cellIndex++);
-            phylumCell.innerHTML = result.phylum;
-            phylumCell.className = "py-5 px-5";
+            addCell(`<i>${result.canonicalName}</i>`);
+            addCell(result.authorship);
 
-            // Class
-            const classCell = row.insertCell(cellIndex++);
-            classCell.innerHTML = result.class;
-            classCell.className = "py-5 px-5";
+            // Published In - View button
+            const viewBtn = (field, title) =>
+                `<button class="inline-flex items-center px-4 py-2 text-base font-medium rounded-lg text-white bg-gray-800 hover:opacity-90 transition-colors duration-200 shadow-sm hover:shadow-md" onclick="showGbifDetail(${i}, '${field}', '${title}')"><i class="fa-solid fa-eye mr-2"></i>View</button>`;
 
-            // Order
-            const orderCell = row.insertCell(cellIndex++);
-            orderCell.innerHTML = result.order;
-            orderCell.className = "py-5 px-5";
+            const piCell = addCell(result.publishedIn && result.publishedIn !== '-'
+                ? viewBtn('publishedIn', 'Published In') : '-', "py-5 px-5 text-center");
+            if (result.publishedIn && result.publishedIn !== '-') piCell.dataset.exportValue = result.publishedIn;
 
-            // Family
-            const familyCell = row.insertCell(cellIndex++);
-            familyCell.innerHTML = result.family;
-            familyCell.className = "py-5 px-5";
+            // Taxonomic Status with color
+            const statusColorMap = {
+                'ACCEPTED': '#BACD92',
+                'SYNONYM': '#FFE066',
+                'DOUBTFUL': '#FFE066',
+                'Error': '#FA7070'
+            };
+            const statusCell = addCell(result.taxonomicStatus, "py-5 px-5 font-bold");
+            statusCell.style.backgroundColor = statusColorMap[result.taxonomicStatus] || '#D1D1C7';
 
-            // Genus
-            const genusCell = row.insertCell(cellIndex++);
-            genusCell.innerHTML = `<i>${result.genus}</i>`;
-            genusCell.className = "py-5 px-5";
+            // Vernacular Names - View button
+            const vnCell = addCell(result.vernacularNames && result.vernacularNames !== '-'
+                ? viewBtn('vernacularNames', 'Vernacular Names') : '-', "py-5 px-5 text-center");
+            if (result.vernacularNames && result.vernacularNames !== '-') vnCell.dataset.exportValue = result.vernacularNames;
 
-            // Species Name
-            const speciesCell = row.insertCell(cellIndex++);
-            speciesCell.innerHTML = `<i>${result.speciesName}</i>`;
-            speciesCell.className = "py-5 px-5";
-
-            // Scientific Name
-            const sciNameCell = row.insertCell(cellIndex++);
-            sciNameCell.innerHTML = `<i>${result.scientificName}</i>`;
-            sciNameCell.className = "py-5 px-5";
-
-            // Canonical Name
-            const canonicalCell = row.insertCell(cellIndex++);
-            canonicalCell.innerHTML = `<i>${result.canonicalName}</i>`;
-            canonicalCell.className = "py-5 px-5";
-
-            // Authorship
-            const authorshipCell = row.insertCell(cellIndex++);
-            authorshipCell.innerHTML = result.authorship;
-            authorshipCell.className = "py-5 px-5";
-
-            // Taxonomic Status
-            const statusCell = row.insertCell(cellIndex++);
-            const statusColor = result.taxonomicStatus === 'ACCEPTED' ? '#BACD92' :
-                result.taxonomicStatus === 'SYNONYM' ? '#FFE066' :
-                    result.taxonomicStatus === 'DOUBTFUL' ? '#FFE066' :
-                        result.taxonomicStatus === 'Error' ? '#FA7070' : '#D1D1C7';
-            statusCell.innerHTML = result.taxonomicStatus;
-            statusCell.className = "py-5 px-5 font-bold";
-            statusCell.style.backgroundColor = statusColor;
+            if (gbifOccurrencesOpt) addCell(result.occurrenceCount || '-', "py-5 px-5 text-center");
+            if (gbifDistributionsOpt) {
+                const distCell = addCell(result.distributions && result.distributions !== '-'
+                    ? viewBtn('distributions', 'Distributions') : '-', "py-5 px-5 text-center");
+                if (result.distributions && result.distributions !== '-') distCell.dataset.exportValue = result.distributions;
+            }
+            if (gbifDescriptionsOpt) {
+                const descCell = addCell(result.descriptions && result.descriptions !== '-'
+                    ? viewBtn('descriptions', 'Descriptions') : '-', "py-5 px-5 text-center");
+                if (result.descriptions && result.descriptions !== '-') descCell.dataset.exportValue = result.descriptions;
+            }
 
             // Link
-            const linkCell = row.insertCell(cellIndex++);
+            const linkCell = addCell('-', "py-5 px-5");
             if (result.key !== '-') {
                 linkCell.innerHTML = `
-                    <a class="inline-flex items-center px-4 py-2 border border-gray-800 text-base font-medium rounded-lg text-gray-800 bg-white hover:bg-gray-50 transition-colors duration-200 shadow-sm hover:shadow-md" 
-                       href="https://www.gbif.org/species/${result.key}" 
+                    <a class="inline-flex items-center px-4 py-2 border border-gray-800 text-base font-medium rounded-lg text-gray-800 bg-white hover:bg-gray-50 transition-colors duration-200 shadow-sm hover:shadow-md"
+                       href="https://www.gbif.org/species/${result.key}"
                        target="_blank">
                         <i class="fa-solid fa-arrow-up-right-from-square mr-2 text-lg"></i>
                         View
                     </a>
                 `;
-            } else {
-                linkCell.innerHTML = '-';
             }
-            linkCell.className = "py-5 px-5";
 
-            // Contar status para estatísticas
             if (result.taxonomicStatus === 'ACCEPTED' || result.taxonomicStatus === 'SYNONYM') {
                 successCount++;
             } else if (result.taxonomicStatus === 'Error') {
@@ -424,7 +596,7 @@ async function getGBIF(apiKey = 'gbif') {
             }
         }
 
-        // Mostrar aviso de sucesso
+        // Status notice
         if (successCount > 0) {
             const successNotice = document.createElement('div');
             successNotice.className = 'bg-gray-200 border-l-4 border-gray-800 p-5 my-1 mx-1 rounded-lg shadow-sm';
@@ -465,7 +637,7 @@ async function getGBIF(apiKey = 'gbif') {
             gbifResults.insertBefore(errorNotice, _gbifTableWrapper);
         }
 
-        // Adicionar controles similares às outras APIs
+        // Controls (search, column filters, export)
         const controlsContainer = document.createElement('div');
         controlsContainer.className = 'bg-white rounded mb-4 mx-1';
         controlsContainer.innerHTML = `
@@ -479,9 +651,9 @@ async function getGBIF(apiKey = 'gbif') {
                         <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                             <i class="fas fa-search text-gray-400"></i>
                         </div>
-                        <input 
-                            type="text" 
-                            id="gbif-table-search" 
+                        <input
+                            type="text"
+                            id="gbif-table-search"
                             class="block w-full pl-10 pr-12 py-3 text-base text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-200"
                             placeholder="Type to search in visible columns..."
                             autocomplete="off"
@@ -502,7 +674,7 @@ async function getGBIF(apiKey = 'gbif') {
                 <h4 class="text-base font-semibold text-gray-800 mb-3">
                     <i class="fas fa-columns mr-2"></i>Toggle Column Visibility
                 </h4>
-                <div id="gbif-column-filters" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-items-start"></div>
+                <div id="gbif-column-filters" class="flex flex-wrap gap-x-6 gap-y-2"></div>
             </div>
 
             <!-- Export Section -->
@@ -527,10 +699,8 @@ async function getGBIF(apiKey = 'gbif') {
             </div>
         `;
 
-        // Inserir controles ANTES da tabela
         gbifResults.insertBefore(controlsContainer, _gbifTableWrapper);
 
-        // Configurar funcionalidades dos controles
         createColumnFilters('GbifTable', 'gbif-column-filters');
 
         const searchInput = document.getElementById('gbif-table-search');
@@ -580,13 +750,23 @@ async function getGBIF(apiKey = 'gbif') {
         console.log(`🌍 GBIF search completed: ${successCount} successful, ${errorCount} errors`);
 
     } catch (error) {
-        console.error('❌ Error during GBIF search:', error);
+        console.error('Error during GBIF search:', error);
         progressModal.classList.add('hidden');
         alert('An error occurred during the search: ' + error.message);
     }
 }
 
-// Garantir que a instância global seja criada
+/**
+ * Display GBIF modal details for long text fields
+ */
+function showGbifDetail(index, field, title) {
+    const result = window._gbifResults && window._gbifResults[index];
+    if (!result) return showCellModal(title, '-');
+    const text = result[field] || '-';
+    showCellModal(title, text);
+}
+
+// Create global instance
 if (typeof window !== 'undefined') {
     window.gbifAPI = new GbifAPI();
     console.log('🌍 GBIF API loaded and instance created successfully');

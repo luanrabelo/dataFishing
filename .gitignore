@@ -8,4 +8,5 @@ saida_teste
 .env
 apikeys.env
 doc_apis/
-tmpclaude*-cwd
+*.ipynb
+a.py

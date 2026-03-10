@@ -5,8 +5,8 @@
 class EschmeyerAPI {
     constructor() {
         this.baseURL = 'https://researcharchive.calacademy.org/research/ichthyology/catalog/fishcatget.asp';
-        this.maxRetries = 3;
-        this.retryDelay = 2000;
+        this.maxRetries = 5;
+        this.retryDelay = 5000;
         console.log('🐟 EschmeyerAPI instance created');
     }
 
@@ -102,89 +102,37 @@ class EschmeyerAPI {
         const genus = parts[0];
         const species = parts[1];
 
-        // URL da API do Eschmeyer
         const targetUrl = `${this.baseURL}?tbl=species&genus=${encodeURIComponent(genus)}&species=${encodeURIComponent(species)}`;
-
-        // Lista de proxies CORS que funcionam com o Eschmeyer
-        const proxies = [
-            'https://api.allorigins.win/get?url=',
-            'https://corsproxy.io/?',
-            'https://cors-proxy.fringe.zone/',
-            'https://proxy.cors.sh/'
-        ];
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
 
         for (let attempt = 0; attempt < this.maxRetries; attempt++) {
-            // Primeiro, tentar requisição direta (pode funcionar em alguns casos)
-            if (attempt === 0) {
-                try {
-                    console.log(`🐟 Eschmeyer - ${speciesName} Trying direct request (attempt ${attempt + 1}/${this.maxRetries})...`);
+            try {
+                console.log(`🐟 Eschmeyer - ${speciesName} Fetching via proxy (attempt ${attempt + 1}/${this.maxRetries})...`);
 
-                    const response = await fetch(targetUrl, {
-                        method: 'GET',
-                        mode: 'cors',
-                        headers: {
-                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-                        }
-                    });
+                const response = await fetch(proxyUrl, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
 
-                    if (response.ok) {
-                        const htmlContent = await response.text();
-                        return this.parseHTML(htmlContent, speciesName);
-                    }
-                } catch (error) {
-                    console.warn(`🐟 Eschmeyer - ${speciesName} Direct request failed:`, error.message);
+                if (!response.ok) throw new Error(`Proxy HTTP ${response.status}`);
+
+                const json = await response.json();
+                const htmlContent = json.contents;
+
+                if (htmlContent && htmlContent.length > 100) {
+                    console.log(`🐟 Eschmeyer - ${speciesName} Successfully retrieved data via proxy`);
+                    return this.parseHTML(htmlContent, speciesName);
                 }
-            }
 
-            // Tentar com proxies CORS
-            for (const proxy of proxies) {
-                try {
-                    console.log(`🐟 Eschmeyer - ${speciesName} Trying proxy: ${proxy.includes('allorigins') ? 'AllOrigins' : proxy.includes('corsproxy') ? 'CORSProxy' : proxy.includes('fringe') ? 'Fringe' : 'CORS.sh'} (attempt ${attempt + 1}/${this.maxRetries})...`);
+                throw new Error('Empty response from proxy');
 
-                    let proxyUrl;
-                    let fetchOptions = {
-                        method: 'GET',
-                        headers: {
-                            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
-                        }
-                    };
-
-                    if (proxy.includes('allorigins')) {
-                        // AllOrigins retorna JSON com a propriedade 'contents'
-                        proxyUrl = proxy + encodeURIComponent(targetUrl);
-                    } else {
-                        // Outros proxies retornam HTML diretamente
-                        proxyUrl = proxy + encodeURIComponent(targetUrl);
-                    }
-
-                    const response = await fetch(proxyUrl, fetchOptions);
-
-                    if (response.ok) {
-                        let htmlContent;
-
-                        if (proxy.includes('allorigins')) {
-                            // Para AllOrigins, extrair conteúdo do JSON
-                            const jsonResponse = await response.json();
-                            htmlContent = jsonResponse.contents;
-                        } else {
-                            // Para outros proxies, usar texto diretamente
-                            htmlContent = await response.text();
-                        }
-
-                        if (htmlContent && htmlContent.length > 100) {
-                            console.log(`🐟 Eschmeyer - ${speciesName} Successfully retrieved data via proxy`);
-                            return this.parseHTML(htmlContent, speciesName);
-                        }
-                    }
-                } catch (proxyError) {
-                    console.warn(`🐟 Eschmeyer - ${speciesName} Proxy failed:`, proxyError.message);
-                    continue;
+            } catch (error) {
+                if (attempt < this.maxRetries - 1) {
+                    console.warn(`🐟 Eschmeyer - ${speciesName} Attempt ${attempt + 1} failed: ${error.message}. Retrying in ${this.retryDelay}ms...`);
+                    await this.delay(this.retryDelay);
+                } else {
+                    console.error(`🐟 Eschmeyer - ${speciesName} All attempts failed: ${error.message}`);
                 }
-            }
-
-            if (attempt < this.maxRetries - 1) {
-                console.warn(`🐟 Eschmeyer - ${speciesName} All methods failed, retrying in ${this.retryDelay}ms...`);
-                await this.delay(this.retryDelay);
             }
         }
 
@@ -563,7 +511,7 @@ async function getEschmeyer(apiKey = 'eschmeyer') {
     );
 
     let headerHTML = `
-    <thead class="text-base text-white bg-gray-800 text-left whitespace-nowrap" data-sticky="true" style="position: sticky; z-index: 20;">
+    <thead class="text-base text-white bg-gray-800 text-left whitespace-nowrap" data-sticky="true">
         <tr>
             <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('EschmeyerTable', 0)">
                 Species Name <i class="fas fa-sort ml-2"></i>
@@ -578,7 +526,6 @@ async function getEschmeyer(apiKey = 'eschmeyer') {
                 Habitat <i class="fas fa-sort ml-2"></i>
             </th>
             ${eschmeyerSynonymsOpt ? `<th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('EschmeyerTable', ${3 + (eschmeyerStatusOpt ? 1 : 0) + (eschmeyerAcceptedNameOpt ? 1 : 0) + (eschmeyerFamilyOpt ? 1 : 0)})">Synonyms Count <i class="fas fa-sort ml-2"></i></th>` : ''}
-            <th scope="col" class="py-5 px-5">Link</th>
         </tr>
     </thead>
     `;
@@ -685,18 +632,6 @@ async function getEschmeyer(apiKey = 'eschmeyer') {
                 synonymsCell.className = "py-5 px-5 text-center";
             }
 
-            // Link
-            const linkCell = row.insertCell(cellIndex++);
-            linkCell.innerHTML = `
-                <a class="inline-flex items-center px-4 py-2 border border-gray-800 text-base font-medium rounded-lg text-gray-800 bg-white hover:bg-gray-50 transition-colors duration-200 shadow-sm hover:shadow-md" 
-                   href="https://researcharchive.calacademy.org/research/ichthyology/catalog/fishcatget.asp?tbl=species&genus=${encodeURIComponent(result.speciesName.split(' ')[0])}&species=${encodeURIComponent(result.speciesName.split(' ')[1])}" 
-                   target="_blank">
-                    <i class="fa-solid fa-arrow-up-right-from-square mr-2 text-lg"></i>
-                    View
-                </a>
-            `;
-            linkCell.className = "py-5 px-5";
-
             // Contar status para estatísticas
             if (result.status === 'Valid' || result.status === 'Synonym') {
                 successCount++;
@@ -789,7 +724,7 @@ async function getEschmeyer(apiKey = 'eschmeyer') {
                 <h4 class="text-base font-semibold text-gray-800 mb-3">
                     <i class="fas fa-columns mr-2"></i>Toggle Column Visibility
                 </h4>
-                <div id="eschmeyer-column-filters" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-items-start"></div>
+                <div id="eschmeyer-column-filters" class="flex flex-wrap gap-x-6 gap-y-2"></div>
             </div>
 
             <!-- Export Section -->

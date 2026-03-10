@@ -87,27 +87,66 @@ document.addEventListener('DOMContentLoaded', function () {
     // Check API availability after a short delay
     setTimeout(() => {
         console.log('Checking API availability:');
-        console.log('- EschmeyerAPI:', typeof EschmeyerAPI !== 'undefined' ? 'Available' : 'Missing');
-        console.log('- WormsAPI:', typeof WormsAPI !== 'undefined' ? 'Available' : 'Missing');
-        console.log('- GbifAPI:', typeof GbifAPI !== 'undefined' ? 'Available' : 'Missing');
+        console.log('- BhlAPI:', typeof BhlAPI !== 'undefined' ? 'Available' : 'Missing');
+        console.log('- BirdLifeAPI:', typeof BirdLifeAPI !== 'undefined' ? 'Available' : 'Missing');
         console.log('- BoldAPI:', typeof BoldAPI !== 'undefined' ? 'Available' : 'Missing');
+        console.log('- ColAPI:', typeof ColAPI !== 'undefined' ? 'Available' : 'Missing');
+        console.log('- EBirdAPI:', typeof EBirdAPI !== 'undefined' ? 'Available' : 'Missing');
+        console.log('- EolAPI:', typeof EolAPI !== 'undefined' ? 'Available' : 'Missing');
+        console.log('- EschmeyerAPI:', typeof EschmeyerAPI !== 'undefined' ? 'Available' : 'Missing');
+        console.log('- GbifAPI:', typeof GbifAPI !== 'undefined' ? 'Available' : 'Missing');
         console.log('- IucnAPI:', typeof IucnAPI !== 'undefined' ? 'Available' : 'Missing');
         console.log('- NcbiAPI:', typeof NcbiAPI !== 'undefined' ? 'Available' : 'Missing');
+        console.log('- ObisAPI:', typeof ObisAPI !== 'undefined' ? 'Available' : 'Missing');
+        console.log('- OpenDataBioAPI:', typeof OpenDataBioAPI !== 'undefined' ? 'Available' : 'Missing');
+        console.log('- SalveAPI:', typeof SalveAPI !== 'undefined' ? 'Available' : 'Missing');
+        console.log('- SpeciesLinkAPI:', typeof SpeciesLinkAPI !== 'undefined' ? 'Available' : 'Missing');
+        console.log('- WormsAPI:', typeof WormsAPI !== 'undefined' ? 'Available' : 'Missing');
 
-        if (typeof EschmeyerAPI !== 'undefined' && typeof window.eschmeyerAPI === 'undefined') {
-            window.eschmeyerAPI = new EschmeyerAPI();
+        if (typeof BhlAPI !== 'undefined' && typeof window.bhlAPI === 'undefined') {
+            window.bhlAPI = new BhlAPI();
         }
-        if (typeof WormsAPI !== 'undefined' && typeof window.wormsAPI === 'undefined') {
-            window.wormsAPI = new WormsAPI();
-        }
-        if (typeof GbifAPI !== 'undefined' && typeof window.gbifAPI === 'undefined') {
-            window.gbifAPI = new GbifAPI();
+        if (typeof BirdLifeAPI !== 'undefined' && typeof window.birdlifeAPI === 'undefined') {
+            window.birdlifeAPI = new BirdLifeAPI();
         }
         if (typeof BoldAPI !== 'undefined' && typeof window.boldAPI === 'undefined') {
             window.boldAPI = new BoldAPI();
         }
+        if (typeof ColAPI !== 'undefined' && typeof window.colAPI === 'undefined') {
+            window.colAPI = new ColAPI();
+        }
+        if (typeof EBirdAPI !== 'undefined' && typeof window.ebirdAPI === 'undefined') {
+            window.ebirdAPI = new EBirdAPI();
+        }
+        if (typeof EolAPI !== 'undefined' && typeof window.eolAPI === 'undefined') {
+            window.eolAPI = new EolAPI();
+        }
+        if (typeof EschmeyerAPI !== 'undefined' && typeof window.eschmeyerAPI === 'undefined') {
+            window.eschmeyerAPI = new EschmeyerAPI();
+        }
+        if (typeof GbifAPI !== 'undefined' && typeof window.gbifAPI === 'undefined') {
+            window.gbifAPI = new GbifAPI();
+        }
+        if (typeof IucnAPI !== 'undefined' && typeof window.iucnAPI === 'undefined') {
+            window.iucnAPI = new IucnAPI();
+        }
         if (typeof NcbiAPI !== 'undefined' && typeof window.ncbiAPI === 'undefined') {
             window.ncbiAPI = new NcbiAPI();
+        }
+        if (typeof ObisAPI !== 'undefined' && typeof window.obisAPI === 'undefined') {
+            window.obisAPI = new ObisAPI();
+        }
+        if (typeof OpenDataBioAPI !== 'undefined' && typeof window.opendatabioAPI === 'undefined') {
+            window.opendatabioAPI = new OpenDataBioAPI();
+        }
+        if (typeof SalveAPI !== 'undefined' && typeof window.salveAPI === 'undefined') {
+            window.salveAPI = new SalveAPI();
+        }
+        if (typeof SpeciesLinkAPI !== 'undefined' && typeof window.specieslinkAPI === 'undefined') {
+            window.specieslinkAPI = new SpeciesLinkAPI();
+        }
+        if (typeof WormsAPI !== 'undefined' && typeof window.wormsAPI === 'undefined') {
+            window.wormsAPI = new WormsAPI();
         }
     }, 100);
 
@@ -151,14 +190,33 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 // Initialize per-API progress bars
                 apiProgressContainer.innerHTML = '';
+
+                // Adjust layout based on number of selected APIs
+                if (selectedApis.length > 6) {
+                    apiProgressContainer.className = 'grid grid-cols-3 gap-3';
+                } else if (selectedApis.length > 3) {
+                    apiProgressContainer.className = 'grid grid-cols-2 gap-3';
+                } else {
+                    apiProgressContainer.className = 'space-y-3';
+                }
+
                 selectedApis.forEach(apiKey => {
                     const apiName = {
-                        'eschmeyer': "Eschmeyer's Catalog",
-                        'worms': 'WoRMS',
-                        'gbif': 'GBIF',
+                        'bhl': 'BHL',
+                        'birdlife': 'BirdLife',
                         'bold': 'BOLD Systems',
+                        'col': 'Catalogue of Life',
+                        'ebird': 'eBird',
+                        'eol': 'Encyclopedia of Life',
+                        'eschmeyer': "Eschmeyer's Catalog",
+                        'gbif': 'GBIF',
                         'iucn': 'IUCN Red List',
-                        'ncbi': 'NCBI'
+                        'ncbi': 'NCBI',
+                        'obis': 'OBIS',
+                        'opendatabio': 'OpenDataBio',
+                        'salve': 'ICMBio SALVE',
+                        'specieslink': 'speciesLink',
+                        'worms': 'WoRMS'
                     }[apiKey] || apiKey;
 
                     const apiProgressDiv = document.createElement('div');
@@ -210,12 +268,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Map API keys to their search functions
             const apiSearchMap = {
-                'eschmeyer': getEschmeyer,
-                'worms': getWoRMS,
-                'gbif': getGBIF,
+                'bhl': typeof getBHL !== 'undefined' ? getBHL : null,
+                'birdlife': typeof getBirdLife !== 'undefined' ? getBirdLife : null,
                 'bold': getBOLD,
+                'col': typeof getCOL !== 'undefined' ? getCOL : null,
+                'ebird': typeof getEBird !== 'undefined' ? getEBird : null,
+                'eol': typeof getEOL !== 'undefined' ? getEOL : null,
+                'eschmeyer': getEschmeyer,
+                'gbif': getGBIF,
                 'iucn': getIUCN,
-                'ncbi': typeof getNcbi !== 'undefined' ? getNcbi : null
+                'ncbi': typeof getNcbi !== 'undefined' ? getNcbi : null,
+                'obis': typeof getOBIS !== 'undefined' ? getOBIS : null,
+                'opendatabio': typeof getOpenDataBio !== 'undefined' ? getOpenDataBio : null,
+                'salve': getSALVE,
+                'specieslink': typeof getSpeciesLink !== 'undefined' ? getSpeciesLink : null,
+                'worms': getWoRMS
             };
 
             // Create a wrapper function to intercept progress updates

@@ -11,6 +11,7 @@
   <script src="https://unpkg.com/exceljs/dist/exceljs.min.js"></script>
   <script src="https://unpkg.com/@popperjs/core@2"></script>
   <script src="https://unpkg.com/tippy.js@6"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.js"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,9 +23,19 @@
   <script src="gbif.js"></script>
   <script src="bold.js"></script>
   <script src="iucn.js"></script>
+  <script src="salve.js"></script>
   <script src="ncbi-genes.js"></script>
   <script src="ncbi.js"></script>
+  <script src="col.js"></script>
+  <!-- <script src="eol.js"></script> -->
+  <script src="bhl.js"></script>
+  <script src="specieslink.js"></script>
+  <!-- <script src="opendatabio.js"></script> -->
+  <script src="obis.js"></script>
+  <script src="ebird.js"></script>
+  <script src="birdlife.js"></script>
   <script src="ui-components.js"></script>
+  <script src="column-icons.js"></script>
   <script src="table-functions.js"></script>
   <script src="dataFishing.js"></script>
 
@@ -358,7 +369,7 @@
 
     <!-- Modal Melhorado -->
     <div id="progressModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 hidden z-50">
-      <div class="bg-white rounded-lg p-8 max-w-2xl w-full mx-4 shadow-2xl">
+      <div class="bg-white rounded-lg p-8 max-w-4xl w-full mx-4 shadow-2xl">
         <div class="text-center">
           <div class="mb-6">
             <i class="fas fa-fish text-blue-600 text-4xl mb-2 animate-pulse"></i>
@@ -384,7 +395,7 @@
             <div class="text-left mb-3">
               <label class="text-sm font-semibold text-gray-700">API Queries</label>
             </div>
-            <div id="apiProgressContainer" class="space-y-3 max-h-48 overflow-y-auto">
+            <div id="apiProgressContainer" class="space-y-3">
               <!-- Per-API progress bars will be inserted here -->
             </div>
           </div>

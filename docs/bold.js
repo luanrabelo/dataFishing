@@ -1,236 +1,124 @@
 /**
  * BOLD Systems (Barcode of Life Data Systems) API Integration
+ * Uses the new BOLD Portal API at portal.boldsystems.org
+ * Taxonomy-only — uses /api/taxonomy/hierarchy endpoint
  */
 
 class BoldAPI {
     constructor() {
-        this.baseURL = 'http://v3.boldsystems.org/index.php/API_Tax/TaxonSearch';
-        this.sequenceURL = 'http://v3.boldsystems.org/index.php/API_Public/sequence';
-        this.taxonomyURL = 'http://v3.boldsystems.org/index.php/API_Tax/TaxonData';
+        this.baseURL = 'https://portal.boldsystems.org';
         this.maxRetries = 3;
         this.retryDelay = 2000;
-        console.log('🧬 BOLD API instance created');
+        console.log('BOLD API instance created');
     }
 
-    async get_BOLD_Systems_data(taxid) {
-        const apiUrl = `http://v3.boldsystems.org/index.php/API_Tax/TaxonData?taxId=${taxid}&dataTypes=basic&includeTree=true`;
-        const proxyUrl = `https://corsproxy.io/?${apiUrl}`;
-        const tax_data = {};
-        try {
-            const response = await fetch(proxyUrl);
-            if (!response.ok) throw new Error(`HTTP-Error: ${response.status}`);
-            const json = await response.json();
-            if (json) {
-                Object.keys(json).forEach(key => {
-                    const value = json[key];
-                    tax_data[value.tax_rank] = value.taxon;
-                });
-                return tax_data;
-            }
-        } catch (error) {
-            return false;
-        }
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    async getSequenceCount(speciesName) {
-        try {
-            const apiUrl = `${this.sequenceURL}?taxon=${encodeURIComponent(speciesName)}&format=json`;
-            const proxyUrl = `https://corsproxy.io/?${apiUrl}`;
-
-            const response = await fetch(proxyUrl, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (response.ok) {
-                const textContent = await response.text();
-
-                if (!textContent || textContent === "[]" || textContent.trim() === "") {
-                    return 0;
-                }
-
-                try {
-                    const data = JSON.parse(textContent);
-                    return Array.isArray(data) ? data.length : 0;
-                } catch (jsonError) {
-                    // Se não for JSON, pode ser FASTA
-                    if (textContent.startsWith(">")) {
-                        return this.countFastaSequences(textContent);
-                    }
-                    return 0;
-                }
-            }
-        } catch (error) {
-            console.warn(`🧬 BOLD - Error getting sequence count for ${speciesName}:`, error.message);
-        }
-
-        return 0;
-    }
-
-    countFastaSequences(fastaText) {
-        try {
-            const lines = fastaText.split('\n');
-            return lines.filter(line => line.startsWith('>')).length;
-        } catch (error) {
-            console.error('Error counting FASTA sequences:', error);
-            return 0;
-        }
-    }
-
-    async downloadSequences(speciesName) {
-        try {
-            const apiUrl = `${this.sequenceURL}?taxon=${encodeURIComponent(speciesName)}&format=json`;
-            const proxyUrl = `https://corsproxy.io/?${apiUrl}`;
-
-            const response = await fetch(proxyUrl);
-            if (response.ok) {
-                const textContent = await response.text();
-
-                if (!textContent || textContent === "[]" || textContent.trim() === "") {
-                    throw new Error('No sequences available for download');
-                }
-
-                let filename, content, mimeType;
-
-                try {
-                    const data = JSON.parse(textContent);
-                    if (Array.isArray(data) && data.length > 0) {
-                        // Converter JSON para FASTA
-                        let fastaContent = '';
-                        const sequencesByMarker = {};
-
-                        data.forEach(record => {
-                            const marker = record.markercode || 'Unknown';
-                            if (!sequencesByMarker[marker]) {
-                                sequencesByMarker[marker] = [];
-                            }
-
-                            if (record.nucleotides) {
-                                const header = `>${record.processid || 'Unknown'}|${record.sampleid || 'Unknown'}|${speciesName}|${marker}|${record.country || 'Unknown'}`;
-                                sequencesByMarker[marker].push(`${header}\n${record.nucleotides}`);
-                            }
-                        });
-
-                        // Criar FASTA combinado
-                        for (const marker in sequencesByMarker) {
-                            fastaContent += `>Marker: ${marker}\n`;
-                            fastaContent += sequencesByMarker[marker].join('\n') + '\n';
-                        }
-
-                        filename = `${speciesName.replace(' ', '_')}_BOLD_sequences.fasta`;
-                        content = fastaContent;
-                        mimeType = 'text/plain';
-                    } else {
-                        throw new Error('No valid sequence data found');
-                    }
-                } catch (jsonError) {
-                    // Se não for JSON válido, assumir que é FASTA
-                    if (textContent.startsWith(">")) {
-                        filename = `${speciesName.replace(' ', '_')}_BOLD_sequences.fasta`;
-                        content = textContent;
-                        mimeType = 'text/plain';
-                    } else {
-                        throw new Error('Invalid sequence format');
-                    }
-                }
-
-                // Fazer download
-                const blob = new Blob([content], { type: mimeType });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-
-                console.log(`🧬 BOLD - Successfully downloaded sequences for ${speciesName}`);
-                return true;
-            } else {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-        } catch (error) {
-            console.error(`🧬 BOLD - Error downloading sequences for ${speciesName}:`, error);
-            alert(`Error downloading sequences for ${speciesName}: ${error.message}`);
-            return false;
-        }
-    }
-
-    async searchSpecies(speciesName) {
-        const apiUrl = `${this.baseURL}?taxName=${encodeURIComponent(speciesName)}`;
-        const proxyUrl = `https://corsproxy.io/?${apiUrl}`;
+    /**
+     * Fetch a BOLD Portal API endpoint with retry logic
+     */
+    async apiFetch(endpoint) {
+        const url = `${this.baseURL}${endpoint}`;
 
         for (let attempt = 0; attempt < this.maxRetries; attempt++) {
             try {
-                console.log(`🧬 BOLD - ${speciesName} Attempting request via proxy (attempt ${attempt + 1}/${this.maxRetries})...`);
-
-                const response = await fetch(proxyUrl, {
+                const response = await fetch(url, {
                     method: 'GET',
                     headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
+                        'Accept': 'application/json'
                     }
                 });
 
-                if (response.ok) {
-                    const data = await response.json();
-
-                    if (data && Object.keys(data).length > 0) {
-                        // Extrair o taxid da resposta
-                        let taxid = null;
-                        for (const key in data) {
-                            if (data[key] && data[key].taxid) {
-                                taxid = data[key].taxid;
-                                break;
-                            }
-                        }
-
-                        if (taxid) {
-                            // Buscar dados detalhados da taxonomia usando a função que funcionava
-                            const taxonomyData = await this.get_BOLD_Systems_data(taxid);
-
-                            // Buscar contagem de sequências
-                            const sequenceCount = await this.getSequenceCount(speciesName);
-
-                            const result = {
-                                speciesName: speciesName,
-                                taxID: taxid,
-                                kingdom: taxonomyData && taxonomyData['kingdom'] ? taxonomyData['kingdom'] : '-',
-                                phylum: taxonomyData && taxonomyData['phylum'] ? taxonomyData['phylum'] : '-',
-                                class: taxonomyData && taxonomyData['class'] ? taxonomyData['class'] : '-',
-                                order: taxonomyData && taxonomyData['order'] ? taxonomyData['order'] : '-',
-                                family: taxonomyData && taxonomyData['family'] ? taxonomyData['family'] : '-',
-                                genus: taxonomyData && taxonomyData['genus'] ? taxonomyData['genus'] : speciesName.split(' ')[0],
-                                species: taxonomyData && taxonomyData['species'] ? taxonomyData['species'] : speciesName,
-                                sequencesCount: sequenceCount
-                            };
-
-                            console.log(`🧬 BOLD - ${speciesName} Successfully found: TaxID=${result.taxID}, Family=${result.family}, Sequences=${result.sequencesCount}`);
-                            return result;
-                        } else {
-                            console.warn(`🧬 BOLD - ${speciesName} No taxonomy ID found`);
-                            return this.createNotFoundResult(speciesName);
-                        }
-                    } else {
-                        console.warn(`🧬 BOLD - ${speciesName} No results found`);
-                        return this.createNotFoundResult(speciesName);
-                    }
-                } else {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
                 }
+
+                return await response.json();
             } catch (error) {
                 if (attempt < this.maxRetries - 1) {
-                    console.warn(`🧬 BOLD - ${speciesName} Request failed: ${error.message}. Retrying in ${this.retryDelay}ms... (Attempt ${attempt + 1}/${this.maxRetries})`);
+                    console.warn(`BOLD - Retry ${attempt + 1}/${this.maxRetries}: ${error.message}`);
                     await this.delay(this.retryDelay);
                 } else {
-                    console.error(`🧬 BOLD - ${speciesName} All attempts failed: ${error.message}`);
-                    return this.createErrorResult(speciesName, error.message);
+                    throw error;
                 }
             }
+        }
+    }
+
+    /**
+     * Search for a species using the BOLD Portal API
+     * Uses only /api/taxonomy/hierarchy for taxonomy data
+     */
+    async searchSpecies(speciesName) {
+        try {
+            console.log(`BOLD - ${speciesName} Fetching data...`);
+
+            // Get taxonomy hierarchy
+            let hierarchyData = null;
+            try {
+                hierarchyData = await this.apiFetch(
+                    `/api/taxonomy/hierarchy?name=${encodeURIComponent(speciesName)}&rank=species`
+                );
+                console.log(`BOLD - ${speciesName} Taxonomy hierarchy:`, hierarchyData);
+            } catch (e) {
+                console.warn(`BOLD - ${speciesName} Could not fetch taxonomy hierarchy: ${e.message}`);
+            }
+
+            // Extract taxid from species-level hierarchy entry
+            let boldTaxId = '-';
+            if (hierarchyData && Array.isArray(hierarchyData.species) && hierarchyData.species.length > 0) {
+                boldTaxId = String(hierarchyData.species[0].taxid || '-');
+            }
+
+            // Build result
+            const result = {
+                speciesName: speciesName,
+                taxID: boldTaxId,
+                phylum: '-',
+                class: '-',
+                order: '-',
+                family: '-',
+                genus: speciesName.split(' ')[0],
+                species: speciesName
+            };
+
+            // Extract taxonomy from hierarchy response
+            if (hierarchyData) {
+                const extractFirst = (arr) => {
+                    if (Array.isArray(arr) && arr.length > 0) {
+                        const first = arr[0];
+                        if (typeof first === 'object' && first !== null) {
+                            return first.taxon || '-';
+                        }
+                        if (typeof first === 'string') return first;
+                    }
+                    return '-';
+                };
+
+                if (hierarchyData.phylum) result.phylum = extractFirst(hierarchyData.phylum);
+                if (hierarchyData.class) result.class = extractFirst(hierarchyData.class);
+                if (hierarchyData.order) result.order = extractFirst(hierarchyData.order);
+                if (hierarchyData.family) result.family = extractFirst(hierarchyData.family);
+                if (hierarchyData.genus) result.genus = extractFirst(hierarchyData.genus);
+                if (hierarchyData.species) result.species = extractFirst(hierarchyData.species);
+            }
+
+            // Determine if species was found
+            const found = hierarchyData && Object.keys(hierarchyData).length > 0;
+
+            if (found) {
+                console.log(`BOLD - ${speciesName} Successfully found: Family=${result.family}`);
+            } else {
+                console.warn(`BOLD - ${speciesName} No results found`);
+            }
+
+            return result;
+
+        } catch (error) {
+            console.error(`BOLD - Error processing ${speciesName}: ${error.message}`);
+            return this.createErrorResult(speciesName, error.message);
         }
     }
 
@@ -238,14 +126,12 @@ class BoldAPI {
         return {
             speciesName: speciesName,
             taxID: '-',
-            kingdom: '-',
             phylum: '-',
             class: '-',
             order: '-',
             family: '-',
             genus: speciesName.split(' ')[0] || '-',
-            species: speciesName,
-            sequencesCount: 0
+            species: speciesName
         };
     }
 
@@ -253,34 +139,27 @@ class BoldAPI {
         return {
             speciesName: speciesName,
             taxID: '-',
-            kingdom: '-',
             phylum: '-',
             class: '-',
             order: '-',
             family: '-',
             genus: speciesName.split(' ')[0] || '-',
             species: speciesName,
-            sequencesCount: 0,
             error: errorMessage
         };
-    }
-
-    delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     async searchBatch(speciesList, onProgress = null, onSpeciesComplete = null) {
         const results = [];
         const total = speciesList.length;
 
-        console.log(`🧬 BOLD - Starting search for ${total} species using CORS proxy...`);
-        console.log(`🧬 BOLD - Note: Using proxy server to bypass browser CORS restrictions`);
+        console.log(`BOLD - Starting search for ${total} species...`);
 
         for (let i = 0; i < speciesList.length; i++) {
             const species = speciesList[i];
 
             try {
-                console.log(`🧬 BOLD - Processing ${species} (${i + 1}/${total})...`);
+                console.log(`BOLD - Processing ${species} (${i + 1}/${total})...`);
 
                 const result = await this.searchSpecies(species);
                 results.push(result);
@@ -293,13 +172,13 @@ class BoldAPI {
                     onProgress(i + 1, total);
                 }
 
-                // Rate limiting mais conservador devido ao uso de proxy
+                // Rate limiting
                 if (i < speciesList.length - 1) {
-                    await this.delay(2000); // 2 segundos entre requests
+                    await this.delay(1000);
                 }
 
             } catch (error) {
-                console.error(`🧬 BOLD - Error processing ${species}:`, error);
+                console.error(`BOLD - Error processing ${species}:`, error);
 
                 const errorResult = this.createErrorResult(species, error.message);
                 results.push(errorResult);
@@ -321,23 +200,16 @@ class BoldAPI {
 async function getBOLD(apiKey = 'bold') {
     console.log(`getBOLD called with apiKey: ${apiKey}`);
 
-    // Verificar se o boldAPI está disponível
     if (typeof window.boldAPI === 'undefined' || !window.boldAPI) {
-        console.error('❌ boldAPI is not available. Attempting to initialize...');
-
         if (typeof BoldAPI !== 'undefined') {
             window.boldAPI = new BoldAPI();
-            console.log('✅ boldAPI initialized successfully');
         } else {
-            console.error('❌ BoldAPI class not found. Please check if bold.js is loaded.');
-            alert('Erro: API do BOLD não está carregada. Por favor, recarregue a página e tente novamente.');
+            alert('Error: BOLD API is not loaded. Please reload the page.');
             return;
         }
     }
 
     const progressModal = document.getElementById('progressModal');
-    const progressBar = document.getElementById('progressBar');
-    const progressText = document.getElementById('progressText');
 
     if (!progressModal) {
         console.error('Progress modal not found');
@@ -355,56 +227,40 @@ async function getBOLD(apiKey = 'bold') {
         return;
     }
 
-    console.log(`🧬 BOLD - Starting search for ${speciesNames.length} species...`);
+    console.log(`BOLD - Starting search for ${speciesNames.length} species...`);
 
-    // Criar tabela do BOLD
+    // Read optional field checkboxes
+    const boldTaxonomyOpt = document.getElementById('boldtaxonomyopt')?.checked ?? true;
+
+    // Build table
     const _boldTable = document.createElement('table');
     _boldTable.id = 'BoldTable';
-    _boldTable.classList.add(
-        "text-base",
-        "text-blue-800",
-        "table-auto",
-        "border-collapse",
-        "w-full"
-    );
+    _boldTable.classList.add("text-base", "text-blue-800", "table-auto", "border-collapse", "w-full");
 
-    let headerHTML = `
-    <thead class="text-base text-white bg-gray-800 text-left whitespace-nowrap" data-sticky="true" style="position: sticky; z-index: 20;">
-        <tr>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('BoldTable', 0)">
-                TaxID <i class="fas fa-sort ml-2"></i>
-            </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('BoldTable', 1)">
-                Kingdom <i class="fas fa-sort ml-2"></i>
-            </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('BoldTable', 2)">
-                Phylum <i class="fas fa-sort ml-2"></i>
-            </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('BoldTable', 3)">
-                Class <i class="fas fa-sort ml-2"></i>
-            </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('BoldTable', 4)">
-                Order <i class="fas fa-sort ml-2"></i>
-            </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('BoldTable', 5)">
-                Family <i class="fas fa-sort ml-2"></i>
-            </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('BoldTable', 6)">
-                Genus <i class="fas fa-sort ml-2"></i>
-            </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('BoldTable', 7)">
-                Species Name <i class="fas fa-sort ml-2"></i>
-            </th>
-            <th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('BoldTable', 8)">
-                Sequences Count <i class="fas fa-sort ml-2"></i>
-            </th>
-            <th scope="col" class="py-5 px-5">Download Sequences</th>
-            <th scope="col" class="py-5 px-5">Link</th>
-        </tr>
-    </thead>
-    `;
+    let colIdx = 0;
+    let headerCells = '';
 
-    _boldTable.innerHTML = headerHTML;
+    const addHeader = (label) => {
+        const idx = colIdx++;
+        headerCells += `<th scope="col" class="py-5 px-5 cursor-pointer hover:bg-gray-700" onclick="sortTable('BoldTable', ${idx})">${label} <i class="fas fa-sort ml-2"></i></th>`;
+    };
+
+    // Taxonomy (mandatory)
+    if (boldTaxonomyOpt) {
+        addHeader('TaxID');
+        addHeader('Phylum');
+        addHeader('Class');
+        addHeader('Order');
+        addHeader('Family');
+        addHeader('Genus');
+    }
+
+    addHeader('Species Name');
+
+    _boldTable.innerHTML = `
+    <thead class="text-base text-white bg-gray-800 text-left whitespace-nowrap" data-sticky="true">
+        <tr>${headerCells}</tr>
+    </thead>`;
 
     const _boldTableBody = _boldTable.createTBody();
     _boldTableBody.classList.add("text-left", 'divide-y-1', 'divide-blue-800', 'divide-dashed');
@@ -417,153 +273,76 @@ async function getBOLD(apiKey = 'bold') {
     boldResults.appendChild(_boldTableWrapper);
 
     try {
-        console.log('🧬 Using boldAPI.searchBatch...');
-
         const results = await window.boldAPI.searchBatch(
             speciesNames,
             (current, total) => {
                 progress = (current / total) * 100;
 
-                // Update per-API progress bar only (not main progress bar)
                 const apiProgressBar = document.getElementById(`progressBar-${apiKey}`);
                 const apiProgressText = document.getElementById(`progressText-${apiKey}`);
                 if (apiProgressBar) apiProgressBar.style.width = progress + '%';
                 if (apiProgressText) apiProgressText.textContent = Math.round(progress) + '%';
 
-                // Also update global progress tracker
                 if (typeof window.globalProgressTracker !== 'undefined') {
                     window.globalProgressTracker.updateApiProgress(apiKey, progress);
                 }
             },
             (result, current, total) => {
-                console.log(`🧬 BOLD - Completed ${current}/${total}: ${result.speciesName}`);
+                console.log(`BOLD - Completed ${current}/${total}: ${result.speciesName}`);
             }
         );
 
-        console.log(`🧬 BOLD search completed. Processing ${results.length} results...`);
-
-        // Contar resultados com sucesso e erros
         let successCount = 0;
         let errorCount = 0;
-        let totalSequences = 0;
 
         for (const result of results) {
             const row = _boldTableBody.insertRow();
-            row.classList.add(
-                'bg-gray-50',
-                'hover:bg-gray-400',
-                'text-black',
-                'odd:bg-gray-200',
-                'even:bg-white',
-                'whitespace-nowrap'
-            );
+            row.classList.add('bg-gray-50', 'hover:bg-gray-400', 'text-black', 'odd:bg-gray-200', 'even:bg-white', 'whitespace-nowrap');
 
-            let cellIndex = 0;
+            let ci = 0;
+            const addCell = (html, cls = "py-5 px-5") => {
+                const cell = row.insertCell(ci++);
+                cell.innerHTML = html;
+                cell.className = cls;
+                return cell;
+            };
 
-            // TaxID
-            const taxIdCell = row.insertCell(cellIndex++);
-            taxIdCell.innerHTML = result.taxID || '-';
-            taxIdCell.className = "py-5 px-5";
-
-            // Kingdom
-            const kingdomCell = row.insertCell(cellIndex++);
-            kingdomCell.innerHTML = result.kingdom || '-';
-            kingdomCell.className = "py-5 px-5";
-
-            // Phylum
-            const phylumCell = row.insertCell(cellIndex++);
-            phylumCell.innerHTML = result.phylum || '-';
-            phylumCell.className = "py-5 px-5";
-
-            // Class
-            const classCell = row.insertCell(cellIndex++);
-            classCell.innerHTML = result.class || '-';
-            classCell.className = "py-5 px-5";
-
-            // Order
-            const orderCell = row.insertCell(cellIndex++);
-            orderCell.innerHTML = result.order || '-';
-            orderCell.className = "py-5 px-5";
-
-            // Family
-            const familyCell = row.insertCell(cellIndex++);
-            familyCell.innerHTML = result.family || '-';
-            familyCell.className = "py-5 px-5";
-
-            // Genus
-            const genusCell = row.insertCell(cellIndex++);
-            genusCell.innerHTML = `<i>${result.genus || '-'}</i>`;
-            genusCell.className = "py-5 px-5";
-
-            // Species Name
-            const speciesCell = row.insertCell(cellIndex++);
-            speciesCell.innerHTML = `<i>${result.speciesName}</i>`;
-            speciesCell.className = "py-5 px-5";
-
-            // Sequences Count
-            const sequencesCell = row.insertCell(cellIndex++);
-            const sequenceCount = result.sequencesCount || 0;
-            const sequenceColor = sequenceCount > 0 ? '#BACD92' : '#D1D1C7';
-            sequencesCell.innerHTML = sequenceCount;
-            sequencesCell.className = "py-5 px-5 font-bold text-center";
-            sequencesCell.style.backgroundColor = sequenceColor;
-
-            // Download Sequences
-            const downloadCell = row.insertCell(cellIndex++);
-            if (sequenceCount > 0) {
-                downloadCell.innerHTML = `
-                    <button class="inline-flex items-center px-4 py-2 border border-gray-800 text-base font-medium rounded-lg text-gray-800 bg-white hover:bg-gray-50 transition-colors duration-200 shadow-sm hover:shadow-md download-sequences-btn" 
-                            onclick="downloadBoldSequences('${result.speciesName}')" 
-                            title="Download sequences for ${result.speciesName}">
-                        <i class="fas fa-download mr-2 text-lg"></i>
-                        Download
-                    </button>
-                `;
-            } else {
-                downloadCell.innerHTML = '-';
+            // Taxonomy
+            if (boldTaxonomyOpt) {
+                addCell(result.taxID || '-');
+                addCell(result.phylum || '-');
+                addCell(result.class || '-');
+                addCell(result.order || '-');
+                addCell(result.family || '-');
+                addCell(`<i>${result.genus || '-'}</i>`);
             }
-            downloadCell.className = "py-5 px-5";
 
-            // Link
-            const linkCell = row.insertCell(cellIndex++);
-            if (result.taxID && result.taxID !== '-') {
-                linkCell.innerHTML = `
-                    <a class="inline-flex items-center px-4 py-2 border border-gray-800 text-base font-medium rounded-lg text-gray-800 bg-white hover:bg-gray-50 transition-colors duration-200 shadow-sm hover:shadow-md" 
-                       href="http://v3.boldsystems.org/index.php/Taxbrowser_Taxonpage?taxid=${result.taxID}" 
-                       target="_blank">
-                        <i class="fa-solid fa-arrow-up-right-from-square mr-2 text-lg"></i>
-                        View
-                    </a>
-                `;
-            } else {
-                linkCell.innerHTML = '-';
-            }
-            linkCell.className = "py-5 px-5";
+            // Species Name (always visible)
+            addCell(`<i>${result.speciesName}</i>`);
 
-            // Contar estatísticas
+            // Statistics
             if (result.taxID && result.taxID !== '-') {
                 successCount++;
             }
             if (result.error) {
                 errorCount++;
             }
-            totalSequences += sequenceCount;
         }
 
-        // Mostrar avisos de resultado
+        // Status notices
         if (successCount > 0) {
             const successNotice = document.createElement('div');
-            successNotice.className = 'bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4';
+            successNotice.className = 'bg-gray-200 border-l-4 border-gray-800 p-5 my-1 mx-1 rounded-lg shadow-sm';
             successNotice.innerHTML = `
-                <div class="flex">
+                <div class="flex items-start">
                     <div class="flex-shrink-0">
-                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-2x fa-check-circle text-black"></i>
                     </div>
-                    <div class="ml-3">
-                        <p class="text-sm">
-                            <strong>Success:</strong> Successfully accessed BOLD Systems database using CORS proxy.
+                    <div class="ml-5">
+                        <p class="text-base font-semibold text-black mb-1">
+                            <strong>Success:</strong> Successfully accessed BOLD Systems database.
                         </p>
-                        <p class="text-sm mt-2">
+                        <p class="text-black text-base leading-relaxed">
                             Results: ${successCount}/${results.length} species found with taxonomy data
                         </p>
                     </div>
@@ -574,25 +353,18 @@ async function getBOLD(apiKey = 'bold') {
 
         if (errorCount > 0) {
             const errorNotice = document.createElement('div');
-            errorNotice.className = 'bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-4';
+            errorNotice.className = 'bg-red-200 border-l-4 border-gray-800 p-5 my-1 mx-1 rounded-lg shadow-sm';
             errorNotice.innerHTML = `
-                <div class="flex">
+                <div class="flex items-start">
                     <div class="flex-shrink-0">
-                        <i class="fas fa-info-circle"></i>
+                        <i class="fas fa-2x fa-exclamation-triangle text-black"></i>
                     </div>
-                    <div class="ml-3">
-                        <p class="text-sm">
-                            <strong>Browser Notice:</strong> ${errorCount} of ${results.length} requests failed.
+                    <div class="ml-5">
+                        <p class="text-base font-semibold text-black mb-1">
+                            <strong>Notice:</strong> ${errorCount} of ${results.length} requests had issues.
                         </p>
-                        <p class="text-sm mt-2">
-                            The BOLD Systems database requires proxy servers for browser access.
-                        </p>
-                        <p class="text-sm mt-2">
+                        <p class="text-black text-base leading-relaxed">
                             Successfully processed: ${successCount}/${results.length} species
-                        </p>
-                        <p class="text-sm mt-2">
-                            <i class="fas fa-lightbulb"></i> 
-                            <strong>Tip:</strong> For better reliability with large datasets, consider using the Python version of dataFishing.
                         </p>
                     </div>
                 </div>
@@ -600,7 +372,7 @@ async function getBOLD(apiKey = 'bold') {
             boldResults.insertBefore(errorNotice, _boldTableWrapper);
         }
 
-        // Remover o botão "Download All Sequences" dos controles se existir
+        // Controls (search, column filters, export)
         const controlsContainer = document.createElement('div');
         controlsContainer.className = 'bg-white rounded mb-4 mx-1';
         controlsContainer.innerHTML = `
@@ -614,9 +386,9 @@ async function getBOLD(apiKey = 'bold') {
                         <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                             <i class="fas fa-search text-gray-400"></i>
                         </div>
-                        <input 
-                            type="text" 
-                            id="bold-table-search" 
+                        <input
+                            type="text"
+                            id="bold-table-search"
                             class="block w-full pl-10 pr-12 py-3 text-base text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-200"
                             placeholder="Type to search in visible columns..."
                             autocomplete="off"
@@ -637,7 +409,7 @@ async function getBOLD(apiKey = 'bold') {
                 <h4 class="text-base font-semibold text-gray-800 mb-3">
                     <i class="fas fa-columns mr-2"></i>Toggle Column Visibility
                 </h4>
-                <div id="bold-column-filters" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-items-start"></div>
+                <div id="bold-column-filters" class="flex flex-wrap gap-x-6 gap-y-2"></div>
             </div>
 
             <!-- Export Section -->
@@ -657,15 +429,13 @@ async function getBOLD(apiKey = 'bold') {
                 </div>
                 <p class="text-base text-gray-600 mt-3">
                     <i class="fas fa-info-circle mr-1"></i>
-                    Export will include only the currently visible columns and filtered results. Use individual download buttons for sequences.
+                    Export will include only the currently visible columns and filtered results.
                 </p>
             </div>
         `;
 
-        // Inserir controles ANTES da tabela
         boldResults.insertBefore(controlsContainer, _boldTableWrapper);
 
-        // Configurar funcionalidades dos controles
         createColumnFilters('BoldTable', 'bold-column-filters');
 
         const searchInput = document.getElementById('bold-table-search');
@@ -712,39 +482,19 @@ async function getBOLD(apiKey = 'bold') {
 
         updateDataResults();
 
-        console.log(`🧬 BOLD search completed: ${successCount} successful, ${totalSequences} total sequences available`);
+        console.log(`BOLD search completed: ${successCount} successful`);
 
     } catch (error) {
-        console.error('❌ Error during BOLD search:', error);
+        console.error('Error during BOLD search:', error);
         progressModal.classList.add('hidden');
         alert('An error occurred during the search: ' + error.message);
     }
 }
 
-// Garantir que a instância global seja criada
+// Create global instance
 if (typeof window !== 'undefined') {
     window.boldAPI = new BoldAPI();
-    console.log('🧬 BOLD API loaded and instance created successfully');
-    window.BoldAPI = BoldAPI;
-} else {
-    if (typeof module !== 'undefined' && module.exports) {
-        module.exports = BoldAPI;
-    }
-}
-
-// Função global para download de sequências
-window.downloadBoldSequences = async function (speciesName) {
-    if (window.boldAPI) {
-        await window.boldAPI.downloadSequences(speciesName);
-    } else {
-        alert('BOLD API not available');
-    }
-};
-
-// Garantir que a instância global seja criada
-if (typeof window !== 'undefined') {
-    window.boldAPI = new BoldAPI();
-    console.log('🧬 BOLD API loaded and instance created successfully');
+    console.log('BOLD API loaded and instance created successfully');
     window.BoldAPI = BoldAPI;
 } else {
     if (typeof module !== 'undefined' && module.exports) {

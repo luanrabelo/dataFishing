@@ -4,11 +4,45 @@
 
 // Card configuration data
 var Cards = {
+    'bhl': [
+        'BHL_All_data*',
+        'BHL_Page_Citations'
+    ],
+    'birdlife': [
+        'BirdLife_All_data*',
+        'BirdLife_Taxonomy*',
+        'BirdLife_Conservation*',
+        'BirdLife_Ecosystem*',
+        'BirdLife_Migration*',
+        'BirdLife_Population*'
+    ],
     'bold': [
         'BOLD_All_data*',
-        'BOLD_Taxonomy*',
-        'BOLD_Sequences*'
+        'BOLD_Taxonomy*'
     ],
+    'col': [
+        'COL_All_data*',
+        'COL_Taxonomy*',
+        'COL_Subfamily',
+        'COL_Authorship*',
+        'COL_Status*',
+        'COL_Extinct',
+        'COL_Group',
+        'COL_Scrutinizer',
+        'COL_Environments',
+        'COL_Synonyms'
+    ],
+    'ebird': [
+        'eBird_All_data*',
+        'eBird_Taxonomy*',
+        'eBird_Common_Name*'
+    ],
+    // 'eol': [
+    //     'EOL_All_data*',
+    //     'EOL_Scientific_Name*',
+    //     'EOL_Common_Names',
+    //     'EOL_Media'
+    // ],
     'eschmeyer': [
         'Eschmeyer_All_data*',
         'Eschmeyer_Taxonomy*',
@@ -21,19 +55,26 @@ var Cards = {
         'GBIF_All_data*',
         'GBIF_Taxonomy*',
         "GBIF_Basionym*",
-        "GBIF_Vernacular_Name*",
-        "GBIF_Taxonomic_Status*"
+        "GBIF_Taxonomic_Status*",
+        "GBIF_Vernacular_Names*",
+        "GBIF_Published_In*",
+        "GBIF_Occurrences",
+        "GBIF_Distributions",
+        "GBIF_Descriptions"
     ],
     'iucn': [
-        'IUCN_All_data*',
+        'IUCN_Taxonomy*',
+        'IUCN_Status_Conservation*',
         'IUCN_Common_Names*',
+        'IUCN_Synonyms_Names*',
         'IUCN_Country_Occurrence*',
         'IUCN_Habitats*',
-        'IUCN_Species_Author*',
-        'IUCN_Status_Conservation*',
-        'IUCN_Synonyms_Names*',
-        'IUCN_Taxonomy*',
-        'IUCN_Threats*'
+        'IUCN_Threats*',
+        'IUCN_Conservation_Measures*',
+        'IUCN_Research_Needed*',
+        'IUCN_Use_Trade*',
+        'IUCN_Documentation*',
+        'IUCN_Citation*'
     ],
     'ncbi': [
         'NCBI_Taxonomy*',
@@ -51,6 +92,37 @@ var Cards = {
         'NCBI_CR',
         'NCBI_matK',
         'NCBI_rbcL'
+    ],
+    'obis': [
+        'OBIS_All_data*',
+        'OBIS_Taxonomy*',
+        'OBIS_Habitat_Flags',
+        'OBIS_External_IDs'
+    ],
+    // 'opendatabio': [
+    //     'OpenDataBio_All_data*',
+    //     'OpenDataBio_Taxonomy*'
+    // ],
+    'salve': [
+        'SALVE_All_data*',
+        'SALVE_Taxonomic_Classification*',
+        'SALVE_Distribution*',
+        'SALVE_Natural_History*',
+        'SALVE_Population*',
+        'SALVE_Threats*',
+        'SALVE_Uses*',
+        'SALVE_Conservation*',
+        'SALVE_Header*'
+    ],
+    'specieslink': [
+        'SpeciesLink_All_data*',
+        'SpeciesLink_Occurrences*',
+        'SpeciesLink_Classification*',
+        'SpeciesLink_Authorship*',
+        'SpeciesLink_Collection_Metadata*',
+        'SpeciesLink_Geography*',
+        'SpeciesLink_BasisOfRecord*',
+        'SpeciesLink_Specimens*'
     ],
     'worms': [
         'WoRMS_All_data*',
@@ -71,12 +143,39 @@ var Cards = {
 };
 
 var NamesCards = {
-    'bold': 'Barcode of Life Data Systems <sup>beta</sup>',
+    'bhl': 'Biodiversity Heritage Library',
+    'birdlife': 'BirdLife International',
+    'bold': 'Barcode of Life Data Systems',
+    'col': 'Catalogue of Life (ChecklistBank)',
+    'ebird': 'eBird (Cornell Lab)',
+    // 'eol': 'Encyclopedia of Life',
     'eschmeyer': 'Eschmeyer\'s Catalog of Fishes',
     'gbif': 'Global Biodiversity Information Facility',
     'iucn': 'Red List of Threatened Species',
     'ncbi': 'National Center for Biotechnology Information',
+    'obis': 'Ocean Biodiversity Information System',
+    // 'opendatabio': 'OpenDataBio INPA',
+    'salve': 'ICMBio SALVE - Brazilian Threatened Species',
+    'specieslink': 'speciesLink (CRIA)',
     'worms': 'World Register of Marine Species'
+};
+
+var CardTooltips = {
+    'bhl': 'Search historical biodiversity literature. Returns page citations and references from the Biodiversity Heritage Library collection.',
+    'birdlife': 'Bird-specific data from BirdLife International. Returns taxonomy, conservation status, ecosystem classification, migration patterns, and population data.',
+    'bold': 'DNA barcode data from the Barcode of Life Data Systems. Returns taxonomy and DNA barcode sequences for species identification.',
+    'col': 'Global taxonomic checklist from Catalogue of Life. Returns taxonomy, authorship, status, synonyms, environments, and extinction status.',
+    'ebird': 'Bird observation data from Cornell Lab of Ornithology. Returns taxonomy and common names from the eBird database.',
+    // 'eol': 'General species information from Encyclopedia of Life. Returns scientific names, common names, and media (images, videos).',
+    'eschmeyer': 'Fish taxonomy from Eschmeyer\'s Catalog of Fishes. Returns taxonomy, status, accepted names, families, and synonyms for fish species.',
+    'gbif': 'Global occurrence records from GBIF. Returns taxonomy, basionyms, vernacular names, occurrence counts, distributions, and species descriptions.',
+    'iucn': 'Conservation assessment data from the IUCN Red List. Returns conservation status, population trend, threats, habitats, conservation actions, country occurrence, and detailed documentation.',
+    'ncbi': 'Molecular and genomic data from NCBI. Returns taxonomy, mitochondrial/nuclear genomes, transcriptomes, SNPs, and gene sequences (COI, Cytb, 16S, 12S, matK, rbcL, etc.).',
+    'obis': 'Marine species occurrences from the Ocean Biodiversity Information System. Returns taxonomy, habitat flags (marine, brackish, freshwater, terrestrial), and external identifiers.',
+    // 'opendatabio': 'Biodiversity data from INPA\'s OpenDataBio platform. Returns taxonomy and associated biodiversity records.',
+    'salve': 'Brazilian threatened species data from ICMBio SALVE. Returns conservation category, population trend, biomes, states, threats, and conservation actions for Brazilian fauna.',
+    'specieslink': 'Brazilian specimen records from speciesLink (CRIA). Returns occurrence counts, classification, authorship, collection metadata, geography, and specimen types.',
+    'worms': 'Marine species taxonomy from the World Register of Marine Species. Returns taxonomy, authority, valid names, species status, environments, extinction status, and citations.'
 };
 
 /**
@@ -126,6 +225,11 @@ function createCard(apiKey, cardData) {
         'basionym': 'Original name (basionym) for the species.',
         'vernacular_name': 'Common names.',
         'taxonomic_status': 'Taxonomic status in GBIF.',
+        'vernacular_names': 'Common/vernacular names from GBIF in multiple languages.',
+        'published_in': 'Original publication reference for the species.',
+        'occurrences': 'Total number of occurrence records in GBIF.',
+        'distributions': 'Geographic distribution data from GBIF.',
+        'descriptions': 'Species descriptions from GBIF linked datasets.',
         'sequences': 'DNA barcode sequences.',
         'mitochondrialgenome': 'Count of complete mitochondrial genomes available.',
         'nucleargenomes': 'Nuclear genome assemblies by assembly level (Scaffold, Contig, Chromosome).',
@@ -141,7 +245,47 @@ function createCard(apiKey, cardData) {
         'cr': 'Control region (D-loop) - non-coding mitochondrial region.',
         'matk': 'Maturase K (matK) - chloroplast gene used for plant DNA barcoding.',
         'rbcl': 'RuBisCO large subunit (rbcL) - chloroplast gene for plant identification.',
-        // ...adicione mais descrições conforme necessário...
+        'criteria': 'IUCN assessment criteria applied (e.g. A2cd, B1ab).',
+        'biomes': 'Brazilian biomes where the species occurs (Amazônia, Cerrado, etc).',
+        'states': 'Brazilian states where the species has been recorded.',
+        'previous_name': 'Previous scientific name before taxonomic revision.',
+        'doi': 'Digital Object Identifier (DOI) for the species assessment.',
+        'assessment_period': 'Period when the conservation assessment was conducted.',
+        'taxonomic_group': 'SALVE taxonomic group classification (Mamíferos, Aves, etc).',
+        'category': 'Conservation threat category (VU, EN, CR, NT, LC, etc).',
+        'commonnames': 'Common/vernacular names in Portuguese.',
+        'populationtrend': 'Population trend (Declining, Stable, Increasing, or Unknown).',
+        'authorship': 'Authors of the species assessment.',
+        'endemic': 'Whether the species is endemic to Brazil.',
+        'oldnames': 'Previous scientific names before taxonomic revision.',
+        'threats': 'Identified threats to the species (e.g. habitat loss, hunting).',
+        'conservation': 'Conservation actions and National Action Plans (PANs).',
+        'distribution': 'Comprehensive distribution information including Brazil-specific geographic data (states, biomes, endemism status).',
+        'natural_history': 'Natural history information including habitat, ecology, behavior, and reproduction of the species.',
+        'uses': 'Information about species uses, traditional knowledge, and economic value.',
+        'statusconservation': 'Conservation status category and assessment criteria.',
+        'countryoccurrence': 'Countries where the species occurs.',
+        'synonymsnames': 'Known synonym names for the species.',
+        'conservationmeasures': 'Conservation measures in place or needed for the species.',
+        'researchneeded': 'Research actions needed for the species.',
+        'usetrade': 'Use and trade information for the species.',
+        'documentation': 'Detailed narrative texts (population, range, habitat, threats, conservation, taxonomic notes, rationale).',
+        'environments': 'Environments where the species occurs (marine, freshwater, terrestrial, etc).',
+        'scientificname': 'Full scientific name of the species.',
+        'commonnames': 'Common/vernacular names in Portuguese.',
+        'media': 'Media assets (images, videos) from EOL.',
+        'pagecitations': 'Number of page citations found in BHL literature.',
+        'collectionmetadata': 'Collection and institution metadata from speciesLink.',
+        'classification': 'Taxonomic classification (kingdom, phylum, class, order, family) from specimen records.',
+        'geography': 'Countries and states/provinces where specimens were collected.',
+        'basisofrecord': 'Types of evidence records (PreservedSpecimen, HumanObservation, FossilSpecimen, etc.).',
+        'specimens': 'Count of type specimens (holotypus, paratypus, neotypus, etc.) found in the sample.',
+        'habitatflags': 'Habitat flags: marine, brackish, freshwater, terrestrial.',
+        'externalids': 'External identifiers (AphiaID, NCBI ID).',
+        'commonname': 'Common/vernacular name for the species.',
+        'ecosystem': 'Ecosystem classification (terrestrial, freshwater, marine).',
+        'migration': 'Migratory status of the species.',
+        'population': 'Population size, derivation, and trend information.',
     };
 
     // Create options for each data type
@@ -240,12 +384,20 @@ function createCard(apiKey, cardData) {
         </div>
     `;
     // Special options for specific APIs (before Important Information)
-    if (apiKey === 'bold') {
-        addBoldSpecialOptions(cardElement);
+    if (apiKey === 'ncbi') {
+        addNcbiSpecialOptions(cardElement);
     } else if (apiKey === 'iucn') {
         addIucnSpecialOptions(cardElement);
-    } else if (apiKey === 'ncbi') {
-        addNcbiSpecialOptions(cardElement);
+    } else if (apiKey === 'bhl') {
+        addBhlSpecialOptions(cardElement);
+    } else if (apiKey === 'specieslink') {
+        addSpecieslinkSpecialOptions(cardElement);
+    } else if (apiKey === 'opendatabio') {
+        addOpendatabioSpecialOptions(cardElement);
+    } else if (apiKey === 'ebird') {
+        addEbirdSpecialOptions(cardElement);
+    } else if (apiKey === 'birdlife') {
+        addBirdlifeSpecialOptions(cardElement);
     }
 
     // Important Information always last
@@ -255,65 +407,7 @@ function createCard(apiKey, cardData) {
 }
 
 /**
- * Add special options for BOLD Systems
- */
-function addBoldSpecialOptions(container) {
-    const specialDiv = document.createElement('div');
-    specialDiv.className = 'bg-gray-200 border-l-4 border-gray-800 p-5 my-1 mx-1 rounded-lg shadow-sm';
-
-    specialDiv.innerHTML = `
-        <div class="flex items-start">
-            <div class="flex-shrink-0">
-                <i class="fas fa-2x fa-dna text-black"></i>
-            </div>
-            <div class="ml-5 w-full">
-                <h3 class="text-base font-semibold text-black mb-1">
-                    <i class="fas fa-download mr-2"></i>Sequence Download Options
-                </h3>
-                <div class="space-y-3 mt-3">
-                    <div class="flex items-center space-x-3">
-                        <label class="relative inline-flex items-center cursor-pointer w-12 h-8 rounded-full transition duration-300 bg-gray-400 flex-shrink-0">
-                            <input type="checkbox" id="boldDownloadSequences" class="sr-only peer">
-                            <i class="far fa-question text-gray-600 text-xl absolute" style="top: 50%; left: 50%; transform: translate(-50%, -50%);"></i>
-                        </label>
-                        <span class="text-base text-gray-800">
-                            <strong>Download Sequences:</strong> Download DNA barcode sequences in FASTA format
-                        </span>
-                    </div>
-                    <p class="text-black text-base leading-relaxed">
-                        <i class="fas fa-info-circle mr-1 text-gray-600"></i>
-                        Sequences will be organized by species and saved as FASTA files.
-                    </p>
-                </div>
-            </div>
-        </div>
-    `;
-
-    // Add toggle behavior for the download checkbox
-    setTimeout(() => {
-        const dlCheckbox = document.getElementById('boldDownloadSequences');
-        if (dlCheckbox) {
-            const dlLabel = dlCheckbox.closest('label');
-            const dlIcon = dlLabel?.querySelector('i:not(.sr-only)');
-            dlCheckbox.addEventListener('change', () => {
-                if (dlCheckbox.checked) {
-                    dlLabel.classList.remove('bg-gray-400');
-                    dlLabel.classList.add('bg-gray-800');
-                    if (dlIcon) dlIcon.className = 'fas fa-check text-white text-xl absolute';
-                } else {
-                    dlLabel.classList.remove('bg-gray-800');
-                    dlLabel.classList.add('bg-gray-400');
-                    if (dlIcon) dlIcon.className = 'far fa-circle text-gray-600 text-xl absolute';
-                }
-            });
-        }
-    }, 100);
-
-    container.appendChild(specialDiv);
-}
-
-/**
- * Add special options for IUCN
+ * Add special options for IUCN Red List (API Token)
  */
 function addIucnSpecialOptions(container) {
     const specialDiv = document.createElement('div');
@@ -322,22 +416,22 @@ function addIucnSpecialOptions(container) {
     specialDiv.innerHTML = `
         <div class="flex items-start">
             <div class="flex-shrink-0">
-                <i class="fas fa-2x fa-key text-black"></i>
+                <i class="fas fa-2x fa-cloud text-black"></i>
             </div>
             <div class="ml-5 w-full">
                 <h3 class="text-base font-semibold text-black mb-1">
-                    <i class="fas fa-cog mr-2"></i>API Configuration
+                    <i class="fas fa-cog mr-2"></i>IUCN API Configuration
                 </h3>
                 <div class="space-y-3 mt-3">
                     <div>
-                        <label for="iucnApiKey" class="block text-base font-medium text-black mb-1">
+                        <label for="iucnApiToken" class="block text-base font-medium text-black mb-1">
                             <i class="fas fa-key mr-1"></i> IUCN API Token (required):
                         </label>
                         <input
-                            type="password"
-                            id="iucnApiKey"
+                            type="text"
+                            id="iucnApiToken"
                             class="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500"
-                            placeholder="Enter your IUCN API token"
+                            placeholder="Enter your IUCN Red List API token"
                         >
                     </div>
                     <div class="flex flex-wrap gap-2">
@@ -349,16 +443,16 @@ function addIucnSpecialOptions(container) {
                         </button>
                     </div>
                     <p id="iucnSaveStatus" class="text-base text-green-700 hidden">
-                        <i class="fas fa-check-circle mr-1"></i> Credentials saved successfully.
+                        <i class="fas fa-check-circle mr-1"></i> Settings saved successfully.
                     </p>
                     <p class="text-black text-base leading-relaxed">
                         <i class="fas fa-shield-alt mr-1 text-gray-600"></i>
-                        <strong>Privacy:</strong> Your API token is stored only in your browser's local storage and is <strong>never</strong> sent to any external server other than the IUCN Red List API.
+                        <strong>Privacy:</strong> Your API token is stored only in your browser's local storage and is <strong>never</strong> sent to any server other than the IUCN CORS proxy.
                     </p>
                     <p class="text-black text-base leading-relaxed">
                         <i class="fas fa-info-circle mr-1 text-gray-600"></i>
-                        Request your free API token at:
-                        <a href="https://apiv3.iucnredlist.org/api/v3/token" target="_blank" class="underline text-gray-800 hover:text-gray-600">
+                        Request an IUCN API v4 token at:
+                        <a href="https://www.iucnredlist.org/search" target="_blank" class="underline text-gray-800 hover:text-gray-600">
                             IUCN Red List API
                         </a>
                     </p>
@@ -369,21 +463,22 @@ function addIucnSpecialOptions(container) {
 
     container.appendChild(specialDiv);
 
-    // Restore saved credentials and setup save/clear buttons
+    // Restore saved token from localStorage
     setTimeout(() => {
-        const savedApiKey = localStorage.getItem('iucn_api_key');
-        const apiKeyInput = document.getElementById('iucnApiKey');
+        const savedToken = localStorage.getItem('iucn_api_token');
+        const tokenInput = document.getElementById('iucnApiToken');
 
-        if (apiKeyInput && savedApiKey) apiKeyInput.value = savedApiKey;
+        if (tokenInput && savedToken) tokenInput.value = savedToken;
 
+        // Save button
         const saveBtn = document.getElementById('iucnSaveCredentials');
         if (saveBtn) {
             saveBtn.addEventListener('click', function () {
-                const apiKey = document.getElementById('iucnApiKey')?.value?.trim() || '';
-                if (apiKey) localStorage.setItem('iucn_api_key', apiKey);
+                const token = document.getElementById('iucnApiToken')?.value?.trim() || '';
+                if (token) localStorage.setItem('iucn_api_token', token);
                 const status = document.getElementById('iucnSaveStatus');
                 if (status) {
-                    status.innerHTML = '<i class="fas fa-check-circle mr-1"></i> Credentials saved successfully.';
+                    status.innerHTML = '<i class="fas fa-check-circle mr-1"></i> Settings saved successfully.';
                     status.className = 'text-base text-green-700';
                     status.classList.remove('hidden');
                     setTimeout(() => status.classList.add('hidden'), 3000);
@@ -391,15 +486,16 @@ function addIucnSpecialOptions(container) {
             });
         }
 
+        // Clear button
         const clearBtn = document.getElementById('iucnClearCredentials');
         if (clearBtn) {
             clearBtn.addEventListener('click', function () {
-                localStorage.removeItem('iucn_api_key');
-                const apiKeyEl = document.getElementById('iucnApiKey');
-                if (apiKeyEl) apiKeyEl.value = '';
+                localStorage.removeItem('iucn_api_token');
+                const tokenEl = document.getElementById('iucnApiToken');
+                if (tokenEl) tokenEl.value = '';
                 const status = document.getElementById('iucnSaveStatus');
                 if (status) {
-                    status.innerHTML = '<i class="fas fa-trash-alt mr-1"></i> Saved credentials cleared.';
+                    status.innerHTML = '<i class="fas fa-trash-alt mr-1"></i> Saved settings cleared.';
                     status.className = 'text-base text-red-700';
                     status.classList.remove('hidden');
                     setTimeout(() => status.classList.add('hidden'), 3000);
@@ -598,6 +694,415 @@ function addNcbiSpecialOptions(container) {
 }
 
 /**
+ * Add special options for BHL (API Key)
+ */
+function addBhlSpecialOptions(container) {
+    const specialDiv = document.createElement('div');
+    specialDiv.className = 'bg-gray-200 border-l-4 border-gray-800 p-5 my-1 mx-1 rounded-lg shadow-sm';
+
+    specialDiv.innerHTML = `
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <i class="fas fa-2x fa-book text-black"></i>
+            </div>
+            <div class="ml-5 w-full">
+                <h3 class="text-base font-semibold text-black mb-1">
+                    <i class="fas fa-cog mr-2"></i>BHL API Configuration
+                </h3>
+                <div class="space-y-3 mt-3">
+                    <div>
+                        <label for="bhlApiKey" class="block text-base font-medium text-black mb-1">
+                            <i class="fas fa-key mr-1"></i> BHL API Key (required):
+                        </label>
+                        <input
+                            type="text"
+                            id="bhlApiKey"
+                            class="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500"
+                            placeholder="Enter your BHL API key"
+                        >
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button id="bhlSaveCredentials" class="inline-flex items-center px-4 py-2 border border-gray-800 text-base font-medium rounded-md text-white bg-gray-800 hover:bg-gray-700 transition-colors duration-200">
+                            <i class="fas fa-save mr-2"></i> Save to Browser
+                        </button>
+                        <button id="bhlClearCredentials" class="inline-flex items-center px-4 py-2 border border-gray-400 text-base font-medium rounded-md text-gray-800 bg-white hover:bg-gray-100 transition-colors duration-200">
+                            <i class="fas fa-trash-alt mr-2"></i> Clear Saved Data
+                        </button>
+                    </div>
+                    <p id="bhlSaveStatus" class="text-base text-green-700 hidden">
+                        <i class="fas fa-check-circle mr-1"></i> Settings saved successfully.
+                    </p>
+                    <p class="text-black text-base leading-relaxed">
+                        <i class="fas fa-shield-alt mr-1 text-gray-600"></i>
+                        <strong>Privacy:</strong> Your API key is stored only in your browser's local storage and is <strong>never</strong> sent to any server other than BHL's API.
+                    </p>
+                    <p class="text-black text-base leading-relaxed">
+                        <i class="fas fa-info-circle mr-1 text-gray-600"></i>
+                        Request a BHL API key at:
+                        <a href="https://www.biodiversitylibrary.org/getapikey.aspx" target="_blank" class="underline text-gray-800 hover:text-gray-600">
+                            BHL API Key Request
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    `;
+
+    container.appendChild(specialDiv);
+
+    setTimeout(() => {
+        const savedKey = localStorage.getItem('bhl_api_key');
+        const keyInput = document.getElementById('bhlApiKey');
+        if (keyInput && savedKey) keyInput.value = savedKey;
+
+        const saveBtn = document.getElementById('bhlSaveCredentials');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', function () {
+                const key = document.getElementById('bhlApiKey')?.value?.trim() || '';
+                if (key) localStorage.setItem('bhl_api_key', key);
+                const status = document.getElementById('bhlSaveStatus');
+                if (status) {
+                    status.innerHTML = '<i class="fas fa-check-circle mr-1"></i> Settings saved successfully.';
+                    status.className = 'text-base text-green-700';
+                    status.classList.remove('hidden');
+                    setTimeout(() => status.classList.add('hidden'), 3000);
+                }
+            });
+        }
+
+        const clearBtn = document.getElementById('bhlClearCredentials');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function () {
+                localStorage.removeItem('bhl_api_key');
+                const keyEl = document.getElementById('bhlApiKey');
+                if (keyEl) keyEl.value = '';
+                const status = document.getElementById('bhlSaveStatus');
+                if (status) {
+                    status.innerHTML = '<i class="fas fa-trash-alt mr-1"></i> Saved settings cleared.';
+                    status.className = 'text-base text-red-700';
+                    status.classList.remove('hidden');
+                    setTimeout(() => status.classList.add('hidden'), 3000);
+                }
+            });
+        }
+    }, 100);
+}
+
+/**
+ * Add special options for speciesLink (API Key)
+ */
+function addSpecieslinkSpecialOptions(container) {
+    const specialDiv = document.createElement('div');
+    specialDiv.className = 'bg-gray-200 border-l-4 border-gray-800 p-5 my-1 mx-1 rounded-lg shadow-sm';
+
+    specialDiv.innerHTML = `
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <i class="fas fa-2x fa-map-marked-alt text-black"></i>
+            </div>
+            <div class="ml-5 w-full">
+                <h3 class="text-base font-semibold text-black mb-1">
+                    <i class="fas fa-cog mr-2"></i>speciesLink API Configuration
+                </h3>
+                <div class="space-y-3 mt-3">
+                    <div>
+                        <label for="specieslinkApiKey" class="block text-base font-medium text-black mb-1">
+                            <i class="fas fa-key mr-1"></i> speciesLink API Key (required):
+                        </label>
+                        <input
+                            type="text"
+                            id="specieslinkApiKey"
+                            class="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500"
+                            placeholder="Enter your speciesLink API key"
+                        >
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button id="specieslinkSaveCredentials" class="inline-flex items-center px-4 py-2 border border-gray-800 text-base font-medium rounded-md text-white bg-gray-800 hover:bg-gray-700 transition-colors duration-200">
+                            <i class="fas fa-save mr-2"></i> Save to Browser
+                        </button>
+                        <button id="specieslinkClearCredentials" class="inline-flex items-center px-4 py-2 border border-gray-400 text-base font-medium rounded-md text-gray-800 bg-white hover:bg-gray-100 transition-colors duration-200">
+                            <i class="fas fa-trash-alt mr-2"></i> Clear Saved Data
+                        </button>
+                    </div>
+                    <p id="specieslinkSaveStatus" class="text-base text-green-700 hidden">
+                        <i class="fas fa-check-circle mr-1"></i> Settings saved successfully.
+                    </p>
+                    <p class="text-black text-base leading-relaxed">
+                        <i class="fas fa-shield-alt mr-1 text-gray-600"></i>
+                        <strong>Privacy:</strong> Your API key is stored only in your browser's local storage and is <strong>never</strong> sent to any server other than speciesLink's API directly.
+                    </p>
+                    <p class="text-black text-base leading-relaxed">
+                        <i class="fas fa-info-circle mr-1 text-gray-600"></i>
+                        Request a speciesLink API key at:
+                        <a href="https://specieslink.net/" target="_blank" class="underline text-gray-800 hover:text-gray-600">
+                            speciesLink Portal
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    `;
+
+    container.appendChild(specialDiv);
+
+    setTimeout(() => {
+        const savedKey = localStorage.getItem('specieslink_api_key');
+        const keyInput = document.getElementById('specieslinkApiKey');
+        if (keyInput && savedKey) keyInput.value = savedKey;
+
+        const saveBtn = document.getElementById('specieslinkSaveCredentials');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', function () {
+                const key = document.getElementById('specieslinkApiKey')?.value?.trim() || '';
+                if (key) localStorage.setItem('specieslink_api_key', key);
+                const status = document.getElementById('specieslinkSaveStatus');
+                if (status) {
+                    status.innerHTML = '<i class="fas fa-check-circle mr-1"></i> Settings saved successfully.';
+                    status.className = 'text-base text-green-700';
+                    status.classList.remove('hidden');
+                    setTimeout(() => status.classList.add('hidden'), 3000);
+                }
+            });
+        }
+
+        const clearBtn = document.getElementById('specieslinkClearCredentials');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function () {
+                localStorage.removeItem('specieslink_api_key');
+                const keyEl = document.getElementById('specieslinkApiKey');
+                if (keyEl) keyEl.value = '';
+                const status = document.getElementById('specieslinkSaveStatus');
+                if (status) {
+                    status.innerHTML = '<i class="fas fa-trash-alt mr-1"></i> Saved settings cleared.';
+                    status.className = 'text-base text-red-700';
+                    status.classList.remove('hidden');
+                    setTimeout(() => status.classList.add('hidden'), 3000);
+                }
+            });
+        }
+    }, 100);
+}
+
+/**
+ * Add special options for OpenDataBio (API Token)
+ */
+function addOpendatabioSpecialOptions(container) {
+    const specialDiv = document.createElement('div');
+    specialDiv.className = 'bg-gray-200 border-l-4 border-gray-800 p-5 my-1 mx-1 rounded-lg shadow-sm';
+
+    specialDiv.innerHTML = `
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <i class="fas fa-2x fa-database text-black"></i>
+            </div>
+            <div class="ml-5 w-full">
+                <h3 class="text-base font-semibold text-black mb-1">
+                    <i class="fas fa-cog mr-2"></i>OpenDataBio API Configuration
+                </h3>
+                <div class="space-y-3 mt-3">
+                    <div>
+                        <label for="opendatabioApiToken" class="block text-base font-medium text-black mb-1">
+                            <i class="fas fa-key mr-1"></i> OpenDataBio API Token (optional):
+                        </label>
+                        <input
+                            type="text"
+                            id="opendatabioApiToken"
+                            class="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500"
+                            placeholder="Enter your OpenDataBio API token (optional for public data)"
+                        >
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button id="opendatabioSaveCredentials" class="inline-flex items-center px-4 py-2 border border-gray-800 text-base font-medium rounded-md text-white bg-gray-800 hover:bg-gray-700 transition-colors duration-200">
+                            <i class="fas fa-save mr-2"></i> Save to Browser
+                        </button>
+                        <button id="opendatabioClearCredentials" class="inline-flex items-center px-4 py-2 border border-gray-400 text-base font-medium rounded-md text-gray-800 bg-white hover:bg-gray-100 transition-colors duration-200">
+                            <i class="fas fa-trash-alt mr-2"></i> Clear Saved Data
+                        </button>
+                    </div>
+                    <p id="opendatabioSaveStatus" class="text-base text-green-700 hidden">
+                        <i class="fas fa-check-circle mr-1"></i> Settings saved successfully.
+                    </p>
+                    <p class="text-black text-base leading-relaxed">
+                        <i class="fas fa-shield-alt mr-1 text-gray-600"></i>
+                        <strong>Privacy:</strong> Your token is stored only in your browser's local storage. The token is sent directly to OpenDataBio's API when possible; if CORS blocks direct access, public data may be retrieved via a CORS proxy (without the token).
+                    </p>
+                    <p class="text-black text-base leading-relaxed">
+                        <i class="fas fa-info-circle mr-1 text-gray-600"></i>
+                        Learn more at:
+                        <a href="https://opendatabio.github.io/" target="_blank" class="underline text-gray-800 hover:text-gray-600">
+                            OpenDataBio Documentation
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    `;
+
+    container.appendChild(specialDiv);
+
+    setTimeout(() => {
+        const savedToken = localStorage.getItem('opendatabio_api_token');
+        const tokenInput = document.getElementById('opendatabioApiToken');
+        if (tokenInput && savedToken) tokenInput.value = savedToken;
+
+        const saveBtn = document.getElementById('opendatabioSaveCredentials');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', function () {
+                const token = document.getElementById('opendatabioApiToken')?.value?.trim() || '';
+                if (token) localStorage.setItem('opendatabio_api_token', token);
+                const status = document.getElementById('opendatabioSaveStatus');
+                if (status) {
+                    status.innerHTML = '<i class="fas fa-check-circle mr-1"></i> Settings saved successfully.';
+                    status.className = 'text-base text-green-700';
+                    status.classList.remove('hidden');
+                    setTimeout(() => status.classList.add('hidden'), 3000);
+                }
+            });
+        }
+
+        const clearBtn = document.getElementById('opendatabioClearCredentials');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function () {
+                localStorage.removeItem('opendatabio_api_token');
+                const tokenEl = document.getElementById('opendatabioApiToken');
+                if (tokenEl) tokenEl.value = '';
+                const status = document.getElementById('opendatabioSaveStatus');
+                if (status) {
+                    status.innerHTML = '<i class="fas fa-trash-alt mr-1"></i> Saved settings cleared.';
+                    status.className = 'text-base text-red-700';
+                    status.classList.remove('hidden');
+                    setTimeout(() => status.classList.add('hidden'), 3000);
+                }
+            });
+        }
+    }, 100);
+}
+
+/**
+ * Add special options for eBird (API Key)
+ */
+function addEbirdSpecialOptions(container) {
+    const specialDiv = document.createElement('div');
+    specialDiv.className = 'bg-gray-200 border-l-4 border-gray-800 p-5 my-1 mx-1 rounded-lg shadow-sm';
+
+    specialDiv.innerHTML = `
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <i class="fas fa-2x fa-dove text-black"></i>
+            </div>
+            <div class="ml-5 w-full">
+                <h3 class="text-base font-semibold text-black mb-1">
+                    <i class="fas fa-cog mr-2"></i>eBird API Configuration
+                </h3>
+                <div class="space-y-3 mt-3">
+                    <div>
+                        <label for="ebirdApiKey" class="block text-base font-medium text-black mb-1">
+                            <i class="fas fa-key mr-1"></i> eBird API Key (required):
+                        </label>
+                        <input
+                            type="text"
+                            id="ebirdApiKey"
+                            class="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500"
+                            placeholder="Enter your eBird API key"
+                        >
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button id="ebirdSaveCredentials" class="inline-flex items-center px-4 py-2 border border-gray-800 text-base font-medium rounded-md text-white bg-gray-800 hover:bg-gray-700 transition-colors duration-200">
+                            <i class="fas fa-save mr-2"></i> Save to Browser
+                        </button>
+                        <button id="ebirdClearCredentials" class="inline-flex items-center px-4 py-2 border border-gray-400 text-base font-medium rounded-md text-gray-800 bg-white hover:bg-gray-100 transition-colors duration-200">
+                            <i class="fas fa-trash-alt mr-2"></i> Clear Saved Data
+                        </button>
+                    </div>
+                    <p id="ebirdSaveStatus" class="text-base text-green-700 hidden">
+                        <i class="fas fa-check-circle mr-1"></i> Settings saved successfully.
+                    </p>
+                    <p class="text-black text-base leading-relaxed">
+                        <i class="fas fa-shield-alt mr-1 text-gray-600"></i>
+                        <strong>Privacy:</strong> Your API key is stored only in your browser's local storage and is <strong>never</strong> sent to any server other than eBird's API.
+                    </p>
+                    <p class="text-black text-base leading-relaxed">
+                        <i class="fas fa-info-circle mr-1 text-gray-600"></i>
+                        Request an eBird API key at:
+                        <a href="https://ebird.org/api/keygen" target="_blank" class="underline text-gray-800 hover:text-gray-600">
+                            eBird API Key Request
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    `;
+
+    container.appendChild(specialDiv);
+
+    setTimeout(() => {
+        const savedKey = localStorage.getItem('ebird_api_key');
+        const keyInput = document.getElementById('ebirdApiKey');
+        if (keyInput && savedKey) keyInput.value = savedKey;
+
+        const saveBtn = document.getElementById('ebirdSaveCredentials');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', function () {
+                const key = document.getElementById('ebirdApiKey')?.value?.trim() || '';
+                if (key) localStorage.setItem('ebird_api_key', key);
+                const status = document.getElementById('ebirdSaveStatus');
+                if (status) {
+                    status.innerHTML = '<i class="fas fa-check-circle mr-1"></i> Settings saved successfully.';
+                    status.className = 'text-base text-green-700';
+                    status.classList.remove('hidden');
+                    setTimeout(() => status.classList.add('hidden'), 3000);
+                }
+            });
+        }
+
+        const clearBtn = document.getElementById('ebirdClearCredentials');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function () {
+                localStorage.removeItem('ebird_api_key');
+                const keyEl = document.getElementById('ebirdApiKey');
+                if (keyEl) keyEl.value = '';
+                const status = document.getElementById('ebirdSaveStatus');
+                if (status) {
+                    status.innerHTML = '<i class="fas fa-trash-alt mr-1"></i> Saved settings cleared.';
+                    status.className = 'text-base text-red-700';
+                    status.classList.remove('hidden');
+                    setTimeout(() => status.classList.add('hidden'), 3000);
+                }
+            });
+        }
+    }, 100);
+}
+
+/**
+ * Add special options for BirdLife International (CSV file upload)
+ */
+function addBirdlifeSpecialOptions(container) {
+    const specialDiv = document.createElement('div');
+    specialDiv.className = 'bg-gray-200 border-l-4 border-gray-800 p-5 my-1 mx-1 rounded-lg shadow-sm';
+
+    specialDiv.innerHTML = `
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <i class="fas fa-2x fa-feather-alt text-black"></i>
+            </div>
+            <div class="ml-5 w-full">
+                <h3 class="text-base font-semibold text-black mb-1">
+                    <i class="fas fa-cog mr-2"></i>BirdLife International Configuration
+                </h3>
+                <div class="space-y-2 mt-3">
+                    <p id="birdlifeCsvStatus" class="text-base text-gray-700">
+                        <i class="fas fa-file-csv mr-1 text-gray-600"></i>
+                        Data source: <strong>csv/BirdLife.csv</strong> — loaded automatically when search starts.
+                    </p>
+                </div>
+            </div>
+        </div>
+    `;
+
+    container.appendChild(specialDiv);
+}
+
+/**
  * Create checkboxes for database selection (multi-select)
  */
 function createCheckboxesForCards(Cards) {
@@ -679,10 +1184,20 @@ function createCheckboxesForCards(Cards) {
 
         const textLabel = document.createElement('span');
         textLabel.className = 'ml-5 text-base text-gray-800';
-        textLabel.innerHTML = NamesCards[key];
+        textLabel.textContent = NamesCards[key];
+
+        // Add info icon with tooltip for API description
+        if (CardTooltips[key]) {
+            const infoIcon = document.createElement('i');
+            infoIcon.className = 'fas fa-info-circle text-gray-800 ml-2 text-sm';
+            infoIcon.title = CardTooltips[key];
+            infoIcon.style.cursor = 'help';
+            textLabel.appendChild(infoIcon);
+        }
 
         wrapperDiv.appendChild(label);
         wrapperDiv.appendChild(textLabel);
+
         container.appendChild(wrapperDiv);
     });
 }

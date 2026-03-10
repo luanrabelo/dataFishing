@@ -13,45 +13,292 @@ function getStickyTop() {
 }
 
 /**
- * Update sticky header positioning for all tables
+ * Update sticky header positioning.
+ * The resultsHeader uses CSS sticky (it is NOT inside an overflow wrapper).
+ * Table theads use JS-based cloning because .table-wrapper has overflow-x:auto
+ * which breaks CSS position:sticky.
  */
 function updateStickyHeaders() {
     const stickyTop = getStickyTop();
-    const allTableHeads = document.querySelectorAll('thead[data-sticky="true"]');
-    allTableHeads.forEach(thead => {
-        thead.style.top = stickyTop + 'px';
+
+    // Results header - CSS sticky works (not inside overflow container)
+    const resultsHeader = document.getElementById('resultsHeader');
+    if (resultsHeader) {
+        resultsHeader.style.top = stickyTop + 'px';
+    }
+
+    // Table theads - JS clone approach (inside overflow-x:auto wrapper)
+    const resultsHeaderHeight = resultsHeader ? resultsHeader.offsetHeight : 0;
+    const headerOffset = stickyTop + resultsHeaderHeight;
+
+    document.querySelectorAll('.table-wrapper').forEach(wrapper => {
+        const table = wrapper.querySelector('table');
+        const thead = table?.querySelector('thead[data-sticky="true"]');
+        if (!thead || !table) return;
+
+        // Only process visible wrappers (visible tab panel)
+        if (wrapper.offsetParent === null) {
+            // Hidden - remove clone if exists
+            if (wrapper._stickyClone) {
+                wrapper._stickyClone.style.display = 'none';
+            }
+            return;
+        }
+
+        const wrapperRect = wrapper.getBoundingClientRect();
+        const theadHeight = thead.offsetHeight;
+        const bottomLimit = wrapperRect.bottom - theadHeight;
+
+        const shouldStick = wrapperRect.top < headerOffset && bottomLimit > headerOffset;
+
+        let clone = wrapper._stickyClone;
+
+        if (shouldStick) {
+            if (!clone) {
+                clone = document.createElement('div');
+                clone.className = 'sticky-thead-clone';
+                clone.style.cssText = 'position:fixed; z-index:25; overflow:hidden; pointer-events:auto; background:#1f2937; box-shadow:0 2px 4px rgba(0,0,0,0.15);';
+
+                const cloneTable = document.createElement('table');
+                cloneTable.className = table.className;
+                cloneTable.style.borderCollapse = 'collapse';
+                const cloneThead = thead.cloneNode(true);
+                cloneThead.style.backgroundColor = '#1f2937';
+                cloneThead.querySelectorAll('th').forEach(th => th.removeAttribute('onclick'));
+                cloneTable.appendChild(cloneThead);
+                clone.appendChild(cloneTable);
+
+                // Delegate click events for sorting
+                clone.addEventListener('click', (e) => {
+                    const th = e.target.closest('th');
+                    if (th) {
+                        const idx = Array.from(th.parentElement.children).indexOf(th);
+                        const origTh = thead.querySelectorAll('th')[idx];
+                        if (origTh) origTh.click();
+                        // Refresh clone after sort (icons change)
+                        setTimeout(() => {
+                            const newCloneThead = thead.cloneNode(true);
+                            newCloneThead.style.backgroundColor = '#1f2937';
+                            newCloneThead.querySelectorAll('th').forEach(th => th.removeAttribute('onclick'));
+                            const oldCloneThead = clone.querySelector('thead');
+                            clone.querySelector('table').replaceChild(newCloneThead, oldCloneThead);
+                        }, 50);
+                    }
+                });
+
+                document.body.appendChild(clone);
+                wrapper._stickyClone = clone;
+            }
+
+            // Position clone
+            clone.style.top = headerOffset + 'px';
+            clone.style.left = wrapperRect.left + 'px';
+            clone.style.width = wrapperRect.width + 'px';
+
+            // Sync horizontal scroll
+            const cloneTable = clone.querySelector('table');
+            cloneTable.style.transform = `translateX(${-wrapper.scrollLeft}px)`;
+            cloneTable.style.width = table.offsetWidth + 'px';
+
+            // Sync column widths
+            const origThs = thead.querySelectorAll('th');
+            const cloneThs = clone.querySelectorAll('th');
+            origThs.forEach((th, i) => {
+                if (cloneThs[i]) {
+                    const w = th.getBoundingClientRect().width;
+                    cloneThs[i].style.width = w + 'px';
+                    cloneThs[i].style.minWidth = w + 'px';
+                    cloneThs[i].style.maxWidth = w + 'px';
+                    // Sync visibility
+                    cloneThs[i].style.display = th.style.display;
+                }
+            });
+
+            clone.style.display = 'block';
+        } else if (clone) {
+            clone.style.display = 'none';
+        }
+    });
+}
+
+/**
+ * Clean up stale sticky clones (call when tab changes or tables are removed)
+ */
+function cleanupStickyClones() {
+    document.querySelectorAll('.sticky-thead-clone').forEach(clone => {
+        clone.remove();
+    });
+    document.querySelectorAll('.table-wrapper').forEach(wrapper => {
+        wrapper._stickyClone = null;
     });
 }
 
 // Initialize sticky header updates when page loads
 document.addEventListener('DOMContentLoaded', function() {
-    // Initial update
     setTimeout(() => updateStickyHeaders(), 100);
 
-    // Watch for resize and update offsets
-    window.addEventListener('resize', updateStickyHeaders);
+    window.addEventListener('resize', () => {
+        cleanupStickyClones();
+        updateStickyHeaders();
+    });
 
-    // Also update when tip container visibility changes
     const tipContainer = document.querySelector('.tip-container');
     if (tipContainer) {
         const observer = new MutationObserver(updateStickyHeaders);
         observer.observe(tipContainer, { attributes: true, subtree: true });
     }
 
-    // Watch for new tables added to Results container
     const resultsContainer = document.getElementById('Results');
     if (resultsContainer) {
         const observer = new MutationObserver(() => {
-            // Update sticky headers when new tables are added
-            setTimeout(() => updateStickyHeaders(), 50);
+            setTimeout(() => {
+                // Attach horizontal scroll listener to new table-wrappers
+                document.querySelectorAll('.table-wrapper').forEach(wrapper => {
+                    if (!wrapper._scrollListenerAdded) {
+                        wrapper.addEventListener('scroll', updateStickyHeaders, { passive: true });
+                        wrapper._scrollListenerAdded = true;
+                    }
+                });
+                updateStickyHeaders();
+            }, 50);
         });
         observer.observe(resultsContainer, { childList: true, subtree: true });
     }
 
-    // Update sticky headers when scrolling (for header visibility)
-    document.addEventListener('scroll', updateStickyHeaders, true);
+    window.addEventListener('scroll', updateStickyHeaders, { passive: true });
 });
 
+
+// ========== Modal for long text ==========
+
+/**
+ * Create the modal element (once) for displaying long cell text
+ */
+function ensureCellModal() {
+    if (document.getElementById('cellTextModal')) return;
+
+    const modal = document.createElement('div');
+    modal.id = 'cellTextModal';
+    modal.className = 'hidden';
+    modal.style.cssText = 'position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center;';
+    modal.innerHTML = `
+        <div id="cellTextModalBackdrop" style="position:absolute; inset:0; background:rgba(0,0,0,0.5);"></div>
+        <div style="position:relative; background:white; border-radius:12px; max-width:1100px; width:95%; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 25px 50px rgba(0,0,0,0.25);">
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid #e5e7eb; background:#1f2937; border-radius:12px 12px 0 0;">
+                <h3 id="cellTextModalTitle" style="font-size:16px; font-weight:600; color:white; margin:0;"></h3>
+                <button id="cellTextModalClose" style="background:none; border:none; color:white; font-size:32px; cursor:pointer; padding:8px 12px; line-height:1; display:flex; align-items:center; justify-content:center; width:48px; height:48px;">&times;</button>
+            </div>
+            <div id="cellTextModalBody" style="padding:20px; overflow-y:auto; font-size:14px; line-height:1.7; color:#1f2937; text-align:justify;"></div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    document.getElementById('cellTextModalBackdrop').addEventListener('click', closeCellModal);
+    document.getElementById('cellTextModalClose').addEventListener('click', closeCellModal);
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeCellModal();
+    });
+}
+
+function showCellModal(title, text, noBreak) {
+    ensureCellModal();
+    // Remove any BHL modal search bar that may have been injected previously
+    const bhlSearch = document.querySelector('#cellTextModal .bhl-modal-search');
+    if (bhlSearch) bhlSearch.remove();
+    document.getElementById('cellTextModalTitle').textContent = title;
+    const body = document.getElementById('cellTextModalBody');
+    // Escape HTML entities, then replace ; with line breaks for readability (unless noBreak)
+    const escaped = text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    body.innerHTML = noBreak ? escaped : escaped.replace(/;\s*/g, ';<br>');
+    const modal = document.getElementById('cellTextModal');
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeCellModal() {
+    const modal = document.getElementById('cellTextModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+        // Remove any BHL modal search bar
+        const bhlSearch = modal.querySelector('.bhl-modal-search');
+        if (bhlSearch) bhlSearch.remove();
+    }
+    document.body.style.overflow = '';
+}
+
+/**
+ * Truncate cell text and add expand icon if text exceeds maxLength.
+ * @param {HTMLElement} cell - The table cell element
+ * @param {number} maxLength - Maximum characters to show before truncating
+ * @param {string} title - Column header name for the modal title
+ */
+function truncateCellText(cell, maxLength, title) {
+    const fullText = cell.textContent.trim();
+    if (!fullText || fullText === '-') return;
+
+    // Check if this column should show icon-only (from column-icons.js)
+    const table = cell.closest('table');
+    if (table && typeof IconColumns !== 'undefined') {
+        const tableIdToApi = {
+            'BhlTable': 'bhl', 'BirdLifeTable': 'birdlife', 'BoldTable': 'bold',
+            'ColTable': 'col', 'EBirdTable': 'ebird', 'EolTable': 'eol',
+            'EschmeyerTable': 'eschmeyer', 'GbifTable': 'gbif', 'IucnTable': 'iucn',
+            'NcbiTable': 'ncbi', 'ObisTable': 'obis', 'OpenDataBioTable': 'opendatabio',
+            'SalveTable': 'salve', 'SpeciesLinkTable': 'specieslink', 'WormsTable': 'worms'
+        };
+        const apiKey = tableIdToApi[table.id];
+        if (apiKey && IconColumns[apiKey] && IconColumns[apiKey].includes(title)) {
+            cell.dataset.fullText = fullText;
+            cell.dataset.columnTitle = title;
+            cell.innerHTML = `
+                <button class="cell-icon-btn" title="${title}: Click to view"
+                        style="background:none; border:none; cursor:pointer; padding:4px 8px;">
+                    <i class="fas fa-eye text-gray-500 hover:text-gray-800 text-lg transition-colors duration-200"></i>
+                </button>
+            `;
+            cell.style.textAlign = 'center';
+            cell.querySelector('.cell-icon-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                showCellModal(title, fullText);
+            });
+            return;
+        }
+    }
+
+    // For non-icon columns, only truncate if text exceeds maxLength
+    if (fullText.length <= maxLength) return;
+
+    const truncated = fullText.substring(0, maxLength) + '...';
+    cell.dataset.fullText = fullText;
+    cell.dataset.columnTitle = title;
+    cell.style.cursor = 'pointer';
+    cell.innerHTML = `
+        <span class="cell-truncated-text" style="cursor:pointer;" title="Click to view full text">${truncated}</span>
+        <button class="cell-expand-btn" title="View full text" style="background:none; border:1px solid #9ca3af; border-radius:6px; color:#374151; cursor:pointer; padding:2px 6px; margin-left:6px; font-size:12px; vertical-align:middle; transition:all 0.2s;"
+                onmouseover="this.style.background='#1f2937'; this.style.color='white'; this.style.borderColor='#1f2937';"
+                onmouseout="this.style.background='none'; this.style.color='#374151'; this.style.borderColor='#9ca3af';">
+            <i class="fas fa-expand-alt"></i>
+        </button>
+    `;
+
+    cell.querySelector('.cell-expand-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        showCellModal(title, fullText);
+    });
+
+    cell.querySelector('.cell-truncated-text').addEventListener('click', (e) => {
+        e.stopPropagation();
+        showCellModal(title, fullText);
+    });
+}
+
+
+// ========== Table helper functions ==========
 
 function createSearchInput(tableId, cardBody) {
     const searchContainer = document.createElement('div');
@@ -65,9 +312,9 @@ function createSearchInput(tableId, cardBody) {
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <i class="fas fa-search text-gray-400"></i>
                 </div>
-                <input 
-                    type="text" 
-                    id="table-search" 
+                <input
+                    type="text"
+                    id="table-search"
                     class="block w-full pl-10 pr-12 py-3 text-base text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-200"
                     placeholder="Type to search in visible columns..."
                     autocomplete="off"
@@ -161,6 +408,10 @@ function createColumnFilters(tableId, filterContainerId) {
                 switchIcon.className = 'fas fa-eye-slash text-white text-xl absolute';
             }
 
+            // Refresh sticky clone column widths
+            cleanupStickyClones();
+            setTimeout(updateStickyHeaders, 50);
+
             const searchInput = document.getElementById('table-search');
             if (searchInput && searchInput.value.trim()) {
                 filterAndHighlightTable(tableId, searchInput.value.toLowerCase().trim());
@@ -231,11 +482,11 @@ function filterAndHighlightTable(tableId, searchTerm) {
             const isColumnVisible = cell.style.display !== 'none';
 
             if (isColumnVisible) {
-                const cellText = cell.textContent.toLowerCase();
+                // Use full text from data attribute if available (truncated cells)
+                const cellText = (cell.dataset.exportValue || cell.dataset.fullText || cell.textContent).toLowerCase();
 
                 if (cellText.includes(searchTerm)) {
                     rowMatches = true;
-                    // Save original HTML before modifying (preserves links, italics, etc.)
                     cell.dataset.originalHtml = cell.innerHTML;
                     highlightText(cell, searchTerm);
                 }
@@ -347,23 +598,20 @@ async function exportTableToExcel(tableId) {
     const worksheet = workbook.addWorksheet(tableId);
     const rows = Array.from(table.rows);
 
-    // Filter only visible rows
     const visibleRows = rows.filter(row => row.style.display !== 'none');
 
     visibleRows.forEach((row, rowIndex) => {
-        // Filter only visible cells
         const visibleCells = Array.from(row.cells).filter(cell => cell.style.display !== 'none');
 
         visibleCells.forEach((cell, cellIndex) => {
             const excelCell = worksheet.getCell(rowIndex + 1, cellIndex + 1);
-            excelCell.value = cell.textContent.trim();
+            // Use full text for truncated cells
+            excelCell.value = (cell.dataset.exportValue || cell.dataset.fullText || cell.textContent).trim();
             excelCell.alignment = { vertical: 'middle', wrapText: true };
 
-            // Header row: bold
             if (rowIndex === 0) {
                 excelCell.font = { bold: true };
             } else {
-                // Check if cell contains italic text (<i> without Font Awesome classes)
                 const iElements = cell.querySelectorAll('i');
                 let hasItalic = false;
                 for (const el of iElements) {
@@ -404,7 +652,6 @@ async function exportTableToCSV(tableId) {
     const table = document.getElementById(tableId);
     const rows = Array.from(table.rows);
 
-    // Filter only visible rows and cells
     const visibleRows = rows.filter(row => row.style.display !== 'none');
 
     let csvContent = '';
@@ -412,9 +659,7 @@ async function exportTableToCSV(tableId) {
     visibleRows.forEach((row, rowIndex) => {
         const visibleCells = Array.from(row.cells).filter(cell => cell.style.display !== 'none');
         const rowData = visibleCells.map(cell => {
-            // Clean the cell content
-            let content = cell.textContent.trim();
-            // Escape quotes and wrap in quotes if contains comma or quote
+            let content = (cell.dataset.exportValue || cell.dataset.fullText || cell.textContent).trim();
             if (content.includes(',') || content.includes('"') || content.includes('\n')) {
                 content = '"' + content.replace(/"/g, '""') + '"';
             }
@@ -424,7 +669,6 @@ async function exportTableToCSV(tableId) {
         csvContent += rowData.join(',') + '\n';
     });
 
-    // Create and download file
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -438,7 +682,6 @@ async function exportTableToTSV(tableId) {
     const table = document.getElementById(tableId);
     const rows = Array.from(table.rows);
 
-    // Filter only visible rows and cells
     const visibleRows = rows.filter(row => row.style.display !== 'none');
 
     let tsvContent = '';
@@ -446,9 +689,7 @@ async function exportTableToTSV(tableId) {
     visibleRows.forEach((row, rowIndex) => {
         const visibleCells = Array.from(row.cells).filter(cell => cell.style.display !== 'none');
         const rowData = visibleCells.map(cell => {
-            // Clean the cell content
-            let content = cell.textContent.trim();
-            // Escape tabs and wrap in quotes if contains tab, quote or newline
+            let content = (cell.dataset.exportValue || cell.dataset.fullText || cell.textContent).trim();
             if (content.includes('\t') || content.includes('"') || content.includes('\n')) {
                 content = '"' + content.replace(/"/g, '""') + '"';
             }
@@ -458,7 +699,6 @@ async function exportTableToTSV(tableId) {
         tsvContent += rowData.join('\t') + '\n';
     });
 
-    // Create and download file
     const blob = new Blob([tsvContent], { type: 'text/tab-separated-values;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -472,18 +712,23 @@ function updateDataResults() {
     const dataResults = document.getElementById('dataResults');
     dataResults.innerHTML = '';
 
-    const resultsCard = document.createElement('div');
-    resultsCard.className = 'bg-white rounded mb-4';
+    const resultsContainer = document.getElementById('Results');
+    if (!resultsContainer) return;
+
+    const existingHeader = document.getElementById('resultsHeader');
+    if (existingHeader) existingHeader.remove();
 
     const cardHeader = document.createElement('div');
-    cardHeader.className = 'bg-gray-800 flex items-center text-white py-2 px-2 rounded my-1';
+    cardHeader.id = 'resultsHeader';
+    cardHeader.className = 'bg-gray-800 flex items-center text-white py-2 px-2 rounded my-1 sticky z-30';
+    const stickyTop = getStickyTop();
+    cardHeader.style.top = stickyTop + 'px';
     cardHeader.innerHTML = `
         <div class="flex items-center justify-center h-12 w-12 rounded-full bg-gray-200 text-black mr-3 font-bold text-base">4</div>
         <div class="text-base font-semibold">Visualize and export the results</div>
     `;
-    resultsCard.appendChild(cardHeader);
 
-    dataResults.appendChild(resultsCard);
+    resultsContainer.insertBefore(cardHeader, resultsContainer.firstChild);
 }
 
 // Tab management functions
@@ -492,17 +737,27 @@ function createResultTabs(selectedApis) {
     const resultsContainer = document.getElementById('Results');
     resultsContainer.innerHTML = '';
 
-    // Display names for each API
+    // Clean up stale clones when tabs are recreated
+    cleanupStickyClones();
+
     const tabNames = {
-        'eschmeyer': "Eschmeyer's Catalog",
-        'worms': 'WoRMS',
-        'gbif': 'GBIF',
+        'bhl': 'BHL',
+        'birdlife': 'BirdLife',
         'bold': 'BOLD Systems',
+        'col': 'Catalogue of Life',
+        'ebird': 'eBird',
+        'eol': 'Encyclopedia of Life',
+        'eschmeyer': "Eschmeyer's Catalog",
+        'gbif': 'GBIF',
         'iucn': 'IUCN Red List',
-        'ncbi': 'NCBI'
+        'ncbi': 'NCBI',
+        'obis': 'OBIS',
+        'opendatabio': 'OpenDataBio',
+        'salve': 'ICMBio SALVE',
+        'specieslink': 'speciesLink',
+        'worms': 'WoRMS'
     };
 
-    // If only one API selected, just create the panel without tab buttons
     if (selectedApis.length === 1) {
         const panel = document.createElement('div');
         panel.id = 'tabPanel-' + selectedApis[0];
@@ -511,7 +766,6 @@ function createResultTabs(selectedApis) {
         return;
     }
 
-    // Create tab buttons container
     const tabBar = document.createElement('div');
     tabBar.id = 'tabButtons';
     tabBar.className = 'flex flex-wrap gap-1 bg-gray-200 p-1 rounded-lg mb-4';
@@ -530,7 +784,6 @@ function createResultTabs(selectedApis) {
 
     resultsContainer.appendChild(tabBar);
 
-    // Create tab panels
     const panelsContainer = document.createElement('div');
     panelsContainer.id = 'tabPanels';
 
@@ -548,7 +801,9 @@ function createResultTabs(selectedApis) {
 }
 
 function switchTab(apiKey) {
-    // Update tab buttons
+    // Clean up clones on tab switch
+    cleanupStickyClones();
+
     const tabBar = document.getElementById('tabButtons');
     if (tabBar) {
         const buttons = tabBar.querySelectorAll('button');
@@ -561,7 +816,6 @@ function switchTab(apiKey) {
         });
     }
 
-    // Show/hide panels
     const panelsContainer = document.getElementById('tabPanels');
     if (panelsContainer) {
         const panels = panelsContainer.querySelectorAll('.tab-panel');
@@ -573,4 +827,7 @@ function switchTab(apiKey) {
             }
         });
     }
+
+    // Re-check sticky after tab becomes visible
+    setTimeout(updateStickyHeaders, 50);
 }
